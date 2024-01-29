@@ -9,4 +9,6 @@ public class FileExtension
     
     [JsonRequired]
     public required string[] AppList { get; set; }
+
+    public string DefaultApp { get; set; } = "";
 }
