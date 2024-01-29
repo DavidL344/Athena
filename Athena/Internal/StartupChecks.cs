@@ -53,11 +53,46 @@ public static class StartupChecks
                 }
             }
         };
+        
+        var fileExtensions = new Dictionary<string, FileExtension>
+        {
+            {
+                "zip", new FileExtension
+                {
+                    Name = "Zip Archive",
+                    AppList =
+                    [
+                        "unzip.extract",
+                        "unzip.extract-to-desktop",
+                        "unzip.list"
+                    ]
+                }
+            },
+            {
+                "7z", new FileExtension
+                {
+                    Name = "7-Zip Archive",
+                    AppList =
+                    [
+                        "unzip.extract",
+                        "unzip.extract-to-desktop",
+                        "unzip.list"
+                    ]
+                }
+            }
+        };
 
         foreach (var entry in entries)
         {
             var filePath = Path.Combine(Vars.AppDataDir, "entries", $"{entry.Key}.json");
             var fileContents = JsonSerializer.Serialize(entry.Value, Vars.JsonSerializerOptions);
+            await File.WriteAllTextAsync(filePath, fileContents);
+        }
+
+        foreach (var fileExtension in fileExtensions)
+        {
+            var filePath = Path.Combine(Vars.AppDataDir, "files", $"{fileExtension.Key}.json");
+            var fileContents = JsonSerializer.Serialize(fileExtension.Value, Vars.JsonSerializerOptions);
             await File.WriteAllTextAsync(filePath, fileContents);
         }
     }
