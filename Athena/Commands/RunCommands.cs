@@ -4,10 +4,11 @@ using Athena.Model;
 using CliWrap;
 using CliWrap.Buffered;
 using Cocona;
+using Microsoft.Extensions.Logging;
 
 namespace Athena.Commands;
 
-public class RunCommands
+public class RunCommands : CoconaConsoleAppBase
 {
     [Command("run", Description = "Open a file with the registered application")]
     public async Task OpenFile(
@@ -16,7 +17,9 @@ public class RunCommands
         [Option('f', Description = "Skip the app picker and choose the top-most option")] bool first,
         [Option('p', Description = "Show the app picker even when the default app is specified")] bool picker)
     {
-        Console.WriteLine($"Opening {file} with entry={entry}, default={!first}, and picker={picker}...");
+        Context.Logger.LogInformation(
+            "Opening {File} with entry={Entry}, default={PickFirstApp}, and picker={Picker}...",
+            file, entry, !first, picker);
         
         if (Path.GetExtension(file).Length == 0)
             throw new ApplicationException("The file has no extension!");
@@ -49,7 +52,7 @@ public class RunCommands
         // The user wants to use the default app
         if (first)
         {
-            Console.WriteLine($"The first entry is {definition.AppList[0]}");
+            Context.Logger.LogInformation("The first entry is {FirstEntry}", definition.AppList[0]);
             await OpenFileWithEntry(file, definition, 0);
             return;
         }
@@ -62,8 +65,8 @@ public class RunCommands
 
         if (string.IsNullOrWhiteSpace(definition.DefaultApp))
         {
-            Console.WriteLine("There's no default app for the file extension and the picker is not yet implemented");
-            Console.WriteLine($"The first entry is {definition.AppList[0]}");
+            Context.Logger.LogInformation("There's no default app for the file extension and the picker is not yet implemented");
+            Context.Logger.LogInformation("The first entry is {FirstEntry}", definition.AppList[0]);
             await OpenFileWithEntry(file, definition, 0);
             return;
         }
@@ -75,7 +78,7 @@ public class RunCommands
         await OpenFileWithEntry(file, definition, defaultEntry);
     }
 
-    private static async Task OpenFileWithEntry(string file, FileExtension definition, int entryIndex)
+    private async Task OpenFileWithEntry(string file, FileExtension definition, int entryIndex)
     {
         var entry = definition.AppList[entryIndex];
         var appEntry = Path.Combine(Vars.AppDataDir, "entries", $"{entry}.json");
@@ -89,7 +92,9 @@ public class RunCommands
         if (appEntryDefinition is null)
             throw new ApplicationException("The entry definition is invalid!");
         
-        Console.WriteLine($"Opening {appEntryDefinition.Name} with {appEntryDefinition.Path} and params {appEntryDefinition.Arguments}...");
+        Context.Logger.LogInformation(
+            "Opening {Name} with {Path} and params {Arguments}...",
+            appEntryDefinition.Name, appEntryDefinition.Path, appEntryDefinition.Arguments);
 
         var arguments = Environment.ExpandEnvironmentVariables(appEntryDefinition.Arguments
             .Replace("~", "%HOME%")
