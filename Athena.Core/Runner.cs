@@ -1,5 +1,4 @@
-﻿using Athena.Core.Internal;
-using Athena.Core.Model;
+﻿using Athena.Core.Model;
 using CliWrap;
 using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;

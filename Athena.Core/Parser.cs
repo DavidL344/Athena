@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Athena.Core.Internal;
 using Athena.Core.Model;
+using Athena.Core.Model.Entry;
+using Athena.Core.Model.Opener;
 using Microsoft.Extensions.Logging;
 
 namespace Athena.Core;

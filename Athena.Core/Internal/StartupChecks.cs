@@ -1,5 +1,7 @@
 using System.Text.Json;
 using Athena.Core.Model;
+using Athena.Core.Model.Entry;
+using Athena.Core.Model.Opener;
 
 namespace Athena.Core.Internal;
 
@@ -32,7 +34,7 @@ public static class StartupChecks
                 "unzip.extract", new AppEntry
                 {
                     Name = "Unzip (Extract)",
-                    Type = AppEntry.EntryType.File,
+                    Type = EntryType.File,
                     Path = "unzip",
                     Arguments = "$FILE"
                 }
@@ -41,7 +43,7 @@ public static class StartupChecks
                 "unzip.extract-to-desktop", new AppEntry
                 {
                     Name = "Unzip (Extract to Desktop)",
-                    Type = AppEntry.EntryType.File,
+                    Type = EntryType.File,
                     Path = "unzip",
                     Arguments = "-d ~/Desktop $FILE"
                 }
@@ -50,7 +52,7 @@ public static class StartupChecks
                 "unzip.list", new AppEntry
                 {
                     Name = "Unzip (List)",
-                    Type = AppEntry.EntryType.File,
+                    Type = EntryType.File,
                     Path = "unzip",
                     Arguments = "-l $FILE"
                 }
@@ -62,7 +64,7 @@ public static class StartupChecks
             {
                 "zip", new FileExtension
                 {
-                    Name = "Zip Archive",
+                    FriendlyName = "Zip Archive",
                     AppList =
                     [
                         "unzip.extract",
@@ -74,7 +76,7 @@ public static class StartupChecks
             {
                 "7z", new FileExtension
                 {
-                    Name = "7-Zip Archive",
+                    FriendlyName = "7-Zip Archive",
                     AppList =
                     [
                         "unzip.extract",
@@ -84,17 +86,17 @@ public static class StartupChecks
                 }
             }
         };
-
+        
         foreach (var entry in entries)
         {
-            var filePath = Path.Combine(Vars.AppDataDir, "entries", $"{entry.Key}.json");
+            var filePath = Path.Combine(Vars.ConfigPaths[ConfigType.Entries], $"{entry.Key}.json");
             var fileContents = JsonSerializer.Serialize(entry.Value, Vars.JsonSerializerOptions);
             await File.WriteAllTextAsync(filePath, fileContents);
         }
 
         foreach (var fileExtension in fileExtensions)
         {
-            var filePath = Path.Combine(Vars.AppDataDir, "files", $"{fileExtension.Key}.json");
+            var filePath = Path.Combine(Vars.ConfigPaths[ConfigType.Files], $"{fileExtension.Key}.json");
             var fileContents = JsonSerializer.Serialize(fileExtension.Value, Vars.JsonSerializerOptions);
             await File.WriteAllTextAsync(filePath, fileContents);
         }

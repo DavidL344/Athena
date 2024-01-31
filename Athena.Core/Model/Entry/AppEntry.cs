@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Athena.Core.Model;
+namespace Athena.Core.Model.Entry;
 
 public class AppEntry
 {
@@ -17,7 +17,8 @@ public class AppEntry
     public required string Name { get; set; }
 
     /// <summary>
-    /// An entry type
+    /// An app entry type.
+    /// Influences whether the entry is shown in the file, protocol, or both app pickers.
     /// </summary>
     /// <value>all/file/protocol</value>
     public EntryType Type { get; set; } = EntryType.All;
@@ -45,11 +46,4 @@ public class AppEntry
     /// </example>
     [JsonRequired]
     public required string Arguments { get; set; }
-    
-    public enum EntryType
-    {
-        All,
-        File,
-        Protocol
-    }
 }

@@ -1,5 +1,5 @@
 using Athena.Core;
-using Athena.Core.Model;
+using Athena.Core.Model.Entry;
 using Cocona;
 using Microsoft.Extensions.Logging;
 
