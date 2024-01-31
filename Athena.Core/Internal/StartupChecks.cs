@@ -1,7 +1,7 @@
 using System.Text.Json;
-using Athena.Model;
+using Athena.Core.Model;
 
-namespace Athena.Internal;
+namespace Athena.Core.Internal;
 
 public static class StartupChecks
 {

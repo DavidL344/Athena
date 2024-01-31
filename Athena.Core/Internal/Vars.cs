@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Athena.Internal;
+namespace Athena.Core.Internal;
 
 public class Vars
 {

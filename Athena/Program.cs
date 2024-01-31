@@ -1,5 +1,5 @@
 ﻿using Athena.Commands;
-using Athena.Internal;
+using Athena.Core.Internal;
 using Cocona;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

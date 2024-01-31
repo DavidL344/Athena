@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Athena.Model;
+namespace Athena.Core.Model;
 
 public class AppEntry
 {
