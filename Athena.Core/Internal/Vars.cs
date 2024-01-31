@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Athena.Core.Model;
 
 namespace Athena.Core.Internal;
 
@@ -15,6 +16,13 @@ public class Vars
             return Directory.Exists(portableConfigDir) ? portableConfigDir : userConfigDir;
         }
     }
+
+    public static readonly Dictionary<ConfigType, string> ConfigPaths = new()
+    {
+        { ConfigType.Entries, Path.Combine(AppDataDir, "entries") },
+        { ConfigType.Files, Path.Combine(AppDataDir, "files") },
+        { ConfigType.Protocols, Path.Combine(AppDataDir, "protocols") }
+    };
     
     public static string AssemblyDir
         => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;

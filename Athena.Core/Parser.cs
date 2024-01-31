@@ -15,7 +15,7 @@ public class Parser(ILogger logger)
             throw new ApplicationException("The file has no extension!");
         
         var fileExtension = Path.GetExtension(filePath).Substring(1);
-        var definitionPath = Path.Combine(Vars.AppDataDir, "files", $"{fileExtension}.json");
+        var definitionPath = Path.Combine(Vars.ConfigPaths[ConfigType.Files], $"{fileExtension}.json");
 
         if (!File.Exists(definitionPath))
             throw new ApplicationException($"The file extension ({fileExtension}) isn't registered with Athena!");
@@ -38,7 +38,7 @@ public class Parser(ILogger logger)
             throw new ApplicationException("The entry ID is out of range!");
         
         var appEntryName = fileExtensionDefinition.AppList[entryIndex];
-        var appEntryPath = Path.Combine(Vars.AppDataDir, "entries", $"{appEntryName}.json");
+        var appEntryPath = Path.Combine(Vars.ConfigPaths[ConfigType.Entries], $"{appEntryName}.json");
         
         if (!File.Exists(appEntryPath))
             throw new ApplicationException($"The entry ({appEntryName}) isn't defined!");
