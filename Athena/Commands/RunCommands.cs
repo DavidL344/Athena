@@ -8,7 +8,7 @@ namespace Athena.Commands;
 public class RunCommands : CoconaConsoleAppBase
 {
     [Command("run", Description = "Open a file with the registered application")]
-    public async Task OpenFile(
+    public async Task<int> OpenFile(
         [Argument("file", Description = "A file to be opened")] string filePath,
         [Option('e', Description = "An entry ID from the list of registered apps")] int? entry,
         [Option('f', Description = "Skip the app picker and choose the top-most option")] bool first,
@@ -22,11 +22,12 @@ public class RunCommands : CoconaConsoleAppBase
         {
             var appEntryDefinition = await GetAppDefinition(filePath, entry, first, picker);
             var runner = new Runner(Context.Logger);
-            var result = await runner.Run(appEntryDefinition.Path, appEntryDefinition.Arguments);
+            return await runner.Run(appEntryDefinition.Path, appEntryDefinition.Arguments);
         }
         catch (Exception e)
         {
-            Context.Logger.LogError(e, "An error occurred while opening the file");
+            Context.Logger.LogError("An error occurred while opening the file: {Message}", e.Message);
+            return 1;
         }
     }
 
