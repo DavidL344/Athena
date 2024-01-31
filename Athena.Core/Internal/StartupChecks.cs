@@ -7,7 +7,10 @@ public static class StartupChecks
 {
     public static async Task RunAsync()
     {
-        var firstRun = !Directory.Exists(Vars.AppDataDir) || Directory.GetFiles(Vars.AppDataDir).Length == 0;
+        var configDirNoDirs = Directory.GetDirectories(Vars.AppDataDir).Length == 0;
+        var configDirNoFiles = Directory.GetFiles(Vars.AppDataDir).Length == 0;
+        
+        var firstRun = !Directory.Exists(Vars.AppDataDir) || (configDirNoDirs && configDirNoFiles);
         if (firstRun) Directory.CreateDirectory(Vars.AppDataDir);
         
         var subDirs = new[] { "entries", "files", "protocols" };
