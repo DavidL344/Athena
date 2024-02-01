@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Athena.Core.Model.Opener;
 
-public class Protocol
+public class Protocol : IOpener
 {
     /// <summary>
     /// The name of the protocol before the :// part.

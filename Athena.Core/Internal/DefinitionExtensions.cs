@@ -5,10 +5,10 @@ namespace Athena.Core.Internal;
 
 public static class DefinitionExtensions
 {
-    public static bool HasEntries(this FileExtension fileExtensionDefinition)
-        => fileExtensionDefinition.AppList.Length > 0;
+    public static bool HasEntries(this IOpener openerDefinition)
+        => openerDefinition.AppList.Length > 0;
     
-    public static bool HasEntry(this FileExtension fileExtensionDefinition, int entryIndex)
+    public static bool HasEntry(this IOpener fileExtensionDefinition, int entryIndex)
         => entryIndex >= 0 && entryIndex < fileExtensionDefinition.AppList.Length;
     
     public static AppEntry ExpandEnvironmentVariables(this AppEntry appEntryDefinition, string filePath)

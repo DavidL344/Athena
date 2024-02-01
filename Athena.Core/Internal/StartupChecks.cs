@@ -31,6 +31,38 @@ public static class StartupChecks
         var entries = new Dictionary<string, AppEntry>
         {
             {
+                "athena.protocol", new AppEntry
+                {
+                    Name = "Athena",
+                    Type = EntryType.Protocol,
+#if DEBUG
+                    Path = Path.Combine(Vars.AssemblyDir, "Athena"),
+#else
+                    Path = "athena",
+#endif
+                    Arguments = "run $URL -l",
+                    RemoveProtocol = true
+                }
+            },
+            {
+                "firefox.open", new AppEntry
+                {
+                    Name = "Firefox (Open)",
+                    Type = EntryType.All,
+                    Path = "firefox",
+                    Arguments = "$URL"
+                }
+            },
+            {
+                "firefox.open-private", new AppEntry
+                {
+                    Name = "Firefox (Private)",
+                    Type = EntryType.All,
+                    Path = "firefox",
+                    Arguments = "firefox -private-window $URL"
+                }
+            },
+            {
                 "unzip.extract", new AppEntry
                 {
                     Name = "Unzip (Extract)",
@@ -87,6 +119,45 @@ public static class StartupChecks
             }
         };
         
+        var protocols = new Dictionary<string, Protocol>
+        {
+            {
+                "athena", new Protocol
+                {
+                    SchemaName = "athena",
+                    AppList =
+                    [
+                        "athena.protocol"
+                    ],
+                    DefaultApp = "athena.protocol"
+                }
+            },
+            {
+                "http", new Protocol
+                {
+                    SchemaName = "http",
+                    AppList =
+                    [
+                        "firefox.open",
+                        "firefox.open-private"
+                    ],
+                    DefaultApp = "firefox.open"
+                }
+            },
+            {
+                "https", new Protocol
+                {
+                    SchemaName = "https",
+                    AppList =
+                    [
+                        "firefox.open",
+                        "firefox.open-private"
+                    ],
+                    DefaultApp = "firefox.open"
+                }
+            }
+        };
+
         foreach (var entry in entries)
         {
             var filePath = Path.Combine(Vars.ConfigPaths[ConfigType.Entries], $"{entry.Key}.json");
@@ -98,6 +169,13 @@ public static class StartupChecks
         {
             var filePath = Path.Combine(Vars.ConfigPaths[ConfigType.Files], $"{fileExtension.Key}.json");
             var fileContents = JsonSerializer.Serialize(fileExtension.Value, Vars.JsonSerializerOptions);
+            await File.WriteAllTextAsync(filePath, fileContents);
+        }
+        
+        foreach (var protocol in protocols)
+        {
+            var filePath = Path.Combine(Vars.ConfigPaths[ConfigType.Protocols], $"{protocol.Key}.json");
+            var fileContents = JsonSerializer.Serialize(protocol.Value, Vars.JsonSerializerOptions);
             await File.WriteAllTextAsync(filePath, fileContents);
         }
     }

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Athena.Core.Internal;
 using Athena.Core.Model;
 using Athena.Core.Model.Entry;
@@ -9,7 +10,15 @@ namespace Athena.Core;
 
 public class Parser(ILogger logger)
 {
-    public async Task<FileExtension> GetFileExtensionDefinition(string filePath)
+    public async Task<IOpener> GetOpenerDefinition(string filePath, bool openLocally)
+    {
+        var uri = new Uri(filePath);
+        return uri.IsFile || openLocally
+            ? await GetFileExtensionDefinition(filePath)
+            : await GetProtocolDefinition(filePath);
+    }
+    
+    private async Task<FileExtension> GetFileExtensionDefinition(string filePath)
     {
         filePath = Environment.ExpandEnvironmentVariables(filePath);
         
@@ -33,13 +42,41 @@ public class Parser(ILogger logger)
         
         return definition;
     }
-
-    public async Task<AppEntry> GetAppEntryDefinition(FileExtension fileExtensionDefinition, int entryIndex)
+    
+    private async Task<Protocol> GetProtocolDefinition(string url)
     {
-        if (!fileExtensionDefinition.HasEntry(entryIndex))
+        url = Environment.ExpandEnvironmentVariables(url);
+        
+        var uri = new Uri(url);
+        var protocol = uri.Scheme;
+        
+        var definitionPath = Path.Combine(Vars.ConfigPaths[ConfigType.Protocols], $"{protocol}.json");
+
+        if (!File.Exists(definitionPath))
+            throw new ApplicationException($"The protocol ({protocol}) isn't registered with Athena!");
+        
+        var definitionData = await File.ReadAllTextAsync(definitionPath);
+        var definition = JsonSerializer.Deserialize<Protocol>(definitionData, Vars.JsonSerializerOptions);
+        
+        if (definition is null)
+            throw new ApplicationException("The protocol definition is invalid!");
+
+        if (!definition.HasEntries())
+            throw new ApplicationException("The protocol has no associated entries!");
+        
+        return definition;
+    }
+
+    public async Task<AppEntry> GetAppEntryDefinition<T>(
+        T openerDefinition,
+        int entryIndex, string filePath) where T : IOpener
+    {
+        filePath = Environment.ExpandEnvironmentVariables(filePath);
+        
+        if (!openerDefinition.HasEntry(entryIndex))
             throw new ApplicationException("The entry ID is out of range!");
         
-        var appEntryName = fileExtensionDefinition.AppList[entryIndex];
+        var appEntryName = openerDefinition.AppList[entryIndex];
         var appEntryPath = Path.Combine(Vars.ConfigPaths[ConfigType.Entries], $"{appEntryName}.json");
         
         if (!File.Exists(appEntryPath))
@@ -51,21 +88,27 @@ public class Parser(ILogger logger)
         if (definition is null)
             throw new ApplicationException("The entry definition is invalid!");
 
-        return definition;
-    }
-
-    public async Task<AppEntry> GetFirstAppEntryDefinition(FileExtension fileExtensionDefinition, string filePath)
-    {
-        logger.LogInformation("The first entry is {FirstEntry}", fileExtensionDefinition.AppList[0]);
-        return await GetAppEntryDefinition(fileExtensionDefinition, 0, filePath);
-    }
-
-    public async Task<AppEntry> GetAppEntryDefinition(
-        FileExtension fileExtensionDefinition, int entryIndex,
-        string filePath)
-    {
-        filePath = Environment.ExpandEnvironmentVariables(filePath);
-        var definition = await GetAppEntryDefinition(fileExtensionDefinition, entryIndex);
+        if (definition.RemoveProtocol)
+            filePath = RemoveProtocolFromUrl(filePath);
+        
         return definition.ExpandEnvironmentVariables(filePath);
+    }
+
+    public async Task<AppEntry> GetFirstAppEntryDefinition<T>(
+        T openerDefinition, string filePath) where T : IOpener
+    {
+        logger.LogInformation("The first entry is {FirstEntry}", openerDefinition.AppList[0]);
+        return await GetAppEntryDefinition(openerDefinition, 0, filePath);
+    }
+    
+    private string RemoveProtocolFromUrl(string url)
+    {
+        var uri = new Uri(url);
+        var protocol = uri.Scheme;
+        
+        var pattern = $@"(^{protocol}:(?:\/{{0,2}}))?";
+        var result = Regex.Replace(url, pattern, "");
+        
+        return result;
     }
 }

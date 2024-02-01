@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Athena.Core.Model.Opener;
 
-public class FileExtension
+public class FileExtension : IOpener
 {
     /// <summary>
     /// A friendly name of the file extension. 

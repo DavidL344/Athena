@@ -20,7 +20,10 @@ public class AppEntry
     /// An app entry type.
     /// Influences whether the entry is shown in the file, protocol, or both app pickers.
     /// </summary>
-    /// <value>all/file/protocol</value>
+    /// <remarks>
+    /// The local app picker is shown when the file path is resolved directly.<br />
+    /// When accessing resources from the internet, the protocol app picker is used instead.
+    /// </remarks>
     public EntryType Type { get; set; } = EntryType.All;
 
     /// <summary>
@@ -46,4 +49,9 @@ public class AppEntry
     /// </example>
     [JsonRequired]
     public required string Arguments { get; set; }
+    
+    /// <summary>
+    /// Sets whether the protocol should be removed from the URL.
+    /// </summary>
+    public bool RemoveProtocol { get; set; } = false;
 }
