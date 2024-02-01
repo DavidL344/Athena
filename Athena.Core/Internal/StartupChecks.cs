@@ -96,7 +96,7 @@ public static class StartupChecks
             {
                 "zip", new FileExtension
                 {
-                    FriendlyName = "Zip Archive",
+                    Name = "Zip Archive",
                     AppList =
                     [
                         "unzip.extract",
@@ -108,7 +108,7 @@ public static class StartupChecks
             {
                 "7z", new FileExtension
                 {
-                    FriendlyName = "7-Zip Archive",
+                    Name = "7-Zip Archive",
                     AppList =
                     [
                         "unzip.extract",
@@ -124,7 +124,7 @@ public static class StartupChecks
             {
                 "athena", new Protocol
                 {
-                    SchemaName = "athena",
+                    Name = "athena",
                     AppList =
                     [
                         "athena.protocol"
@@ -135,7 +135,7 @@ public static class StartupChecks
             {
                 "http", new Protocol
                 {
-                    SchemaName = "http",
+                    Name = "http",
                     AppList =
                     [
                         "firefox.open",
@@ -147,7 +147,7 @@ public static class StartupChecks
             {
                 "https", new Protocol
                 {
-                    SchemaName = "https",
+                    Name = "https",
                     AppList =
                     [
                         "firefox.open",

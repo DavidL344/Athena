@@ -13,7 +13,8 @@ public class FileExtension : IOpener
     /// Zip archive
     /// </example>
     [JsonRequired]
-    public required string FriendlyName { get; set; }
+    [JsonPropertyName("friendlyName")]
+    public required string Name { get; set; }
     
     /// <summary>
     /// A list of app entries that support the file extension.

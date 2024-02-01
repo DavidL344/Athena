@@ -7,7 +7,7 @@ public class Protocol : IOpener
     /// <summary>
     /// The name of the protocol before the :// part.
     /// </summary>
-    /// <remarks>The schema gets populated to x-scheme-handler/<see cref="SchemaName" /> automatically.</remarks>
+    /// <remarks>The schema gets populated to x-scheme-handler/<see cref="Name" /> automatically.</remarks>
     /// <example>
     /// http<br />
     /// https<br />
@@ -15,7 +15,8 @@ public class Protocol : IOpener
     /// ssh
     /// </example>
     [JsonRequired]
-    public required string SchemaName { get; set; }
+    [JsonPropertyName("schemaName")]
+    public required string Name { get; set; }
     
     /// <summary>
     /// A list of app entries that support the protocol.
