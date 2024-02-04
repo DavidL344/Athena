@@ -45,6 +45,9 @@ public class Parser(ILogger logger)
     
     private async Task<Protocol> GetProtocolDefinition(string url)
     {
+        if (!Vars.Config.EnableProtocolHandler)
+            throw new ApplicationException("The protocol handler is disabled!");
+        
         url = Environment.ExpandEnvironmentVariables(url);
         
         var uri = new Uri(url);

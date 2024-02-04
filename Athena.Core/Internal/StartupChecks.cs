@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Athena.Core.Model;
+using Athena.Core.Model.Configuration;
 using Athena.Core.Model.Entry;
 using Athena.Core.Model.Opener;
 
@@ -14,6 +15,12 @@ public static class StartupChecks
         
         var firstRun = !Directory.Exists(Vars.AppDataDir) || (configDirNoDirs && configDirNoFiles);
         if (firstRun) Directory.CreateDirectory(Vars.AppDataDir);
+
+        if (!File.Exists(Vars.AppConfigPath))
+        {
+            var fileContents = JsonSerializer.Serialize(new Config(), Vars.JsonSerializerOptions);
+            await File.WriteAllTextAsync(Vars.AppConfigPath, fileContents);
+        }
         
         var subDirs = new[] { "entries", "files", "protocols" };
         foreach (var subDir in subDirs)
