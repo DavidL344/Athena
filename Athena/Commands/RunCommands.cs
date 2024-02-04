@@ -1,5 +1,6 @@
 using Athena.Core;
 using Athena.Core.Model.Entry;
+using Athena.Terminal;
 using Cocona;
 using Microsoft.Extensions.Logging;
 
@@ -41,20 +42,19 @@ public class RunCommands : CoconaConsoleAppBase
         if (entry is not null)
             return await parser.GetAppEntryDefinition(openerDefinition, entry.Value, filePath);
         
-        // The user wants to use the default app
+        // The user wants to use the first app in the list
         if (first)
             return await parser.GetFirstAppEntryDefinition(openerDefinition, filePath);
         
-        // The user decides to pick an app at runtime
-        if (picker)
-            // TODO: open the app picker
-            throw new NotImplementedException("The app picker has yet to be implemented!");
-
-        if (string.IsNullOrWhiteSpace(openerDefinition.DefaultApp))
+        // There's no default app specified or the user decides to pick an app at runtime
+        if (picker || string.IsNullOrWhiteSpace(openerDefinition.DefaultApp))
         {
-            // TODO: open the app picker
-            Context.Logger.LogWarning("There's no default app for the file extension and the picker is not yet implemented");
-            return await parser.GetFirstAppEntryDefinition(openerDefinition, filePath);
+            var appIndex = AppPicker.Show(openerDefinition);
+            
+            if (appIndex == -1)
+                throw new ApplicationException("The user has cancelled the operation!");
+            
+            return await parser.GetAppEntryDefinition(openerDefinition, appIndex, filePath);
         }
         
         // When no options are specified, use the default app
