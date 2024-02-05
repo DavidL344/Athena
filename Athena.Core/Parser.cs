@@ -19,16 +19,16 @@ public class Parser
     
     public async Task<IOpener> GetOpenerDefinition(string filePath, bool openLocally)
     {
-        var uri = new Uri(filePath);
+        var expandedPath = Path.GetFullPath(Environment.ExpandEnvironmentVariables(filePath));
+        var uri = new Uri(expandedPath);
+        
         return uri.IsFile || openLocally
-            ? await GetFileExtensionDefinition(filePath)
-            : await GetProtocolDefinition(filePath);
+            ? await GetFileExtensionDefinition(uri.AbsoluteUri)
+            : await GetProtocolDefinition(uri);
     }
     
     private async Task<FileExtension> GetFileExtensionDefinition(string filePath)
     {
-        filePath = Environment.ExpandEnvironmentVariables(filePath);
-        
         if (Path.GetExtension(filePath).Length == 0)
             throw new ApplicationException("The file has no extension!");
         
@@ -50,16 +50,12 @@ public class Parser
         return definition;
     }
     
-    private async Task<Protocol> GetProtocolDefinition(string url)
+    private async Task<Protocol> GetProtocolDefinition(Uri uri)
     {
         if (!Vars.Config.EnableProtocolHandler)
             throw new ApplicationException("The protocol handler is disabled!");
         
-        url = Environment.ExpandEnvironmentVariables(url);
-        
-        var uri = new Uri(url);
         var protocol = uri.Scheme;
-        
         var definitionPath = Path.Combine(Vars.ConfigPaths[ConfigType.Protocols], $"{protocol}.json");
 
         if (!File.Exists(definitionPath))
@@ -97,7 +93,7 @@ public class Parser
         
         if (definition is null)
             throw new ApplicationException("The entry definition is invalid!");
-
+        
         if (definition.RemoveProtocol)
             filePath = RemoveProtocolFromUrl(filePath);
         
