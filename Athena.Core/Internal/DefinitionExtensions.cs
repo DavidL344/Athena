@@ -18,8 +18,8 @@ internal static class DefinitionExtensions
 
         appEntryDefinition.Arguments = Environment.ExpandEnvironmentVariables(appEntryDefinition.Arguments
             .Replace("~", "%HOME%")
-            .Replace("$FILE", filePath)
-            .Replace("$URL", filePath));
+            .Replace("$FILE", $"\"{filePath}\"")
+            .Replace("$URL", $"\"{filePath}\""));
         
         return appEntryDefinition;
     }
