@@ -8,6 +8,17 @@ namespace Athena.Commands;
 
 public class RunCommands : CoconaConsoleAppBase
 {
+    private readonly Parser _parser;
+    private readonly Runner _runner;
+    private readonly ILogger<RunCommands> _logger;
+    
+    public RunCommands(Parser parser, Runner runner, ILogger<RunCommands> logger)
+    {
+        _parser = parser;
+        _runner = runner;
+        _logger = logger;
+    }
+    
     [Command("run", Description = "Open a file with the registered application")]
     public async Task<int> OpenFile(
         [Argument("file", Description = "A file to be opened")] string filePath,
@@ -16,35 +27,33 @@ public class RunCommands : CoconaConsoleAppBase
         [Option('l', Description = "Open any possible URLs as files rather than links")] bool local,
         [Option('p', Description = "Show the app picker even when the default app is specified")] bool picker)
     {
-        Context.Logger.LogInformation(
+        _logger.LogInformation(
             "Opening {File} with entry={Entry}, default={PickDefaultApp}, local={Local}, and picker={Picker}...",
             filePath, entry, !first, local, picker);
         
         try
         {
             var appEntryDefinition = await GetAppDefinition(filePath, entry, first, local, picker);
-            var runner = new Runner(Context.Logger);
-            return await runner.Run(appEntryDefinition.Path, appEntryDefinition.Arguments);
+            return await _runner.Run(appEntryDefinition.Path, appEntryDefinition.Arguments);
         }
         catch (Exception e)
         {
-            Context.Logger.LogError("An error occurred while opening the file: {Message}", e.Message);
+            _logger.LogError("An error occurred while opening the file: {Message}", e.Message);
             return 1;
         }
     }
 
     private async Task<AppEntry> GetAppDefinition(string filePath, int? entry, bool first, bool local, bool picker)
     {
-        var parser = new Parser(Context.Logger);
-        var openerDefinition = await parser.GetOpenerDefinition(filePath, local);
+        var openerDefinition = await _parser.GetOpenerDefinition(filePath, local);
         
         // The user has picked an entry ID to open the file/protocol with
         if (entry is not null)
-            return await parser.GetAppEntryDefinition(openerDefinition, entry.Value, filePath);
+            return await _parser.GetAppEntryDefinition(openerDefinition, entry.Value, filePath);
         
         // The user wants to use the first app in the list
         if (first)
-            return await parser.GetFirstAppEntryDefinition(openerDefinition, filePath);
+            return await _parser.GetFirstAppEntryDefinition(openerDefinition, filePath);
         
         // There's no default app specified or the user decides to pick an app at runtime
         if (picker || string.IsNullOrWhiteSpace(openerDefinition.DefaultApp))
@@ -54,7 +63,7 @@ public class RunCommands : CoconaConsoleAppBase
             if (appIndex == -1)
                 throw new ApplicationException("The user has cancelled the operation!");
             
-            return await parser.GetAppEntryDefinition(openerDefinition, appIndex, filePath);
+            return await _parser.GetAppEntryDefinition(openerDefinition, appIndex, filePath);
         }
         
         // When no options are specified, use the default app
@@ -62,6 +71,6 @@ public class RunCommands : CoconaConsoleAppBase
         if (defaultEntry == -1)
             throw new ApplicationException("The default app is not in the list of registered apps!");
         
-        return await parser.GetAppEntryDefinition(openerDefinition, defaultEntry, filePath);
+        return await _parser.GetAppEntryDefinition(openerDefinition, defaultEntry, filePath);
     }
 }

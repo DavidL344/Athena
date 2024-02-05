@@ -3,7 +3,7 @@ using Athena.Core.Model.Opener;
 
 namespace Athena.Core.Internal;
 
-public static class DefinitionExtensions
+internal static class DefinitionExtensions
 {
     public static bool HasEntries(this IOpener openerDefinition)
         => openerDefinition.AppList.Length > 0;

@@ -8,8 +8,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Athena.Core;
 
-public class Parser(ILogger logger)
+public class Parser
 {
+    private readonly ILogger _logger;
+
+    public Parser(ILogger<Parser> logger)
+    {
+        _logger = logger;
+    }
+    
     public async Task<IOpener> GetOpenerDefinition(string filePath, bool openLocally)
     {
         var uri = new Uri(filePath);
@@ -100,7 +107,7 @@ public class Parser(ILogger logger)
     public async Task<AppEntry> GetFirstAppEntryDefinition<T>(
         T openerDefinition, string filePath) where T : IOpener
     {
-        logger.LogInformation("The first entry is {FirstEntry}", openerDefinition.AppList[0]);
+        _logger.LogInformation("The first entry is {FirstEntry}", openerDefinition.AppList[0]);
         return await GetAppEntryDefinition(openerDefinition, 0, filePath);
     }
     

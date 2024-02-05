@@ -1,5 +1,5 @@
 ﻿using Athena.Commands;
-using Athena.Core.Internal;
+using Athena.Core.DependencyInjection;
 using Cocona;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,11 +16,10 @@ builder.Services.AddLogging(x =>
     x.AddConsole();
 });
 
-builder.Services.AddSingleton(Vars.JsonSerializerOptions);
+builder.Environment.InitAthena();
+builder.Services.AddAthenaCore();
 
 var app = builder.Build();
-
-await StartupChecks.RunAsync();
 
 app.AddCommands<RunCommands>();
 

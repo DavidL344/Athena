@@ -6,7 +6,7 @@ using Athena.Core.Model.Opener;
 
 namespace Athena.Core.Internal;
 
-public static class StartupChecks
+internal static class StartupChecks
 {
     public static async Task RunAsync()
     {

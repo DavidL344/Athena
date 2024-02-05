@@ -5,11 +5,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Athena.Core;
 
-public class Runner(ILogger logger)
+public class Runner
 {
+    private readonly ILogger<Runner> _logger;
+
+    public Runner(ILogger<Runner> logger)
+    {
+        _logger = logger;
+    }
+    
     public async Task<int> Run(string executablePath, string arguments, ConsolePipes? consolePipes = null)
     {
-        logger.LogInformation(
+        _logger.LogInformation(
             "Opening {Path} with params {Arguments}...",
             executablePath, arguments);
         
@@ -22,7 +29,7 @@ public class Runner(ILogger logger)
             .ExecuteBufferedAsync();
 
         var exitCode = result.ExitCode;
-        logger.LogInformation("Process exited with exit code {ExitCode}", exitCode);
+        _logger.LogInformation("Process exited with exit code {ExitCode}", exitCode);
         
         return exitCode;
     }

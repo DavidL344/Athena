@@ -6,7 +6,7 @@ using Athena.Core.Model.Configuration;
 
 namespace Athena.Core.Internal;
 
-public class Vars
+internal class Vars
 {
     public static string AppDataDir
     {
