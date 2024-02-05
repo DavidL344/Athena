@@ -8,11 +8,11 @@ internal static class StartupChecks
 {
     public static async Task RunAsync()
     {
+        if (!Directory.Exists(Vars.AppDataDir)) Directory.CreateDirectory(Vars.AppDataDir);
+        
         var configDirNoDirs = Directory.GetDirectories(Vars.AppDataDir).Length == 0;
         var configDirNoFiles = Directory.GetFiles(Vars.AppDataDir).Length == 0;
-        
-        var firstRun = !Directory.Exists(Vars.AppDataDir) || (configDirNoDirs && configDirNoFiles);
-        if (firstRun) Directory.CreateDirectory(Vars.AppDataDir);
+        var firstRun = configDirNoDirs && configDirNoFiles;
 
         if (!File.Exists(Vars.AppConfigPath))
         {
