@@ -42,19 +42,10 @@ public class Parser
     
     private async Task<FileExtension> GetFileExtensionDefinition(string filePath)
     {
-        string fullPath;
-
-        if (filePath.StartsWith("file:"))
-            fullPath = Path.GetFullPath(RemoveProtocolFromUrl(filePath));
-        else if (IsStreamable(filePath))
-            fullPath = RemoveProtocolFromUrl(filePath);
-        else
-            fullPath = Path.GetFullPath(filePath);
-        
-        if (Path.GetExtension(fullPath).Length == 0)
+        if (Path.GetExtension(filePath).Length == 0)
             throw new ApplicationException("The file has no extension!");
         
-        var fileExtension = Path.GetExtension(fullPath).Substring(1);
+        var fileExtension = Path.GetExtension(filePath).Substring(1);
         var definitionPath = Path.Combine(Vars.ConfigPaths[ConfigType.Files], $"{fileExtension}.json");
 
         if (!File.Exists(definitionPath))
@@ -119,6 +110,8 @@ public class Parser
         if (definition.RemoveProtocol)
             filePath = RemoveProtocolFromUrl(filePath);
         
+        filePath = ParseStreamPath(filePath);
+        
         return definition.ExpandEnvironmentVariables(filePath);
     }
 
@@ -129,6 +122,17 @@ public class Parser
         return await GetAppEntryDefinition(openerDefinition, 0, filePath);
     }
 
+    private string ParseStreamPath(string filePath)
+    {
+        if (filePath.StartsWith("file:"))
+            return Path.GetFullPath(RemoveProtocolFromUrl(filePath));
+        
+        if (IsStreamable(filePath))
+            return RemoveProtocolFromUrl(filePath);
+        
+        return filePath;
+    }
+    
     private bool IsStreamable(string url)
         => _config.StreamableProtocolPrefixes.Any(protocol => url.StartsWith($"{protocol}:"));
     
@@ -140,6 +144,7 @@ public class Parser
         var pattern = $@"(^{protocol}:(?:\/{{0,2}}))?";
         var result = Regex.Replace(url, pattern, "");
         
+        _logger.LogInformation("Parsed the stream path: {StreamPathOld} --> {StreamPathNew}", url, result);
         return result;
     }
 }
