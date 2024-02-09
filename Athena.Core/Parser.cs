@@ -19,20 +19,34 @@ public class Parser
     
     public async Task<IOpener> GetOpenerDefinition(string filePath, bool openLocally)
     {
-        var expandedPath = Path.GetFullPath(Environment.ExpandEnvironmentVariables(filePath));
-        var uri = new Uri(expandedPath);
+        var expandedPath = Environment.ExpandEnvironmentVariables(filePath);
+        Uri uri;
+        
+        try
+        {
+            uri = new Uri(expandedPath);
+        }
+        catch (UriFormatException)
+        {
+            // The path starts with a dot or contains just the file name
+            uri = new Uri(Path.GetFullPath(filePath));
+        }
         
         return uri.IsFile || openLocally
-            ? await GetFileExtensionDefinition(uri.AbsoluteUri)
+            ? await GetFileExtensionDefinition(expandedPath)
             : await GetProtocolDefinition(uri);
     }
     
     private async Task<FileExtension> GetFileExtensionDefinition(string filePath)
     {
-        if (Path.GetExtension(filePath).Length == 0)
+        var fullPath = filePath.StartsWith("file:")
+            ? Path.GetFullPath(RemoveProtocolFromUrl(filePath))
+            : Path.GetFullPath(filePath);
+        
+        if (Path.GetExtension(fullPath).Length == 0)
             throw new ApplicationException("The file has no extension!");
         
-        var fileExtension = Path.GetExtension(filePath).Substring(1);
+        var fileExtension = Path.GetExtension(fullPath).Substring(1);
         var definitionPath = Path.Combine(Vars.ConfigPaths[ConfigType.Files], $"{fileExtension}.json");
 
         if (!File.Exists(definitionPath))
