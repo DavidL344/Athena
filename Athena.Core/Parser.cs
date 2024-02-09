@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Athena.Core.Internal;
 using Athena.Core.Model;
+using Athena.Core.Model.Configuration;
 using Athena.Core.Model.Entry;
 using Athena.Core.Model.Opener;
 using Microsoft.Extensions.Logging;
@@ -10,10 +11,12 @@ namespace Athena.Core;
 
 public class Parser
 {
+    private readonly Config _config;
     private readonly ILogger _logger;
 
-    public Parser(ILogger<Parser> logger)
+    public Parser(Config config, ILogger<Parser> logger)
     {
+        _config = config;
         _logger = logger;
     }
     
@@ -32,16 +35,21 @@ public class Parser
             uri = new Uri(Path.GetFullPath(filePath));
         }
         
-        return uri.IsFile || openLocally
+        return uri.IsFile || openLocally || IsStreamable(filePath)
             ? await GetFileExtensionDefinition(expandedPath)
             : await GetProtocolDefinition(uri);
     }
     
     private async Task<FileExtension> GetFileExtensionDefinition(string filePath)
     {
-        var fullPath = filePath.StartsWith("file:")
-            ? Path.GetFullPath(RemoveProtocolFromUrl(filePath))
-            : Path.GetFullPath(filePath);
+        string fullPath;
+
+        if (filePath.StartsWith("file:"))
+            fullPath = Path.GetFullPath(RemoveProtocolFromUrl(filePath));
+        else if (IsStreamable(filePath))
+            fullPath = RemoveProtocolFromUrl(filePath);
+        else
+            fullPath = Path.GetFullPath(filePath);
         
         if (Path.GetExtension(fullPath).Length == 0)
             throw new ApplicationException("The file has no extension!");
@@ -120,6 +128,9 @@ public class Parser
         _logger.LogInformation("The first entry is {FirstEntry}", openerDefinition.AppList[0]);
         return await GetAppEntryDefinition(openerDefinition, 0, filePath);
     }
+
+    private bool IsStreamable(string url)
+        => _config.StreamableProtocolPrefixes.Any(protocol => url.StartsWith($"{protocol}:"));
     
     private string RemoveProtocolFromUrl(string url)
     {
