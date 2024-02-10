@@ -1,4 +1,4 @@
-﻿using Athena.Commands;
+﻿using Athena.Commands.Internal;
 using Athena.Core.DependencyInjection;
 using Cocona;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +21,6 @@ builder.Services.AddAthenaCore();
 
 var app = builder.Build();
 
-app.AddCommands<RunCommands>();
+app.RegisterCommands();
 
 app.Run();

@@ -1,3 +1,4 @@
+using Athena.Commands.Internal;
 using Athena.Core;
 using Athena.Core.Model.Entry;
 using Athena.Terminal;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Athena.Commands;
 
-public class RunCommands : CoconaConsoleAppBase
+public class RunCommands : ICommands
 {
     private readonly Parser _parser;
     private readonly Runner _runner;
