@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena", "Athena\Athena.csproj", "{B4565B57-25E5-4E87-B091-04D8CA584C05}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Core", "Athena.Core\Athena.Core.csproj", "{83BE2314-BD91-4753-8AB4-588C75ECFDFA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{B4565B57-25E5-4E87-B091-04D8CA584C05}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4565B57-25E5-4E87-B091-04D8CA584C05}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4565B57-25E5-4E87-B091-04D8CA584C05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83BE2314-BD91-4753-8AB4-588C75ECFDFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83BE2314-BD91-4753-8AB4-588C75ECFDFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83BE2314-BD91-4753-8AB4-588C75ECFDFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83BE2314-BD91-4753-8AB4-588C75ECFDFA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

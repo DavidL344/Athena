@@ -1,4 +1,8 @@
-﻿using Cocona;
+﻿using Athena.Commands.Internal;
+using Athena.Core.DependencyInjection;
+using Cocona;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 var builder = CoconaApp.CreateBuilder(args, x =>
 {
@@ -6,6 +10,17 @@ var builder = CoconaApp.CreateBuilder(args, x =>
     x.TreatPublicMethodsAsCommands = false;
 });
 
+builder.Logging.AddDebug();
+builder.Services.AddLogging(x =>
+{
+    x.AddConsole();
+});
+
+builder.Environment.InitAthena();
+builder.Services.AddAthenaCore();
+
 var app = builder.Build();
+
+app.RegisterCommands();
 
 app.Run();
