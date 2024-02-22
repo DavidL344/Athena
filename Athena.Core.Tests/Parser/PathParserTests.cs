@@ -35,13 +35,26 @@ public class PathParserTests
 
     [Theory]
     [InlineData("~/file.txt")]
+    [InlineData("$HOME/file.txt")]
+    [InlineData("%HOME%/file.txt")]
+    [InlineData("$CURRENT_DIR/file.txt")]
+    [InlineData("%CURRENT_DIR%/file.txt")]
     public void GetPath__ReturnsPath__WhenFilePathHasEnvironmentVariables(string filePath)
     {
         // Arrange
         var options = new PathParserOptions { OpenLocally = true };
         var parser = new PathParser(options);
+        
+        Environment.SetEnvironmentVariable("CURRENT_DIR", _workingDir);
+        if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            filePath = filePath
+                .Replace("$HOME", "$USERPROFILE")
+                .Replace("%HOME%", "%USERPROFILE%");
+        
         filePath = Environment.ExpandEnvironmentVariables(filePath
-            .Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)));
+            .Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
+            .Replace("$HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
+            .Replace("$CURRENT_DIR", _workingDir));
         var expected = new Uri(filePath);
         
         // Act
