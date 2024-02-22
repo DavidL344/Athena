@@ -1,21 +1,22 @@
 using System.Text.RegularExpressions;
 using Athena.Core.Parser.Options;
+using Athena.Core.Parser.Shared;
 using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Parser;
 
 public class PathParser
 {
-    private readonly PathParserOptions _options;
+    private readonly ParserOptions _options;
     private readonly ILogger _logger;
 
-    public PathParser(PathParserOptions options, ILogger<PathParser> logger)
+    public PathParser(ParserOptions options, ILogger<PathParser> logger)
     {
         _options = options;
         _logger = logger;
     }
 
-    internal PathParser(PathParserOptions options)
+    internal PathParser(ParserOptions options)
     {
         _options = options;
         _logger = new Logger<PathParser>(new LoggerFactory());
@@ -39,7 +40,7 @@ public class PathParser
         catch (UriFormatException)
         {
             // The path starts with a dot or contains just the file name
-            expandedPath = Path.GetFullPath(filePath);
+            expandedPath = Path.GetFullPath(expandedPath);
             uri = new Uri(expandedPath);
             
             _logger.LogInformation("Parsed {FilePath} as either a relative path or a URL: {FileUri}",
@@ -54,7 +55,7 @@ public class PathParser
         
         // The URI is a local file or the user wants to open a URL locally,
         // based on its file extension instead of the protocol
-        if (uri.IsFile || _options.OpenLocally)
+        if (ParserHelper.IsLocalOrRequested(expandedPath, _options.OpenLocally, _options.StreamableProtocolPrefixes))
             return new Uri(Path.GetFullPath(expandedPath));
         
         return new Uri(expandedPath);
@@ -64,7 +65,6 @@ public class PathParser
     {
         var expandedPath = filePath
             .Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-        
         
         // Replace $VAR with %VAR% to support environment variable expansion
         var regex = new Regex(@"\$(\w+)");

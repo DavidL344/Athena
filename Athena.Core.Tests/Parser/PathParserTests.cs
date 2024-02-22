@@ -22,7 +22,7 @@ public class PathParserTests
     public void GetPath__ReturnsPath__WhenFilePathIsRelative(string filePath)
     {
         // Arrange
-        var options = new PathParserOptions { OpenLocally = true };
+        var options = new ParserOptions { OpenLocally = true };
         var parser = new PathParser(options);
         var expected = new Uri(Path.GetFullPath(filePath));
         
@@ -42,7 +42,7 @@ public class PathParserTests
     public void GetPath__ReturnsPath__WhenFilePathHasEnvironmentVariables(string filePath)
     {
         // Arrange
-        var options = new PathParserOptions { OpenLocally = true };
+        var options = new ParserOptions { OpenLocally = true };
         var parser = new PathParser(options);
         
         Environment.SetEnvironmentVariable("CURRENT_DIR", _workingDir);
@@ -76,7 +76,7 @@ public class PathParserTests
     public void GetPath__ReturnsPath__WhenFilePathIsAbsolute(string filePath)
     {
         // Arrange
-        var options = new PathParserOptions { OpenLocally = true };
+        var options = new ParserOptions { OpenLocally = true };
         var parser = new PathParser(options);
         var expected = new Uri(filePath
             .Replace("/", Path.DirectorySeparatorChar.ToString())
@@ -117,7 +117,7 @@ public class PathParserTests
     public void GetPath__ReturnsPath__WhenFilePathIsRemote(string filePath)
     {
         // Arrange
-        var options = new PathParserOptions { OpenLocally = false };
+        var options = new ParserOptions { OpenLocally = false };
         var parser = new PathParser(options);
         var expected = new Uri(filePath);
         
