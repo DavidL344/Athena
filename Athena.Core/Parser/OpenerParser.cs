@@ -32,7 +32,6 @@ public class OpenerParser
     private async Task<FileExtension> GetFileExtensionDefinition(string filePath)
     {
         _logger.LogInformation("Local file detected, getting the file extension definition...");
-        filePath = ParserHelper.ParseStreamPath(filePath, _options.StreamableProtocolPrefixes);
         
         if (Path.GetExtension(filePath).Length == 0)
             throw new ApplicationException("The file has no extension!");
@@ -49,7 +48,7 @@ public class OpenerParser
         if (definition is null)
             throw new ApplicationException("The file extension definition is invalid!");
         
-        if (definition.AppList.Length == 0)
+        if (definition.AppList.Count == 0)
             throw new ApplicationException("The file extension has no associated entries!");
         
         return definition;
@@ -74,7 +73,7 @@ public class OpenerParser
         if (definition is null)
             throw new ApplicationException("The protocol definition is invalid!");
 
-        if (definition.AppList.Length == 0)
+        if (definition.AppList.Count == 0)
             throw new ApplicationException("The protocol has no associated entries!");
 
         return definition;

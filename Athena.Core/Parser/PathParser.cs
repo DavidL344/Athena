@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Athena.Core.Parser.Options;
 using Athena.Core.Parser.Shared;
 using Microsoft.Extensions.Logging;
@@ -28,7 +27,7 @@ public class PathParser
             .Replace("/", Path.DirectorySeparatorChar.ToString())
             .Replace(@"\", Path.DirectorySeparatorChar.ToString());
 
-        var expandedPath = ExpandEnvironmentVariables(filePath);
+        var expandedPath = ParserHelper.ExpandEnvironmentVariables(filePath);
         Uri uri;
         
         try
@@ -59,22 +58,5 @@ public class PathParser
             return new Uri(Path.GetFullPath(expandedPath));
         
         return new Uri(expandedPath);
-    }
-    
-    private static string ExpandEnvironmentVariables(string filePath)
-    {
-        var expandedPath = filePath
-            .Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-        
-        // Replace $VAR with %VAR% to support environment variable expansion
-        var regex = new Regex(@"\$(\w+)");
-        var matches = regex.Matches(expandedPath).ToArray();
-        foreach (var match in matches)
-        {
-            var variable = match.Groups[1].Value;
-            expandedPath = expandedPath.Replace($"${variable}", $"%{variable}%");
-        }
-        
-        return Environment.ExpandEnvironmentVariables(expandedPath);
     }
 }
