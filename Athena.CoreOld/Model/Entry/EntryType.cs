@@ -1,4 +1,4 @@
-namespace Athena.Core.Model.Entry;
+namespace Athena.CoreOld.Model.Entry;
 
 public enum EntryType
 {

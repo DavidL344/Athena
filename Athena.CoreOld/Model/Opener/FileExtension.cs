@@ -1,31 +1,31 @@
 using System.Text.Json.Serialization;
 
-namespace Athena.Core.Model.Opener;
+namespace Athena.CoreOld.Model.Opener;
 
-public class Protocol : IOpener
+public class FileExtension : IOpener
 {
     /// <summary>
-    /// The name of the protocol before the :// part.
+    /// A friendly name of the file extension. 
     /// </summary>
-    /// <remarks>The schema gets populated to x-scheme-handler/<see cref="Name" /> automatically.</remarks>
     /// <example>
-    /// http<br />
-    /// https<br />
-    /// mailto<br />
-    /// ssh
+    /// HTML document<br />
+    /// MP3 audio<br />
+    /// Zip archive
     /// </example>
     [JsonRequired]
-    [JsonPropertyName("schemaName")]
+    [JsonPropertyName("friendlyName")]
     public required string Name { get; set; }
     
     /// <summary>
-    /// A list of app entries that support the protocol.
+    /// A list of app entries that support the file extension.
     /// </summary>
     /// <example>
     /// firefox.open<br />
     /// firefox.open-private<br />
     /// foobar2000.play<br />
     /// foobar2000.enqueue
+    /// unzip.extract<br />
+    /// unzip.list<br />
     /// </example>
     [JsonRequired]
     public required string[] AppList { get; set; }

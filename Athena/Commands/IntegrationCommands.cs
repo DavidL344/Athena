@@ -1,6 +1,6 @@
 using System.Reflection;
 using Athena.Commands.Internal;
-using Athena.Core;
+using Athena.CoreOld;
 using Cocona;
 using Spectre.Console;
 

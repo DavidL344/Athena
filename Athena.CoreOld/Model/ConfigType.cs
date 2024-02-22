@@ -1,4 +1,4 @@
-namespace Athena.Core.Model;
+namespace Athena.CoreOld.Model;
 
 public enum ConfigType
 {

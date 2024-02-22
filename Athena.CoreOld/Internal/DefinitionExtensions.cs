@@ -1,7 +1,7 @@
-using Athena.Core.Model.Entry;
-using Athena.Core.Model.Opener;
+using Athena.CoreOld.Model.Entry;
+using Athena.CoreOld.Model.Opener;
 
-namespace Athena.Core.Internal;
+namespace Athena.CoreOld.Internal;
 
 internal static class DefinitionExtensions
 {

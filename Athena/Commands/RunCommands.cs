@@ -1,6 +1,6 @@
 using Athena.Commands.Internal;
-using Athena.Core;
-using Athena.Core.Model.Entry;
+using Athena.CoreOld;
+using Athena.CoreOld.Model.Entry;
 using Athena.Terminal;
 using Cocona;
 using Microsoft.Extensions.Logging;

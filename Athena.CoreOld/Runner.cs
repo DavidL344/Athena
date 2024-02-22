@@ -1,9 +1,9 @@
-﻿using Athena.Core.Model;
+﻿using Athena.CoreOld.Model;
 using CliWrap;
 using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;
 
-namespace Athena.Core;
+namespace Athena.CoreOld;
 
 public class Runner
 {

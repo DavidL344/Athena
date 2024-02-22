@@ -1,10 +1,10 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Athena.Core.Model;
-using Athena.Core.Model.Configuration;
+using Athena.CoreOld.Model;
+using Athena.CoreOld.Model.Configuration;
 
-namespace Athena.Core.Internal;
+namespace Athena.CoreOld.Internal;
 
 internal class Vars
 {

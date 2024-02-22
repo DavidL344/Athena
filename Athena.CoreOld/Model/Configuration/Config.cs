@@ -1,4 +1,4 @@
-namespace Athena.Core.Model.Configuration;
+namespace Athena.CoreOld.Model.Configuration;
 
 public class Config
 {

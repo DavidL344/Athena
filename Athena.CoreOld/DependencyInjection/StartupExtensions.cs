@@ -1,7 +1,7 @@
-using Athena.Core.Internal;
+using Athena.CoreOld.Internal;
 using Microsoft.Extensions.Hosting;
 
-namespace Athena.Core.DependencyInjection;
+namespace Athena.CoreOld.DependencyInjection;
 
 public static class StartupExtensions
 {

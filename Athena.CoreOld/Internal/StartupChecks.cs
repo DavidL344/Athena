@@ -1,8 +1,8 @@
 using System.Text.Json;
-using Athena.Core.Internal.Samples;
-using Athena.Core.Model.Configuration;
+using Athena.CoreOld.Internal.Samples;
+using Athena.CoreOld.Model.Configuration;
 
-namespace Athena.Core.Internal;
+namespace Athena.CoreOld.Internal;
 
 internal static class StartupChecks
 {

@@ -1,13 +1,13 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Athena.Core.Internal;
-using Athena.Core.Model;
-using Athena.Core.Model.Configuration;
-using Athena.Core.Model.Entry;
-using Athena.Core.Model.Opener;
+using Athena.CoreOld.Internal;
+using Athena.CoreOld.Model;
+using Athena.CoreOld.Model.Configuration;
+using Athena.CoreOld.Model.Entry;
+using Athena.CoreOld.Model.Opener;
 using Microsoft.Extensions.Logging;
 
-namespace Athena.Core;
+namespace Athena.CoreOld;
 
 public class Parser
 {

@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Athena.CoreOld\Athena.CoreOld.csproj" />
       <ProjectReference Include="..\Athena.Core\Athena.Core.csproj" />
     </ItemGroup>
 

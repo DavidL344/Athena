@@ -1,6 +1,6 @@
 using CliWrap;
 
-namespace Athena.Core.Model;
+namespace Athena.CoreOld.Model;
 
 public record ConsolePipes
 {

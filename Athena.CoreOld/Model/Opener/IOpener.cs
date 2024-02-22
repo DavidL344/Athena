@@ -1,4 +1,4 @@
-namespace Athena.Core.Model.Opener;
+namespace Athena.CoreOld.Model.Opener;
 
 public interface IOpener
 {

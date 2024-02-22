@@ -1,5 +1,5 @@
 using System.Text;
-using Athena.Core.Model.Opener;
+using Athena.CoreOld.Model.Opener;
 using Spectre.Console;
 
 namespace Athena.Terminal;

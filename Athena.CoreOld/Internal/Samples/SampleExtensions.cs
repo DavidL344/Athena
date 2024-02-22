@@ -1,7 +1,7 @@
 using System.Text.Json;
-using Athena.Core.Model;
+using Athena.CoreOld.Model;
 
-namespace Athena.Core.Internal.Samples;
+namespace Athena.CoreOld.Internal.Samples;
 
 public static class SampleExtensions
 {
