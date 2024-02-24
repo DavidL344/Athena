@@ -10,22 +10,19 @@ namespace Athena.Core.Parser;
 public class AppParser
 {
     private readonly Dictionary<ConfigType, string> _configPaths;
-    private readonly ParserOptions _options;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ILogger<AppParser> _logger;
 
     public AppParser(Dictionary<ConfigType, string> configPaths,
-        ParserOptions options,  JsonSerializerOptions jsonSerializerOptions,
-        ILogger<AppParser> logger)
+        JsonSerializerOptions jsonSerializerOptions, ILogger<AppParser> logger)
     {
         _configPaths = configPaths;
-        _options = options;
         _jsonSerializerOptions = jsonSerializerOptions;
         _logger = logger;
     }
 
     public async Task<AppEntry> GetAppDefinition<T>(
-        T openerDefinition, string filePath, string entryName, bool expandVars = true)
+        T openerDefinition, string filePath, string entryName, ParserOptions options, bool expandVars = true)
         where T : IOpener
     {
         var entryIndex = openerDefinition.AppList.IndexOf(entryName);
@@ -35,11 +32,11 @@ public class AppParser
         
         _logger.LogInformation("Found {EntryName} at index {EntryIndex}", entryName, entryIndex);
         
-        return await GetAppDefinition(openerDefinition, filePath, entryIndex, expandVars);
+        return await GetAppDefinition(openerDefinition, filePath, entryIndex, options, expandVars);
     }
     
     public async Task<AppEntry> GetAppDefinition<T>(
-        T openerDefinition, string filePath, int entryIndex, bool expandVars = true)
+        T openerDefinition, string filePath, int entryIndex, ParserOptions options, bool expandVars = true)
         where T : IOpener
     {
         if (filePath.Length == 0)
@@ -65,7 +62,7 @@ public class AppParser
         
         _logger.LogInformation("Entry {AppEntryName} has been loaded successfully", appEntryName);
         
-        filePath = ParserHelper.ParseStreamPath(filePath, _options.StreamableProtocolPrefixes);
+        filePath = ParserHelper.ParseStreamPath(filePath, options.StreamableProtocolPrefixes);
         
         _logger.LogInformation("File path has been fully parsed, the new file path is {FilePath}", filePath);
         

@@ -47,11 +47,11 @@ public class PathParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
-        var parser = new PathParser(options, _logger);
+        var parser = new PathParser(_logger);
         var expected = new Uri(Path.GetFullPath(filePath));
         
         // Act
-        var result = parser.GetUri(filePath);
+        var result = parser.GetUri(filePath, options);
         
         // Assert
         Assert.Equal(expected, result);
@@ -67,7 +67,7 @@ public class PathParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
-        var parser = new PathParser(options, _logger);
+        var parser = new PathParser(_logger);
         
         Environment.SetEnvironmentVariable("CURRENT_DIR", _workingDir);
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
@@ -82,7 +82,7 @@ public class PathParserTests : IDisposable
         var expected = new Uri(filePath);
         
         // Act
-        var result = parser.GetUri(filePath);
+        var result = parser.GetUri(filePath, options);
         
         // Assert
         Assert.Equal(expected, result);
@@ -101,13 +101,13 @@ public class PathParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
-        var parser = new PathParser(options, _logger);
+        var parser = new PathParser(_logger);
         var expected = new Uri(filePath
             .Replace("/", Path.DirectorySeparatorChar.ToString())
             .Replace(@"\", Path.DirectorySeparatorChar.ToString()));
         
         // Act
-        var result = parser.GetUri(filePath);
+        var result = parser.GetUri(filePath, options);
         _console.WriteLine(expected.ToString());
         _console.WriteLine(result.ToString());
         
@@ -142,11 +142,11 @@ public class PathParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = false };
-        var parser = new PathParser(options, _logger);
+        var parser = new PathParser(_logger);
         var expected = new Uri(filePath);
         
         // Act
-        var result = parser.GetUri(filePath);
+        var result = parser.GetUri(filePath, options);
         
         // Assert
         Assert.Equal(expected, result);

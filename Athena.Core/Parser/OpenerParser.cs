@@ -10,24 +10,21 @@ namespace Athena.Core.Parser;
 public class OpenerParser
 {
     private readonly Dictionary<ConfigType, string> _configPaths;
-    private readonly ParserOptions _options;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ILogger<OpenerParser> _logger;
 
     public OpenerParser(Dictionary<ConfigType, string> configPaths,
-        ParserOptions options, JsonSerializerOptions jsonSerializerOptions,
-        ILogger<OpenerParser> logger)
+        JsonSerializerOptions jsonSerializerOptions, ILogger<OpenerParser> logger)
     {
         _configPaths = configPaths;
-        _options = options;
         _jsonSerializerOptions = jsonSerializerOptions;
         _logger = logger;
     }
 
-    public async Task<IOpener> GetOpenerDefinition(string filePath)
-        => ParserHelper.IsLocalOrRequested(filePath, _options.OpenLocally, _options.StreamableProtocolPrefixes)
+    public async Task<IOpener> GetOpenerDefinition(string filePath, ParserOptions options)
+        => ParserHelper.IsLocalOrRequested(filePath, options.OpenLocally, options.StreamableProtocolPrefixes)
             ? await GetFileExtensionDefinition(filePath)
-            : await GetProtocolDefinition(new Uri(filePath));
+            : await GetProtocolDefinition(new Uri(filePath), options);
 
     private async Task<FileExtension> GetFileExtensionDefinition(string filePath)
     {
@@ -54,11 +51,11 @@ public class OpenerParser
         return definition;
     }
 
-    private async Task<Protocol> GetProtocolDefinition(Uri uri)
+    private async Task<Protocol> GetProtocolDefinition(Uri uri, ParserOptions options)
     {
         _logger.LogInformation("Remote file detected, getting the protocol definition...");
         
-        if (!_options.AllowProtocols)
+        if (!options.AllowProtocols)
             throw new ApplicationException("The protocol handler is disabled!");
         
         var protocol = uri.Scheme;

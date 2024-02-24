@@ -52,7 +52,7 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new AppParser(_configPaths, _jsonSerializerOptions, _logger);
         var expected = new AppEntry
         {
             Name = "mpv (Play)",
@@ -65,7 +65,7 @@ public class AppParserTests : IDisposable
         {
             Name = "MP4 Video",
             AppList = [ "mpv.play" ]
-        }, filePath, "mpv.play", expandVars);
+        }, filePath, "mpv.play", options, expandVars);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -77,14 +77,14 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new AppParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension
         {
             Name = "MP4 Video",
             AppList = [ "mpv.play" ]
-        }, filePath, entryName, expandVars: false));
+        }, filePath, entryName, options, expandVars: false));
         
         // Assert
         Assert.NotNull(exception);
@@ -100,14 +100,14 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new AppParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension
         {
             Name = "MP4 Video",
             AppList = [ "mpv.play" ]
-        }, filePath, entryIndex, expandVars: false));
+        }, filePath, entryIndex, options, expandVars: false));
         
         // Assert
         Assert.NotNull(exception);
@@ -123,14 +123,14 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new AppParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension
         {
             Name = "Random File",
             AppList = [ definitionName ]
-        }, filePath, definitionName, expandVars));
+        }, filePath, definitionName, options, expandVars));
         
         // Assert
         Assert.NotNull(exception);
@@ -145,7 +145,7 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new AppParser(_configPaths, _jsonSerializerOptions, _logger);
         var expected = new AppEntry
         {
             Name = "mpv (Play)",
@@ -163,7 +163,7 @@ public class AppParserTests : IDisposable
         {
             Name = "A temporary file",
             AppList = [ ".temp.open" ]
-        }, url, ".temp.open", expandVars: false);
+        }, url, ".temp.open", options, expandVars: false);
         File.Delete(filePath);
         
         // Assert
@@ -175,14 +175,14 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new AppParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension
         {
             Name = "MP4 Video",
             AppList = [ "mpv.play" ]
-        }, string.Empty, "mpv.play", expandVars: false));
+        }, string.Empty, "mpv.play", options, expandVars: false));
         
         // Assert
         Assert.NotNull(exception);

@@ -53,7 +53,7 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new OpenerParser(_configPaths, _jsonSerializerOptions, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -61,7 +61,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetOpenerDefinition(filePath);
+        var result = await parser.GetOpenerDefinition(filePath, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -78,7 +78,7 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new OpenerParser(_configPaths, _jsonSerializerOptions, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -86,7 +86,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetOpenerDefinition(filePath);
+        var result = await parser.GetOpenerDefinition(filePath, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -98,7 +98,7 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
-        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new OpenerParser(_configPaths, _jsonSerializerOptions, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -106,7 +106,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetOpenerDefinition(url);
+        var result = await parser.GetOpenerDefinition(url, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -123,7 +123,7 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { StreamableProtocolPrefixes = [ "athena", "stream" ] };
-        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new OpenerParser(_configPaths, _jsonSerializerOptions, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -131,7 +131,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetOpenerDefinition(url);
+        var result = await parser.GetOpenerDefinition(url, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -145,7 +145,7 @@ public class OpenerParserTests : IDisposable
         // Arrange
         var uri = new Uri(url);
         var options = new ParserOptions { AllowProtocols = true };
-        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new OpenerParser(_configPaths, _jsonSerializerOptions, _logger);
         var expected = new Protocol
         {
             Name = uri.Scheme,
@@ -159,7 +159,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetOpenerDefinition(url);
+        var result = await parser.GetOpenerDefinition(url, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -171,10 +171,10 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { AllowProtocols = false };
-        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new OpenerParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
-        var exception = await Record.ExceptionAsync(() => parser.GetOpenerDefinition(url));
+        var exception = await Record.ExceptionAsync(() => parser.GetOpenerDefinition(url, options));
         
         // Assert
         Assert.NotNull(exception);
@@ -189,10 +189,10 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true, AllowProtocols = true};
-        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
+        var parser = new OpenerParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
-        var exception = await Record.ExceptionAsync(() => parser.GetOpenerDefinition(filePath));
+        var exception = await Record.ExceptionAsync(() => parser.GetOpenerDefinition(filePath, options));
         
         // Assert
         Assert.NotNull(exception);

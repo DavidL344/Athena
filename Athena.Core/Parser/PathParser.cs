@@ -6,16 +6,14 @@ namespace Athena.Core.Parser;
 
 public class PathParser
 {
-    private readonly ParserOptions _options;
     private readonly ILogger _logger;
 
-    public PathParser(ParserOptions options, ILogger<PathParser> logger)
+    public PathParser(ILogger<PathParser> logger)
     {
-        _options = options;
         _logger = logger;
     }
 
-    public Uri GetUri(string filePath)
+    public Uri GetUri(string filePath, ParserOptions options)
     {
         filePath = filePath
             .Replace("/", Path.DirectorySeparatorChar.ToString())
@@ -48,7 +46,7 @@ public class PathParser
         
         // The URI is a local file or the user wants to open a URL locally,
         // based on its file extension instead of the protocol
-        if (ParserHelper.IsLocalOrRequested(expandedPath, _options.OpenLocally, _options.StreamableProtocolPrefixes))
+        if (ParserHelper.IsLocalOrRequested(expandedPath, options.OpenLocally, options.StreamableProtocolPrefixes))
             return new Uri(Path.GetFullPath(expandedPath));
         
         return new Uri(expandedPath);
