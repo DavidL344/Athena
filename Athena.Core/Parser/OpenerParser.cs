@@ -9,19 +9,16 @@ namespace Athena.Core.Parser;
 
 public class OpenerParser
 {
+    private readonly Dictionary<ConfigType, string> _configPaths;
     private readonly ParserOptions _options;
     private readonly ILogger<OpenerParser> _logger;
 
-    public OpenerParser(ParserOptions options, ILogger<OpenerParser> logger)
+    public OpenerParser(Dictionary<ConfigType, string> configPaths,
+        ParserOptions options, ILogger<OpenerParser> logger)
     {
+        _configPaths = configPaths;
         _options = options;
         _logger = logger;
-    }
-
-    internal OpenerParser(ParserOptions options)
-    {
-        _options = options;
-        _logger = new Logger<OpenerParser>(new LoggerFactory());
     }
 
     public async Task<IOpener> GetOpenerDefinition(string filePath)
@@ -37,7 +34,7 @@ public class OpenerParser
             throw new ApplicationException("The file has no extension!");
         
         var fileExtension = Path.GetExtension(filePath).Substring(1);
-        var definitionPath = Path.Combine(Vars.ConfigPaths[ConfigType.Files], $"{fileExtension}.json");
+        var definitionPath = Path.Combine(_configPaths[ConfigType.Files], $"{fileExtension}.json");
         
         if (!File.Exists(definitionPath))
             throw new ApplicationException($"The file extension ({fileExtension}) isn't registered with Athena!");
@@ -62,7 +59,7 @@ public class OpenerParser
             throw new ApplicationException("The protocol handler is disabled!");
         
         var protocol = uri.Scheme;
-        var definitionPath = Path.Combine(Vars.ConfigPaths[ConfigType.Protocols], $"{protocol}.json");
+        var definitionPath = Path.Combine(_configPaths[ConfigType.Protocols], $"{protocol}.json");
         
         if (!File.Exists(definitionPath))
             throw new ApplicationException($"The protocol ({protocol}) isn't registered with Athena!");

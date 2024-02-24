@@ -1,11 +1,40 @@
+using System.Reflection;
 using Athena.Core.Model.Opener;
 using Athena.Core.Parser;
 using Athena.Core.Parser.Options;
+using Athena.Core.Parser.Shared;
+using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Tests.Parser;
 
-public class OpenerParserTests
+public class OpenerParserTests : IDisposable
 {
+    private readonly string _testsConfigDir;
+    private readonly Dictionary<ConfigType, string> _configPaths;
+    private readonly ILogger<OpenerParser> _logger;
+
+    public OpenerParserTests()
+    {
+        var workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        
+        _testsConfigDir = Path.Combine(workingDir, "user-opener-parser-tests");
+        _configPaths = new Dictionary<ConfigType, string>
+        {
+            { ConfigType.Entries, Path.Combine(_testsConfigDir, "entries") },
+            { ConfigType.Files, Path.Combine(_testsConfigDir, "files") },
+            { ConfigType.Protocols, Path.Combine(_testsConfigDir, "protocols") }
+        };
+        _logger = new Logger<OpenerParser>(new LoggerFactory());
+        
+        Internal.Samples.Generate(_testsConfigDir).GetAwaiter().GetResult();
+    }
+    
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        Internal.Samples.Remove(_testsConfigDir);
+    }
+    
     [Theory]
     [InlineData("/file.mp4")]
     [InlineData("/home/file.mp4")]
@@ -14,7 +43,7 @@ public class OpenerParserTests
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new OpenerParser(options);
+        var parser = new OpenerParser(_configPaths, options, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -39,7 +68,7 @@ public class OpenerParserTests
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new OpenerParser(options);
+        var parser = new OpenerParser(_configPaths, options, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -59,7 +88,7 @@ public class OpenerParserTests
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
-        var parser = new OpenerParser(options);
+        var parser = new OpenerParser(_configPaths, options, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -84,7 +113,7 @@ public class OpenerParserTests
     {
         // Arrange
         var options = new ParserOptions { StreamableProtocolPrefixes = [ "athena", "stream" ] };
-        var parser = new OpenerParser(options);
+        var parser = new OpenerParser(_configPaths, options, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -106,7 +135,7 @@ public class OpenerParserTests
         // Arrange
         var uri = new Uri(url);
         var options = new ParserOptions { AllowProtocols = true };
-        var parser = new OpenerParser(options);
+        var parser = new OpenerParser(_configPaths, options, _logger);
         var expected = new Protocol
         {
             Name = uri.Scheme,
@@ -132,7 +161,7 @@ public class OpenerParserTests
     {
         // Arrange
         var options = new ParserOptions { AllowProtocols = false };
-        var parser = new OpenerParser(options);
+        var parser = new OpenerParser(_configPaths, options, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetOpenerDefinition(url));
@@ -150,7 +179,7 @@ public class OpenerParserTests
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true, AllowProtocols = true};
-        var parser = new OpenerParser(options);
+        var parser = new OpenerParser(_configPaths, options, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetOpenerDefinition(filePath));

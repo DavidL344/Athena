@@ -1,13 +1,41 @@
+using System.Reflection;
 using System.Text.Json;
 using Athena.Core.Model.Opener;
 using Athena.Core.Parser;
 using Athena.Core.Parser.Options;
 using Athena.Core.Parser.Shared;
+using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Tests.Parser;
 
-public class AppParserTests
+public class AppParserTests : IDisposable
 {
+    private readonly string _testsConfigDir;
+    private readonly Dictionary<ConfigType, string> _configPaths;
+    private readonly Logger<AppParser> _logger;
+
+    public AppParserTests()
+    {
+        var workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        
+        _testsConfigDir = Path.Combine(workingDir, "user-app-parser-tests");
+        _configPaths = new Dictionary<ConfigType, string>
+        {
+            { ConfigType.Entries, Path.Combine(_testsConfigDir, "entries") },
+            { ConfigType.Files, Path.Combine(_testsConfigDir, "files") },
+            { ConfigType.Protocols, Path.Combine(_testsConfigDir, "protocols") }
+        };
+        _logger = new Logger<AppParser>(new LoggerFactory());
+        
+        Internal.Samples.Generate(_testsConfigDir).GetAwaiter().GetResult();
+    }
+    
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        Internal.Samples.Remove(_testsConfigDir);
+    }
+    
     [Theory]
     [InlineData("/file.mp4", true)]
     [InlineData("/file.mp4", false)]
@@ -15,7 +43,7 @@ public class AppParserTests
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(options);
+        var parser = new AppParser(_configPaths, options, _logger);
         var expected = new AppEntry
         {
             Name = "mpv (Play)",
@@ -40,7 +68,7 @@ public class AppParserTests
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(options);
+        var parser = new AppParser(_configPaths, options, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension
@@ -63,7 +91,7 @@ public class AppParserTests
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(options);
+        var parser = new AppParser(_configPaths, options, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension
@@ -86,7 +114,7 @@ public class AppParserTests
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(options);
+        var parser = new AppParser(_configPaths, options, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension
@@ -108,7 +136,7 @@ public class AppParserTests
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(options);
+        var parser = new AppParser(_configPaths, options, _logger);
         var expected = new AppEntry
         {
             Name = "mpv (Play)",
@@ -118,7 +146,7 @@ public class AppParserTests
         };
         
         // Act
-        var filePath = Path.Combine(Vars.ConfigPaths[ConfigType.Entries], ".temp.open.json");
+        var filePath = Path.Combine(_configPaths[ConfigType.Entries], ".temp.open.json");
         var fileContents = JsonSerializer.Serialize(expected, Vars.JsonSerializerOptions);
         await File.WriteAllTextAsync(filePath, fileContents);
         
@@ -138,7 +166,7 @@ public class AppParserTests
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(options);
+        var parser = new AppParser(_configPaths, options, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension

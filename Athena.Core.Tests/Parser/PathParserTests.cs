@@ -5,14 +5,25 @@ using Xunit.Abstractions;
 
 namespace Athena.Core.Tests.Parser;
 
-public class PathParserTests
+public class PathParserTests : IDisposable
 {
-    private readonly string _workingDir = Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))!;
+    private readonly string _workingDir;
     private readonly ITestOutputHelper _console;
+    private readonly string _testsConfigDir;
 
     public PathParserTests(ITestOutputHelper testOutputHelper)
     {
+        _workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         _console = testOutputHelper;
+        _testsConfigDir = Path.Combine(_workingDir, "user-path-parser-tests");
+        
+        Internal.Samples.Generate(_testsConfigDir).GetAwaiter().GetResult();
+    }
+    
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        Internal.Samples.Remove(_testsConfigDir);
     }
 
     [Theory]

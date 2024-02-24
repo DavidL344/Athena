@@ -9,19 +9,16 @@ namespace Athena.Core.Parser;
 
 public class AppParser
 {
+    private readonly Dictionary<ConfigType, string> _configPaths;
     private readonly ParserOptions _options;
     private readonly ILogger<AppParser> _logger;
 
-    public AppParser(ParserOptions options, ILogger<AppParser> logger)
+    public AppParser(Dictionary<ConfigType, string> configPaths,
+        ParserOptions options, ILogger<AppParser> logger)
     {
+        _configPaths = configPaths;
         _options = options;
         _logger = logger;
-    }
-    
-    internal AppParser(ParserOptions options)
-    {
-        _options = options;
-        _logger = new Logger<AppParser>(new LoggerFactory());
     }
 
     public async Task<AppEntry> GetAppDefinition<T>(
@@ -49,7 +46,7 @@ public class AppParser
             throw new ApplicationException("The entry ID is out of range!");
         
         var appEntryName = openerDefinition.AppList[entryIndex];
-        var appEntryPath = Path.Combine(Vars.ConfigPaths[ConfigType.Entries], $"{appEntryName}.json");
+        var appEntryPath = Path.Combine(_configPaths[ConfigType.Entries], $"{appEntryName}.json");
         
         if (!File.Exists(appEntryPath))
             throw new ApplicationException($"The entry ({appEntryName}) isn't defined!");
