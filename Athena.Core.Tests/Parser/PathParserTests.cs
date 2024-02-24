@@ -48,10 +48,10 @@ public class PathParserTests : IDisposable
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
         var parser = new PathParser(_logger);
-        var expected = new Uri(Path.GetFullPath(filePath));
+        var expected = Path.GetFullPath(filePath);
         
         // Act
-        var result = parser.GetUri(filePath, options);
+        var result = parser.GetPath(filePath, options);
         
         // Assert
         Assert.Equal(expected, result);
@@ -79,10 +79,10 @@ public class PathParserTests : IDisposable
             .Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
             .Replace("$HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
             .Replace("$CURRENT_DIR", _workingDir));
-        var expected = new Uri(filePath);
+        var expected = filePath;
         
         // Act
-        var result = parser.GetUri(filePath, options);
+        var result = parser.GetPath(filePath, options);
         
         // Assert
         Assert.Equal(expected, result);
@@ -102,14 +102,14 @@ public class PathParserTests : IDisposable
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
         var parser = new PathParser(_logger);
-        var expected = new Uri(filePath
+        var expected = filePath
             .Replace("/", Path.DirectorySeparatorChar.ToString())
-            .Replace(@"\", Path.DirectorySeparatorChar.ToString()));
+            .Replace(@"\", Path.DirectorySeparatorChar.ToString());
         
         // Act
-        var result = parser.GetUri(filePath, options);
-        _console.WriteLine(expected.ToString());
-        _console.WriteLine(result.ToString());
+        var result = parser.GetPath(filePath, options);
+        _console.WriteLine(expected);
+        _console.WriteLine(result);
         
         // Assert
         Assert.Equal(expected, result);
@@ -143,10 +143,10 @@ public class PathParserTests : IDisposable
         // Arrange
         var options = new ParserOptions { OpenLocally = false };
         var parser = new PathParser(_logger);
-        var expected = new Uri(filePath);
+        var expected = filePath;
         
         // Act
-        var result = parser.GetUri(filePath, options);
+        var result = parser.GetPath(filePath, options);
         
         // Assert
         Assert.Equal(expected, result);

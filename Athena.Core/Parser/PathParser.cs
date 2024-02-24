@@ -13,7 +13,7 @@ public class PathParser
         _logger = logger;
     }
 
-    public Uri GetUri(string filePath, ParserOptions options)
+    public string GetPath(string filePath, ParserOptions options)
     {
         filePath = filePath
             .Replace("/", Path.DirectorySeparatorChar.ToString())
@@ -42,13 +42,13 @@ public class PathParser
         // (either relative or absolute, and either with or without a drive letter)
         if (!expandedPath.StartsWith(Path.DirectorySeparatorChar)
             && !expandedPath.StartsWith('.'))
-            return new Uri(expandedPath);
+            return expandedPath;
         
         // The URI is a local file or the user wants to open a URL locally,
         // based on its file extension instead of the protocol
         if (ParserHelper.IsLocalOrRequested(expandedPath, options.OpenLocally, options.StreamableProtocolPrefixes))
-            return new Uri(Path.GetFullPath(expandedPath));
+            return Path.GetFullPath(expandedPath);
         
-        return new Uri(expandedPath);
+        return expandedPath;
     }
 }
