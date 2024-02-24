@@ -11,13 +11,16 @@ public class OpenerParser
 {
     private readonly Dictionary<ConfigType, string> _configPaths;
     private readonly ParserOptions _options;
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ILogger<OpenerParser> _logger;
 
     public OpenerParser(Dictionary<ConfigType, string> configPaths,
-        ParserOptions options, ILogger<OpenerParser> logger)
+        ParserOptions options, JsonSerializerOptions jsonSerializerOptions,
+        ILogger<OpenerParser> logger)
     {
         _configPaths = configPaths;
         _options = options;
+        _jsonSerializerOptions = jsonSerializerOptions;
         _logger = logger;
     }
 
@@ -40,7 +43,7 @@ public class OpenerParser
             throw new ApplicationException($"The file extension ({fileExtension}) isn't registered with Athena!");
         
         var definitionData = await File.ReadAllTextAsync(definitionPath);
-        var definition = JsonSerializer.Deserialize<FileExtension>(definitionData, Vars.JsonSerializerOptions);
+        var definition = JsonSerializer.Deserialize<FileExtension>(definitionData, _jsonSerializerOptions);
         
         if (definition is null)
             throw new ApplicationException("The file extension definition is invalid!");
@@ -65,7 +68,7 @@ public class OpenerParser
             throw new ApplicationException($"The protocol ({protocol}) isn't registered with Athena!");
         
         var definitionData = await File.ReadAllTextAsync(definitionPath);
-        var definition = JsonSerializer.Deserialize<Protocol>(definitionData, Vars.JsonSerializerOptions);
+        var definition = JsonSerializer.Deserialize<Protocol>(definitionData, _jsonSerializerOptions);
         
         if (definition is null)
             throw new ApplicationException("The protocol definition is invalid!");

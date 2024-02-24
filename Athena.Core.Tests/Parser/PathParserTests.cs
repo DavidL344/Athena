@@ -1,6 +1,9 @@
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Athena.Core.Parser;
 using Athena.Core.Parser.Options;
+using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace Athena.Core.Tests.Parser;
@@ -10,14 +13,24 @@ public class PathParserTests : IDisposable
     private readonly string _workingDir;
     private readonly ITestOutputHelper _console;
     private readonly string _testsConfigDir;
+    private readonly ILogger<PathParser> _logger;
 
     public PathParserTests(ITestOutputHelper testOutputHelper)
     {
         _workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         _console = testOutputHelper;
         _testsConfigDir = Path.Combine(_workingDir, "user-path-parser-tests");
+        _logger = new Logger<PathParser>(new LoggerFactory());
         
-        Internal.Samples.Generate(_testsConfigDir).GetAwaiter().GetResult();
+        var jsonSerializerOptions = new JsonSerializerOptions
+        {
+            AllowTrailingCommas = false,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        };
+        
+        Internal.Samples.Generate(_testsConfigDir, jsonSerializerOptions).GetAwaiter().GetResult();
     }
     
     public void Dispose()
@@ -34,7 +47,7 @@ public class PathParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
-        var parser = new PathParser(options);
+        var parser = new PathParser(options, _logger);
         var expected = new Uri(Path.GetFullPath(filePath));
         
         // Act
@@ -54,7 +67,7 @@ public class PathParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
-        var parser = new PathParser(options);
+        var parser = new PathParser(options, _logger);
         
         Environment.SetEnvironmentVariable("CURRENT_DIR", _workingDir);
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
@@ -88,7 +101,7 @@ public class PathParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
-        var parser = new PathParser(options);
+        var parser = new PathParser(options, _logger);
         var expected = new Uri(filePath
             .Replace("/", Path.DirectorySeparatorChar.ToString())
             .Replace(@"\", Path.DirectorySeparatorChar.ToString()));
@@ -129,7 +142,7 @@ public class PathParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = false };
-        var parser = new PathParser(options);
+        var parser = new PathParser(options, _logger);
         var expected = new Uri(filePath);
         
         // Act

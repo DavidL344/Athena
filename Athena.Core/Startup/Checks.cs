@@ -5,9 +5,9 @@ using Athena.Core.Samples;
 
 namespace Athena.Core.Startup;
 
-public class Checks
+internal class Checks
 {
-    public static async Task CheckConfiguration(string appDataDir)
+    public static async Task CheckConfiguration(string appDataDir, JsonSerializerOptions serializerOptions)
     {
         if (!Directory.Exists(appDataDir)) Directory.CreateDirectory(appDataDir);
         
@@ -17,7 +17,7 @@ public class Checks
         
         if (!File.Exists(Path.Combine(appDataDir, "config.json")))
         {
-            var fileContents = JsonSerializer.Serialize(new Config(), Vars.JsonSerializerOptions);
+            var fileContents = JsonSerializer.Serialize(new Config(), serializerOptions);
             await File.WriteAllTextAsync(Path.Combine(appDataDir, "config.json"), fileContents);
         }
         
@@ -29,10 +29,10 @@ public class Checks
                 Directory.CreateDirectory(path);
         }
         
-        if (firstRun) await GenerateSamples(appDataDir);
+        if (firstRun) await GenerateSamples(appDataDir, serializerOptions);
     }
     
-    private static async Task GenerateSamples(string appDataDir)
+    private static async Task GenerateSamples(string appDataDir, JsonSerializerOptions serializerOptions)
     {
         var samples = new List<ISample>
         {
@@ -48,7 +48,8 @@ public class Checks
             { ConfigType.Protocols, Path.Combine(appDataDir, "protocols") }
         };
         
-        var tasks = samples.Select(async sample => await sample.SaveToDisk(configPaths));
+        var tasks = samples.Select(async sample =>
+            await sample.SaveToDisk(configPaths, serializerOptions));
         await Task.WhenAll(tasks);
     }
 }

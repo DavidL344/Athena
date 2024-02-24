@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Athena.Core.Model.Opener;
 using Athena.Core.Parser;
 using Athena.Core.Parser.Options;
@@ -12,6 +13,7 @@ public class AppParserTests : IDisposable
 {
     private readonly string _testsConfigDir;
     private readonly Dictionary<ConfigType, string> _configPaths;
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly Logger<AppParser> _logger;
 
     public AppParserTests()
@@ -25,9 +27,16 @@ public class AppParserTests : IDisposable
             { ConfigType.Files, Path.Combine(_testsConfigDir, "files") },
             { ConfigType.Protocols, Path.Combine(_testsConfigDir, "protocols") }
         };
+        _jsonSerializerOptions = new JsonSerializerOptions
+        {
+            AllowTrailingCommas = false,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        };
         _logger = new Logger<AppParser>(new LoggerFactory());
         
-        Internal.Samples.Generate(_testsConfigDir).GetAwaiter().GetResult();
+        Internal.Samples.Generate(_testsConfigDir, _jsonSerializerOptions).GetAwaiter().GetResult();
     }
     
     public void Dispose()
@@ -43,7 +52,7 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _logger);
+        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
         var expected = new AppEntry
         {
             Name = "mpv (Play)",
@@ -68,7 +77,7 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _logger);
+        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension
@@ -91,7 +100,7 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _logger);
+        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension
@@ -114,7 +123,7 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _logger);
+        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension
@@ -136,7 +145,7 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _logger);
+        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
         var expected = new AppEntry
         {
             Name = "mpv (Play)",
@@ -147,7 +156,7 @@ public class AppParserTests : IDisposable
         
         // Act
         var filePath = Path.Combine(_configPaths[ConfigType.Entries], ".temp.open.json");
-        var fileContents = JsonSerializer.Serialize(expected, Vars.JsonSerializerOptions);
+        var fileContents = JsonSerializer.Serialize(expected, _jsonSerializerOptions);
         await File.WriteAllTextAsync(filePath, fileContents);
         
         var result = await parser.GetAppDefinition(new FileExtension
@@ -166,7 +175,7 @@ public class AppParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new AppParser(_configPaths, options, _logger);
+        var parser = new AppParser(_configPaths, options, _jsonSerializerOptions, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetAppDefinition(new FileExtension

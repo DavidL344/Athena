@@ -5,12 +5,13 @@ namespace Athena.Core.Samples;
 
 public static class SampleExtensions
 {
-    public static async Task SaveToDisk(this ISample sample, Dictionary<ConfigType, string> configPaths)
+    public static async Task SaveToDisk(this ISample sample,
+        Dictionary<ConfigType, string> configPaths, JsonSerializerOptions serializerOptions)
     {
         var entryTasks = sample.Entries.Select(async entry =>
         {
             var filePath = Path.Combine(configPaths[ConfigType.Entries], $"{entry.Key}.json");
-            var fileContents = JsonSerializer.Serialize(entry.Value, Vars.JsonSerializerOptions);
+            var fileContents = JsonSerializer.Serialize(entry.Value, serializerOptions);
             await File.WriteAllTextAsync(filePath, fileContents);
         });
         await Task.WhenAll(entryTasks);
@@ -18,7 +19,7 @@ public static class SampleExtensions
         var fileExtensionTasks = sample.FileExtensions.Select(async fileExtension =>
         {
             var filePath = Path.Combine(configPaths[ConfigType.Files], $"{fileExtension.Key}.json");
-            var fileContents = JsonSerializer.Serialize(fileExtension.Value, Vars.JsonSerializerOptions);
+            var fileContents = JsonSerializer.Serialize(fileExtension.Value, serializerOptions);
             await File.WriteAllTextAsync(filePath, fileContents);
         });
         await Task.WhenAll(fileExtensionTasks);
@@ -26,7 +27,7 @@ public static class SampleExtensions
         var protocolTasks = sample.Protocols.Select(async protocol =>
         {
             var filePath = Path.Combine(configPaths[ConfigType.Protocols], $"{protocol.Key}.json");
-            var fileContents = JsonSerializer.Serialize(protocol.Value, Vars.JsonSerializerOptions);
+            var fileContents = JsonSerializer.Serialize(protocol.Value, serializerOptions);
             await File.WriteAllTextAsync(filePath, fileContents);
         });
         await Task.WhenAll(protocolTasks);

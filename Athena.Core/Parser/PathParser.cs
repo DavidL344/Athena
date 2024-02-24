@@ -15,12 +15,6 @@ public class PathParser
         _logger = logger;
     }
 
-    internal PathParser(ParserOptions options)
-    {
-        _options = options;
-        _logger = new Logger<PathParser>(new LoggerFactory());
-    }
-
     public Uri GetUri(string filePath)
     {
         filePath = filePath

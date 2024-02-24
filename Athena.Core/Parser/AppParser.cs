@@ -11,13 +11,16 @@ public class AppParser
 {
     private readonly Dictionary<ConfigType, string> _configPaths;
     private readonly ParserOptions _options;
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ILogger<AppParser> _logger;
 
     public AppParser(Dictionary<ConfigType, string> configPaths,
-        ParserOptions options, ILogger<AppParser> logger)
+        ParserOptions options,  JsonSerializerOptions jsonSerializerOptions,
+        ILogger<AppParser> logger)
     {
         _configPaths = configPaths;
         _options = options;
+        _jsonSerializerOptions = jsonSerializerOptions;
         _logger = logger;
     }
 
@@ -55,7 +58,7 @@ public class AppParser
             appEntryName, appEntryPath);
         
         var definitionData = await File.ReadAllTextAsync(appEntryPath);
-        var definition = JsonSerializer.Deserialize<AppEntry>(definitionData, Vars.JsonSerializerOptions);
+        var definition = JsonSerializer.Deserialize<AppEntry>(definitionData, _jsonSerializerOptions);
         
         if (definition is null)
             throw new ApplicationException("The entry definition is invalid!");

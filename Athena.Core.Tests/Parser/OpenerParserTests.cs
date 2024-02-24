@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Athena.Core.Model.Opener;
 using Athena.Core.Parser;
 using Athena.Core.Parser.Options;
@@ -11,6 +13,7 @@ public class OpenerParserTests : IDisposable
 {
     private readonly string _testsConfigDir;
     private readonly Dictionary<ConfigType, string> _configPaths;
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ILogger<OpenerParser> _logger;
 
     public OpenerParserTests()
@@ -24,9 +27,16 @@ public class OpenerParserTests : IDisposable
             { ConfigType.Files, Path.Combine(_testsConfigDir, "files") },
             { ConfigType.Protocols, Path.Combine(_testsConfigDir, "protocols") }
         };
+        _jsonSerializerOptions = new JsonSerializerOptions
+        {
+            AllowTrailingCommas = false,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        };
         _logger = new Logger<OpenerParser>(new LoggerFactory());
         
-        Internal.Samples.Generate(_testsConfigDir).GetAwaiter().GetResult();
+        Internal.Samples.Generate(_testsConfigDir, _jsonSerializerOptions).GetAwaiter().GetResult();
     }
     
     public void Dispose()
@@ -43,7 +53,7 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new OpenerParser(_configPaths, options, _logger);
+        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -68,7 +78,7 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions();
-        var parser = new OpenerParser(_configPaths, options, _logger);
+        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -88,7 +98,7 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
-        var parser = new OpenerParser(_configPaths, options, _logger);
+        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -113,7 +123,7 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { StreamableProtocolPrefixes = [ "athena", "stream" ] };
-        var parser = new OpenerParser(_configPaths, options, _logger);
+        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
         var expected = new FileExtension
         {
             Name = "MP4 Video",
@@ -135,7 +145,7 @@ public class OpenerParserTests : IDisposable
         // Arrange
         var uri = new Uri(url);
         var options = new ParserOptions { AllowProtocols = true };
-        var parser = new OpenerParser(_configPaths, options, _logger);
+        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
         var expected = new Protocol
         {
             Name = uri.Scheme,
@@ -161,7 +171,7 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { AllowProtocols = false };
-        var parser = new OpenerParser(_configPaths, options, _logger);
+        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetOpenerDefinition(url));
@@ -179,7 +189,7 @@ public class OpenerParserTests : IDisposable
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true, AllowProtocols = true};
-        var parser = new OpenerParser(_configPaths, options, _logger);
+        var parser = new OpenerParser(_configPaths, options, _jsonSerializerOptions, _logger);
         
         // Act
         var exception = await Record.ExceptionAsync(() => parser.GetOpenerDefinition(filePath));
