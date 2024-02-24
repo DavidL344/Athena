@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 using Athena.Core.Model;
 using Athena.Core.Parser;
 using Athena.Core.Parser.Shared;
+using Athena.Core.Runner;
+using Athena.Core.Runner.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -41,10 +43,14 @@ public static class CoreExtensions
                 WriteIndented = true
             });
         
+        // Parsers
         services.AddSingleton<PathParser>();
         services.AddSingleton<OpenerParser>();
         services.AddSingleton<AppParser>();
-        //services.AddSingleton<Runner>();
+        
+        // Runner
+        services.AddSingleton<RunnerOptions>();
+        services.AddSingleton<AppRunner>();
         
         // User config
         services.AddSingleton<Config>(x =>
