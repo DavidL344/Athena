@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Athena.Core.Model;
@@ -34,14 +35,14 @@ public static class CoreExtensions
             });
         
         // JSON options
-        services.AddSingleton<JsonSerializerOptions>(_ =>
-            new JsonSerializerOptions
-            {
-                AllowTrailingCommas = false,
-                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
+        var serializerOptions = new JsonSerializerOptions
+        {
+            AllowTrailingCommas = false,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        };
+        services.AddSingleton(serializerOptions);
         
         // Parsers
         services.AddSingleton<PathParser>();
@@ -53,21 +54,17 @@ public static class CoreExtensions
         services.AddSingleton<AppRunner>();
         
         // User config
-        services.AddSingleton<Config>(x =>
-        {
-            var serializerOptions = x.GetRequiredService<JsonSerializerOptions>();
-            
-            Startup.Checks.CheckConfiguration(appDataDir, serializerOptions).GetAwaiter().GetResult();
-            
-            return GetConfig(appDataDir, serializerOptions);
-        });
+        Startup.Checks.CheckConfiguration(appDataDir, serializerOptions).GetAwaiter().GetResult();
+        services.AddSingleton<Config>(x => GetConfig(appDataDir, serializerOptions));
     }
 
     private static string GetAppDataDir()
     {
         var assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         
-        var userConfigDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "athena");
+        var userConfigDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Athena" : "athena");
         var portableConfigDir = Path.Combine(assemblyDir, "user");
         
         return Directory.Exists(portableConfigDir) ? portableConfigDir : userConfigDir;
