@@ -102,9 +102,10 @@ public class PathParserTests : IDisposable
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
         var parser = new PathParser(_logger);
-        var expected = filePath
-            .Replace("/", Path.DirectorySeparatorChar.ToString())
-            .Replace(@"\", Path.DirectorySeparatorChar.ToString());
+        var expected = filePath.StartsWith('\\')
+                ? $"{Path.GetPathRoot(Directory.GetCurrentDirectory())}{filePath
+                    .Remove(0, 1).Replace('\\', Path.DirectorySeparatorChar)}"
+                : filePath;
         
         // Act
         var result = parser.GetPath(filePath, options);
@@ -120,17 +121,36 @@ public class PathParserTests : IDisposable
     [InlineData("D:/./test/../file.txt")]
     [InlineData("C:/test/../file.txt")]
     [InlineData("D:/test/./file.txt")]
-    [InlineData("/./home/./user/../user/./file.txt")]
     [InlineData(@"C:\.\file.txt")]
     [InlineData(@"D:\.\test\..\file.txt")]
     [InlineData(@"C:\test\..\file.txt")]
     [InlineData(@"D:\test\.\file.txt")]
     [InlineData(@"\home\user\file.txt")]
-    [InlineData(@"\.\home\.\user\../user/./file.txt")]
-    
     public void GetPath__ReturnsPath__WhenFilePathIsSemiAbsolute(string filePath)
     {
         GetPath__ReturnsPath__WhenFilePathIsAbsolute(filePath);
+    }
+    
+    [Theory]
+    [InlineData("/./home/./user/../user/./file.txt")]
+    [InlineData(@"\.\home\.\user\../user/./file.txt")]
+    public void GetPath__ReturnsPath__WhenFilePathHasMultipleDirectorySeparators(string filePath)
+    {
+        // Arrange
+        var options = new ParserOptions { OpenLocally = true };
+        var parser = new PathParser(_logger);
+        var expected = Path.GetFullPath(filePath
+            .Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .Replace($"..{Path.DirectorySeparatorChar}", "<up>")
+            .Replace($".{Path.DirectorySeparatorChar}", "")
+            .Replace("<up>", $"..{Path.DirectorySeparatorChar}"));
+        
+        // Act
+        var result = parser.GetPath(filePath, options);
+        
+        // Assert
+        Assert.Equal(expected, result);
     }
     
     [Theory]

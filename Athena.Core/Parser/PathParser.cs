@@ -15,16 +15,19 @@ public class PathParser
 
     public string GetPath(string filePath, ParserOptions options)
     {
-        filePath = filePath
-            .Replace("/", Path.DirectorySeparatorChar.ToString())
-            .Replace(@"\", Path.DirectorySeparatorChar.ToString());
-
         var expandedPath = ParserHelper.ExpandEnvironmentVariables(filePath);
         Uri uri;
+        
+        
+        // Prevent the backslashes from expanding the file path as a relative path
+        if (expandedPath.StartsWith('\\'))
+            expandedPath = expandedPath.Replace('\\', '/');
         
         try
         {
             uri = new Uri(expandedPath);
+            expandedPath = expandedPath.Replace('/', Path.DirectorySeparatorChar);
+            
             _logger.LogInformation("Parsed {FilePath} as an absolute path: {FileUri}",
                 filePath, uri);
         }
