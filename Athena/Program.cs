@@ -6,7 +6,8 @@ using Microsoft.Extensions.Logging;
 
 var builder = CoconaApp.CreateBuilder(args, x =>
 {
-    x.EnableShellCompletionSupport = true;
+    if (!OperatingSystem.IsWindows())
+        x.EnableShellCompletionSupport = true;
     x.TreatPublicMethodsAsCommands = false;
 });
 
