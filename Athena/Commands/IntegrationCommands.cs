@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Athena.Commands.Internal;
 using Athena.Core.Runner;
 using Cocona;
@@ -21,7 +20,7 @@ public class IntegrationCommands : ICommands
         // On Linux, the assembly's location points to its dll instead of the executable
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
         _appPath = Path.ChangeExtension(assemblyLocation,
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "exe" : null);
+            OperatingSystem.IsWindows() ? "exe" : null);
         
         _symlinkPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "bin", "athena");
@@ -34,7 +33,7 @@ public class IntegrationCommands : ICommands
     {
         var registrationStatus = "[red]\u25cf Not registered (run `athena integration --add` to register)[/]";
         
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (OperatingSystem.IsWindows())
         {
             var path = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
             var pattern = path!.EndsWith(';') ? $"{_appPathDir};" : $";{_appPathDir}";
@@ -43,7 +42,7 @@ public class IntegrationCommands : ICommands
                 registrationStatus = $"[green]\u25cf Registered[/] at {_appPath}";
         }
         
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && File.Exists(_symlinkPath))
+        if (OperatingSystem.IsLinux() && File.Exists(_symlinkPath))
         {
             var symlinkTarget = File.ResolveLinkTarget(_symlinkPath, true)!.FullName;
             registrationStatus = symlinkTarget == _appPath
@@ -63,7 +62,7 @@ public class IntegrationCommands : ICommands
     {
         if (add)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 var pathBefore = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
                 var pathAfter = pathBefore!.EndsWith(';')
@@ -77,10 +76,10 @@ public class IntegrationCommands : ICommands
             await _runner.RunAsync("ln", $"-s {_appPath} {_symlinkPath}");
             return;
         }
-
+        
         if (remove)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 var pathBefore = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
                 var pathAfter = pathBefore!.EndsWith(';')

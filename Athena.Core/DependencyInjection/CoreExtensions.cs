@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Athena.Core.Model;
@@ -67,7 +66,7 @@ public static class CoreExtensions
         
         var userConfigDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Athena" : "athena");
+            OperatingSystem.IsWindows() ? "Athena" : "athena");
         var portableConfigDir = Path.Combine(assemblyDir, "user");
         
         return Directory.Exists(portableConfigDir) ? portableConfigDir : userConfigDir;
