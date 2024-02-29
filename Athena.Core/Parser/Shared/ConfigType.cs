@@ -1,4 +1,4 @@
-namespace Athena.Core.Model;
+namespace Athena.Core.Parser.Shared;
 
 public enum ConfigType
 {

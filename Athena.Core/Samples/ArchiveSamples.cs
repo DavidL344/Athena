@@ -1,7 +1,6 @@
-using Athena.Core.Model.Entry;
 using Athena.Core.Model.Opener;
 
-namespace Athena.Core.Internal.Samples;
+namespace Athena.Core.Samples;
 
 public class ArchiveSamples : ISample
 {
@@ -11,7 +10,6 @@ public class ArchiveSamples : ISample
             "unzip.extract", new AppEntry
             {
                 Name = "Unzip (Extract)",
-                Type = EntryType.File,
                 Path = "unzip",
                 Arguments = "$FILE"
             }
@@ -20,7 +18,6 @@ public class ArchiveSamples : ISample
             "unzip.extract-to-desktop", new AppEntry
             {
                 Name = "Unzip (Extract to Desktop)",
-                Type = EntryType.File,
                 Path = "unzip",
                 Arguments = "-d ~/Desktop $FILE"
             }
@@ -29,7 +26,6 @@ public class ArchiveSamples : ISample
             "unzip.list", new AppEntry
             {
                 Name = "Unzip (List)",
-                Type = EntryType.File,
                 Path = "unzip",
                 Arguments = "-l $FILE"
             }
@@ -47,7 +43,7 @@ public class ArchiveSamples : ISample
                     "unzip.extract",
                     "unzip.extract-to-desktop",
                     "unzip.list"
-                ]
+                ],
             }
         },
         {

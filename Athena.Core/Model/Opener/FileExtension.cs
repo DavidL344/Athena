@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Athena.Core.Model.DataStructures;
+using Athena.Core.Model.Internal;
 
 namespace Athena.Core.Model.Opener;
 
@@ -28,7 +30,7 @@ public class FileExtension : IOpener
     /// unzip.list<br />
     /// </example>
     [JsonRequired]
-    public required string[] AppList { get; set; }
+    public required UniqueList<string> AppList { get; set; }
 
     /// <summary>
     /// If no entry is specified manually, this app entry will be used.

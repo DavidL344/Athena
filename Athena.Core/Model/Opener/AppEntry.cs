@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Athena.Core.Model.Entry;
+namespace Athena.Core.Model.Opener;
 
 public class AppEntry
 {
@@ -15,16 +15,6 @@ public class AppEntry
     /// </example>
     [JsonRequired]
     public required string Name { get; set; }
-
-    /// <summary>
-    /// An app entry type.
-    /// Influences whether the entry is shown in the file, protocol, or both app pickers.
-    /// </summary>
-    /// <remarks>
-    /// The local app picker is shown when the file path is resolved directly.<br />
-    /// When accessing resources from the internet, the protocol app picker is used instead.
-    /// </remarks>
-    public EntryType Type { get; set; } = EntryType.All;
 
     /// <summary>
     /// The path to the executable with the arguments.

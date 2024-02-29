@@ -1,7 +1,7 @@
-using Athena.Core.Model.Entry;
+using Athena.Core.Model;
 using Athena.Core.Model.Opener;
 
-namespace Athena.Core.Internal.Samples;
+namespace Athena.Core.Samples;
 
 public interface ISample
 {

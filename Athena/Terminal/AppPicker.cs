@@ -1,5 +1,5 @@
 using System.Text;
-using Athena.Core.Model.Opener;
+using Athena.Core.Model.Internal;
 using Spectre.Console;
 
 namespace Athena.Terminal;
@@ -9,8 +9,8 @@ public class AppPicker
     public static int Show(IOpener opener)
     {
         var appListLength = new[] { -1, 0 };
-        if (opener.AppList.Length < 2)
-            return appListLength[opener.AppList.Length];
+        if (opener.AppList.Count < 2)
+            return appListLength[opener.AppList.Count];
 
         const string promptText = "Select an app to open the file with";
         int index;
@@ -24,13 +24,13 @@ public class AppPicker
             selection.AddChoice("Cancel");
 
             var prompt = AnsiConsole.Prompt(selection);
-            index = Array.IndexOf(opener.AppList, prompt);
+            index = Array.IndexOf(opener.AppList.ToArray(), prompt);
         }
         catch (NotSupportedException)
         {
             // Fall back to Console.Read() if the terminal doesn't support the required interactivity
             var fallbackEntries = new StringBuilder();
-            for (var i = 0; i < opener.AppList.Length; i++)
+            for (var i = 0; i < opener.AppList.Count; i++)
                 fallbackEntries.Append($"\n{i}) {opener.AppList[i]}");
 
             Console.Write($"Available entries: {fallbackEntries}\n\nPlease select an entry: ");
@@ -41,6 +41,6 @@ public class AppPicker
                 return -1;
         }
         
-        return index > opener.AppList.Length - 1 ? -1 : index;
+        return index > opener.AppList.Count - 1 ? -1 : index;
     }
 }

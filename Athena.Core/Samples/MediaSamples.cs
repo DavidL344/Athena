@@ -1,7 +1,7 @@
-using Athena.Core.Model.Entry;
+using Athena.Core.Model;
 using Athena.Core.Model.Opener;
 
-namespace Athena.Core.Internal.Samples;
+namespace Athena.Core.Samples;
 
 public class MediaSamples : ISample
 {
@@ -11,7 +11,6 @@ public class MediaSamples : ISample
             "mpv.play", new AppEntry
             {
                 Name = "mpv (Play)",
-                Type = EntryType.All,
                 Path = "mpv",
                 Arguments = "$FILE"
             }
@@ -20,7 +19,6 @@ public class MediaSamples : ISample
             "vlc.play", new AppEntry
             {
                 Name = "VLC Media Player (Play)",
-                Type = EntryType.All,
                 Path = "vlc",
                 Arguments = "$FILE"
             }
