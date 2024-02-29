@@ -1,7 +1,7 @@
 <Project>
     <Target Name="PopulateInfo" DependsOnTargets="GitVersion" BeforeTargets="GetAssemblyVersion;GenerateNuspec;GetPackageContents">
         <PropertyGroup>
-            <Version>$(GitSemVerMajor).$(GitSemVerMinor).$(GitSemVerPatch)$(GitSemVerDashLabel)+$(GitBranch).$(GitCommit)</Version>
+            <Version>$(GitSemVerMajor).$(GitSemVerMinor).$(GitSemVerPatch)$(GitSemVerDashLabel)</Version>
             <PackageVersion>$(Version)</PackageVersion>
 
             <RepositoryBranch>$(GitBranch)</RepositoryBranch>
