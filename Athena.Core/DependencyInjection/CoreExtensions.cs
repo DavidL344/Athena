@@ -14,6 +14,9 @@ namespace Athena.Core.DependencyInjection;
 
 public static class CoreExtensions
 {
+    private const string AppVersion
+        = $"{ThisAssembly.Git.SemVer.Major}.{ThisAssembly.Git.SemVer.Minor}.{ThisAssembly.Git.SemVer.Patch}";
+    
     public static void AddAthenaCore(this IServiceCollection services)
     {
         services.AddAthenaCore(GetAppDataDir());
@@ -54,11 +57,11 @@ public static class CoreExtensions
         services.AddSingleton<AppRunner>();
         
         // User config
-        Startup.Checks.CheckConfiguration(appDataDir, serializerOptions).GetAwaiter().GetResult();
-        services.AddSingleton<Config>(x => GetConfig(appDataDir, serializerOptions));
+        Startup.Checks.CheckEntries(appDataDir, serializerOptions).GetAwaiter().GetResult();
+        services.AddSingleton(GetConfig(appDataDir, serializerOptions));
     }
 
-    private static string GetAppDataDir()
+    internal static string GetAppDataDir()
     {
         var assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         
@@ -70,16 +73,65 @@ public static class CoreExtensions
         return Directory.Exists(portableConfigDir) ? portableConfigDir : userConfigDir;
     }
 
-    private static Config GetConfig(string appDataDir, JsonSerializerOptions serializerOptions)
+    internal static Config GetConfig(string appDataDir, JsonSerializerOptions serializerOptions)
     {
-        var appConfigPath = Path.Combine(appDataDir, "config.json");
+        var configFile = Path.Combine(appDataDir, "config.json");
         
-        var configData = File.ReadAllText(appConfigPath);
-        var config = JsonSerializer.Deserialize<Config>(configData, serializerOptions)!;
+        if (!File.Exists(configFile))
+        {
+            var newConfig = new Config { Version = AppVersion };
             
+            var fileContents = JsonSerializer.Serialize(newConfig, serializerOptions);
+            File.WriteAllText(Path.Combine(appDataDir, "config.json"), fileContents);
+            
+            return newConfig;
+        }
+        
+        var configData = File.ReadAllText(configFile);
+        var config = JsonSerializer.Deserialize<Config>(configData, serializerOptions)!;
+        
         if (config is null)
             throw new ApplicationException("The configuration is invalid!");
+        
+        if (IsConfigUpToDate(config, out var parsedConfig)) return config;
+        
+        var updatedConfig = JsonSerializer.Serialize(parsedConfig, serializerOptions);
+        File.WriteAllText(configFile, updatedConfig);
+
+        return parsedConfig;
+    }
+
+    internal static bool IsConfigUpToDate(Config config, out Config newConfig)
+    {
+        var configVersion = config.Version.Split('.');
+        
+        if (configVersion.Length != 3)
+            throw new ApplicationException("The configuration version is invalid!");
+
+        var appVersion = new[]
+        {
+            int.Parse(ThisAssembly.Git.SemVer.Major),
+            int.Parse(ThisAssembly.Git.SemVer.Minor),
+            int.Parse(ThisAssembly.Git.SemVer.Patch)
+        };
+        
+        // Check the configuration version - if it's older than the current version,
+        // update it with any new properties it might have
+        for (var i = 0; i < configVersion.Length; i++)
+        {
+            if (!int.TryParse(configVersion[i], out var result))
+                throw new ApplicationException("The configuration version is invalid!");
+
+            if (result < appVersion[i])
+            {
+                newConfig = config with { Version = AppVersion };
+                return false;
+            }
             
-        return config;
+            if (result > appVersion[i])
+                throw new ApplicationException("The configuration version is newer than the application version!");
+        }
+        newConfig = config;
+        return true;
     }
 }

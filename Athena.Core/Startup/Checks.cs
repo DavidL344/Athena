@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Athena.Core.Model;
 using Athena.Core.Parser.Shared;
 using Athena.Core.Samples;
 
@@ -7,19 +6,15 @@ namespace Athena.Core.Startup;
 
 internal class Checks
 {
-    public static async Task CheckConfiguration(string appDataDir, JsonSerializerOptions serializerOptions)
+    public static async Task CheckEntries(string appDataDir, JsonSerializerOptions serializerOptions)
     {
         if (!Directory.Exists(appDataDir)) Directory.CreateDirectory(appDataDir);
         
+        // Check if there are any directories or files in the config directory,
+        // implying whether has the application been run before or not 
         var configDirNoDirs = Directory.GetDirectories(appDataDir).Length == 0;
         var configDirNoFiles = Directory.GetFiles(appDataDir).Length == 0;
         var firstRun = configDirNoDirs && configDirNoFiles;
-        
-        if (!File.Exists(Path.Combine(appDataDir, "config.json")))
-        {
-            var fileContents = JsonSerializer.Serialize(new Config(), serializerOptions);
-            await File.WriteAllTextAsync(Path.Combine(appDataDir, "config.json"), fileContents);
-        }
         
         var subDirs = new[] { "entries", "files", "protocols" };
         foreach (var subDir in subDirs)

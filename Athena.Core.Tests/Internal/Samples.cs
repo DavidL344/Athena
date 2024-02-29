@@ -8,7 +8,7 @@ public class Samples
     public static async Task Generate(string appDataDir, JsonSerializerOptions serializerOptions)
     {
         Remove(appDataDir);
-        await Checks.CheckConfiguration(appDataDir, serializerOptions);
+        await Checks.CheckEntries(appDataDir, serializerOptions);
     }
     
     public static void Remove(string userDir)
