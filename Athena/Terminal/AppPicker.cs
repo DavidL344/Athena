@@ -18,7 +18,9 @@ public class AppPicker
         for (var i = 0; i < opener.AppList.Count; i++)
         {
             var entryDefinition = await appParser.GetAppDefinition(opener.AppList[i]);
-            appEntries[i] = entryDefinition.Name;
+            appEntries[i] = opener.AppList[i] == opener.DefaultApp
+                ? $"{entryDefinition.Name} [[default]]"
+                : entryDefinition.Name;
         }
         
         var promptText = $"Select an app to open [green]{opener.Name}[/] with:";
