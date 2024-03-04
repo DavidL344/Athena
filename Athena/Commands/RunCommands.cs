@@ -97,7 +97,7 @@ public class RunCommands : ICommands
         // There's no default app specified or the user decides to pick an app at runtime
         if (openFileOptions.ForceShowAppPicker || string.IsNullOrWhiteSpace(openerDefinition.DefaultApp))
         {
-            var appIndex = AppPicker.Show(openerDefinition);
+            var appIndex = await AppPicker.Show(openerDefinition, _appParser, openFileOptions.ForceShowAppPicker);
             
             if (appIndex == -1)
                 throw new ApplicationException("The user has cancelled the operation!");
