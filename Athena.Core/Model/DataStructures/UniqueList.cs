@@ -12,6 +12,14 @@ public class UniqueList<T> : IList<T>
         _list = [];
         _set = [];
     }
+    
+    public UniqueList(IEnumerable<T> collection)
+    {
+        var enumerable = collection.ToArray();
+        
+        _list = new List<T>(enumerable);
+        _set = new HashSet<T>(enumerable);
+    }
 
     public void Add(T item)
     {
