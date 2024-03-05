@@ -189,4 +189,22 @@ public class AppParserTests : IDisposable
         Assert.IsType<ApplicationException>(exception);
         Assert.Equal("The file path is empty!", exception.Message);
     }
+    
+    [Fact]
+    public async Task GetFriendlyNames__ReturnsFriendlyNames__WhenTheyExist()
+    {
+        // Arrange
+        var parser = new AppParser(_configPaths, _jsonSerializerOptions, _logger);
+        var expected = new[] { "mpv (Play)" };
+        
+        // Act
+        var result = await parser.GetFriendlyNames(new FileExtension
+        {
+            Name = "MP4 Video",
+            AppList = [ "mpv.play" ]
+        });
+        
+        // Assert
+        Assert.Equivalent(expected, result);
+    }
 }

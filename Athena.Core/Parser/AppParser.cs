@@ -46,21 +46,7 @@ public class AppParser
             throw new ApplicationException("The entry ID is out of range!");
         
         var appEntryName = openerDefinition.AppList[entryIndex];
-        var appEntryPath = Path.Combine(_configPaths[ConfigType.Entries], $"{appEntryName}.json");
-        
-        if (!File.Exists(appEntryPath))
-            throw new ApplicationException($"The entry ({appEntryName}) isn't defined!");
-        
-        _logger.LogInformation("Entry {AppEntryName} exists, reading its definition from {AppEntryPath}...",
-            appEntryName, appEntryPath);
-        
-        var definitionData = await File.ReadAllTextAsync(appEntryPath);
-        var definition = JsonSerializer.Deserialize<AppEntry>(definitionData, _jsonSerializerOptions);
-        
-        if (definition is null)
-            throw new ApplicationException("The entry definition is invalid!");
-        
-        _logger.LogInformation("Entry {AppEntryName} has been loaded successfully", appEntryName);
+        var definition = await GetAppDefinition(appEntryName);
         
         filePath = ParserHelper.ParseStreamPath(filePath, options.StreamableProtocolPrefixes);
         
@@ -80,5 +66,42 @@ public class AppParser
         _logger.LogInformation("App entry {AppEntryName} has had its variables expanded", appEntryName);
 
         return definition;
+    }
+
+    public async Task<AppEntry> GetAppDefinition(string definitionName)
+    {
+        var appEntryPath = Path.Combine(_configPaths[ConfigType.Entries], $"{definitionName}.json");
+        
+        if (!File.Exists(appEntryPath))
+            throw new ApplicationException($"The entry ({definitionName}) isn't defined!");
+        
+        _logger.LogInformation("Entry {AppEntryName} exists, reading its definition from {AppEntryPath}...",
+            definitionName, appEntryPath);
+        
+        var definitionData = await File.ReadAllTextAsync(appEntryPath);
+        var definition = JsonSerializer.Deserialize<AppEntry>(definitionData, _jsonSerializerOptions);
+        
+        if (definition is null)
+            throw new ApplicationException("The entry definition is invalid!");
+        
+        _logger.LogInformation("Entry {AppEntryName} has been loaded successfully", definitionName);
+
+        return definition;
+    }
+    
+    public async Task<string[]> GetFriendlyNames(IOpener opener)
+    {
+        // Parse the names of the app entries
+        var friendlyNames = new string[opener.AppList.Count];
+        
+        for (var i = 0; i < opener.AppList.Count; i++)
+        {
+            var entryDefinition = await GetAppDefinition(opener.AppList[i]);
+            friendlyNames[i] = opener.AppList[i] == opener.DefaultApp
+                ? $"{entryDefinition.Name} [[default]]"
+                : entryDefinition.Name;
+        }
+        
+        return friendlyNames;
     }
 }
