@@ -1,29 +1,20 @@
 using System.Text;
-using Athena.Core.Model.Internal;
-using Athena.Core.Parser;
+using Athena.Core.Model.AppPicker;
 using Spectre.Console;
 
 namespace Athena.Terminal;
 
-public class AppPicker
+public class AppPicker : IAppPicker
 {
-    public static async Task<int> Show(IOpener opener, AppParser appParser, bool forceShow)
+    public static async Task<int> Show(AppPickerContext ctx)
     {
-        var appListLength = new[] { -1, 0 };
-        if (opener.AppList.Count < 2 && !forceShow)
-            return appListLength[opener.AppList.Count];
+        var appList = ctx.AppEntries;
         
-        // Parse the names of the app entries
-        var appEntries = new string[opener.AppList.Count];
-        for (var i = 0; i < opener.AppList.Count; i++)
-        {
-            var entryDefinition = await appParser.GetAppDefinition(opener.AppList[i]);
-            appEntries[i] = opener.AppList[i] == opener.DefaultApp
-                ? $"{entryDefinition.Name} [[default]]"
-                : entryDefinition.Name;
-        }
+        var appListReturnCode = new[] { -1, 0 };
+        if (appList.Length < 2)
+            return appListReturnCode[appList.Length];
         
-        var promptText = $"Select an app to open [green]{opener.Name}[/] with:";
+        var promptText = $"Select an app to open [green]{ctx.FriendlyName}[/] with:";
         int index;
         
         try
@@ -32,19 +23,19 @@ public class AppPicker
                 .Title(promptText)
                 .PageSize(6)
                 .MoreChoicesText("[grey](Move up and down to reveal more entries)[/]")
-                .AddChoices(appEntries);
+                .AddChoices(appList);
             selection.AddChoice("[red]Cancel[/]");
-
+            
             var prompt = AnsiConsole.Prompt(selection);
-            index = Array.IndexOf(appEntries, prompt);
+            index = Array.IndexOf(appList, prompt);
         }
         catch (NotSupportedException)
         {
             // Fall back to Console.Read() if the terminal doesn't support the required interactivity
             var fallbackEntries = new StringBuilder();
-            for (var i = 0; i < opener.AppList.Count; i++)
-                fallbackEntries.Append($"\n{i}) {opener.AppList[i]}");
-
+            for (var i = 0; i < appList.Length; i++)
+                fallbackEntries.Append($"\n{i}) {appList[i]}");
+            
             Console.Write($"Available entries: {fallbackEntries}\n\nPlease select an entry: ");
             var readIndex = Console.ReadLine();
             await Console.Out.FlushAsync();
@@ -53,6 +44,6 @@ public class AppPicker
                 return -1;
         }
         
-        return index > opener.AppList.Count - 1 ? -1 : index;
+        return index > appList.Length - 1 ? -1 : index;
     }
 }

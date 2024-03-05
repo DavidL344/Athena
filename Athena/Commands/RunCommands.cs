@@ -1,6 +1,7 @@
 using Athena.Commands.Internal;
 using Athena.Commands.Internal.Model;
 using Athena.Core.Model;
+using Athena.Core.Model.AppPicker;
 using Athena.Core.Model.Opener;
 using Athena.Core.Parser;
 using Athena.Core.Parser.Options;
@@ -97,7 +98,13 @@ public class RunCommands : ICommands
         // There's no default app specified or the user decides to pick an app at runtime
         if (openFileOptions.ForceShowAppPicker || string.IsNullOrWhiteSpace(openerDefinition.DefaultApp))
         {
-            var appIndex = await AppPicker.Show(openerDefinition, _appParser, openFileOptions.ForceShowAppPicker);
+            var context = new AppPickerContext
+            {
+                FriendlyName = openerDefinition.Name,
+                FilePath = openFileOptions.FilePath,
+                AppEntries = await _appParser.GetFriendlyNames(openerDefinition)
+            };
+            var appIndex = await AppPicker.Show(context);
             
             if (appIndex == -1)
                 throw new ApplicationException("The user has cancelled the operation!");

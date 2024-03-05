@@ -88,4 +88,20 @@ public class AppParser
 
         return definition;
     }
+    
+    public async Task<string[]> GetFriendlyNames(IOpener opener)
+    {
+        // Parse the names of the app entries
+        var friendlyNames = new string[opener.AppList.Count];
+        
+        for (var i = 0; i < opener.AppList.Count; i++)
+        {
+            var entryDefinition = await GetAppDefinition(opener.AppList[i]);
+            friendlyNames[i] = opener.AppList[i] == opener.DefaultApp
+                ? $"{entryDefinition.Name} [[default]]"
+                : entryDefinition.Name;
+        }
+        
+        return friendlyNames;
+    }
 }
