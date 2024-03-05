@@ -2,7 +2,7 @@ using System.Reflection;
 using Cocona;
 using Cocona.Builder;
 
-namespace Athena.Commands.Internal;
+namespace Athena.Cli.Commands.Internal;
 
 public static class CommandExtensions
 {

@@ -1,4 +1,4 @@
-namespace Athena.Commands.Internal.Model;
+namespace Athena.Cli.Commands.Internal.Model;
 
 public record OpenFileOptions
 {

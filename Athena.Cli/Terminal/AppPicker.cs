@@ -2,7 +2,7 @@ using System.Text;
 using Athena.Core.Model.AppPicker;
 using Spectre.Console;
 
-namespace Athena.Terminal;
+namespace Athena.Cli.Terminal;
 
 public class AppPicker : IAppPicker
 {

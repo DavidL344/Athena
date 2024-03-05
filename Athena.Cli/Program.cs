@@ -1,4 +1,4 @@
-﻿using Athena.Commands.Internal;
+﻿using Athena.Cli.Commands.Internal;
 using Athena.Core.DependencyInjection;
 using Cocona;
 using Microsoft.Extensions.DependencyInjection;
