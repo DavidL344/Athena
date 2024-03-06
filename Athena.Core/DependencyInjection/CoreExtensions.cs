@@ -28,13 +28,14 @@ public static class CoreExtensions
             services.AddLogging();
         
         // Config paths
-        services.AddSingleton<Dictionary<ConfigType, string>>(_ =>
-            new Dictionary<ConfigType, string>
-            {
-                { ConfigType.Entries, Path.Combine(appDataDir, "entries") },
-                { ConfigType.Files, Path.Combine(appDataDir, "files") },
-                { ConfigType.Protocols, Path.Combine(appDataDir, "protocols") }
-            });
+        var configPaths = new Dictionary<ConfigType, string>
+        {
+            { ConfigType.Entries, Path.Combine(appDataDir, "entries") },
+            { ConfigType.Files, Path.Combine(appDataDir, "files") },
+            { ConfigType.Protocols, Path.Combine(appDataDir, "protocols") },
+            { ConfigType.Plugins, Path.Combine(appDataDir, "plugins") }
+        };
+        services.AddSingleton(configPaths);
         
         // JSON options
         var serializerOptions = new JsonSerializerOptions

@@ -4,5 +4,6 @@ public enum ConfigType
 {
     Entries,
     Files,
-    Protocols
+    Protocols,
+    Plugins
 }

@@ -20,6 +20,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Athena.Core\Athena.Core.csproj" />
+      <ProjectReference Include="..\Athena.Plugins\Athena.Plugins.csproj" />
     </ItemGroup>
 
 </Project>

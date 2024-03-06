@@ -1,5 +1,6 @@
 ﻿using Athena.Cli.Commands.Internal;
 using Athena.Core.DependencyInjection;
+using Athena.Plugins.DependencyInjection;
 using Cocona;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,9 +18,11 @@ builder.Services.AddLogging(x =>
 });
 
 builder.Services.AddAthenaCore();
+builder.Services.AddPlugins();
 
 var app = builder.Build();
 
 app.RegisterCommands();
+app.RunPlugins();
 
 app.Run();
