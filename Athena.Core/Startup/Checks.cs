@@ -33,6 +33,7 @@ internal class Checks
         {
             new ArchiveSamples(),
             new MediaSamples(),
+            new TextSamples(),
             new WebSamples()
         };
         

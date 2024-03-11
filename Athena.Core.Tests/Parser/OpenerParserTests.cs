@@ -1,10 +1,10 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Athena.Core.Configuration;
 using Athena.Core.Model.Opener;
 using Athena.Core.Parser;
 using Athena.Core.Parser.Options;
-using Athena.Core.Parser.Shared;
 using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Tests.Parser;
@@ -12,7 +12,7 @@ namespace Athena.Core.Tests.Parser;
 public class OpenerParserTests : IDisposable
 {
     private readonly string _testsConfigDir;
-    private readonly Dictionary<ConfigType, string> _configPaths;
+    private readonly ConfigPaths _configPaths;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ILogger<OpenerParser> _logger;
 
@@ -21,12 +21,7 @@ public class OpenerParserTests : IDisposable
         var workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         
         _testsConfigDir = Path.Combine(workingDir, "user-opener-parser-tests");
-        _configPaths = new Dictionary<ConfigType, string>
-        {
-            { ConfigType.Entries, Path.Combine(_testsConfigDir, "entries") },
-            { ConfigType.Files, Path.Combine(_testsConfigDir, "files") },
-            { ConfigType.Protocols, Path.Combine(_testsConfigDir, "protocols") }
-        };
+        _configPaths = new ConfigPaths(_testsConfigDir);
         _jsonSerializerOptions = new JsonSerializerOptions
         {
             AllowTrailingCommas = false,

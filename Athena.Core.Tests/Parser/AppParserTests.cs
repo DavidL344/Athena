@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Athena.Core.Configuration;
 using Athena.Core.Model.Opener;
 using Athena.Core.Parser;
 using Athena.Core.Parser.Options;
@@ -12,7 +13,7 @@ namespace Athena.Core.Tests.Parser;
 public class AppParserTests : IDisposable
 {
     private readonly string _testsConfigDir;
-    private readonly Dictionary<ConfigType, string> _configPaths;
+    private readonly ConfigPaths _configPaths;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly Logger<AppParser> _logger;
 
@@ -21,12 +22,7 @@ public class AppParserTests : IDisposable
         var workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         
         _testsConfigDir = Path.Combine(workingDir, "user-app-parser-tests");
-        _configPaths = new Dictionary<ConfigType, string>
-        {
-            { ConfigType.Entries, Path.Combine(_testsConfigDir, "entries") },
-            { ConfigType.Files, Path.Combine(_testsConfigDir, "files") },
-            { ConfigType.Protocols, Path.Combine(_testsConfigDir, "protocols") }
-        };
+        _configPaths = new ConfigPaths(_testsConfigDir);
         _jsonSerializerOptions = new JsonSerializerOptions
         {
             AllowTrailingCommas = false,
@@ -155,7 +151,7 @@ public class AppParserTests : IDisposable
         };
         
         // Act
-        var filePath = Path.Combine(_configPaths[ConfigType.Entries], ".temp.open.json");
+        var filePath = Path.Combine(_configPaths.Subdirectories[ConfigType.Entries], ".temp.open.json");
         var fileContents = JsonSerializer.Serialize(expected, _jsonSerializerOptions);
         await File.WriteAllTextAsync(filePath, fileContents);
         

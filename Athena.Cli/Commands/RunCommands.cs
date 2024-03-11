@@ -1,7 +1,7 @@
 using Athena.Cli.Commands.Internal;
 using Athena.Cli.Commands.Internal.Model;
 using Athena.Cli.Terminal;
-using Athena.Core.Model;
+using Athena.Core.Configuration;
 using Athena.Core.Model.AppPicker;
 using Athena.Core.Model.Opener;
 using Athena.Core.Parser;

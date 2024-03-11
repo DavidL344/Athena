@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Athena.Core.Configuration;
 using Athena.Core.Model.Internal;
 using Athena.Core.Model.Opener;
 using Athena.Core.Parser.Options;
@@ -9,11 +10,11 @@ namespace Athena.Core.Parser;
 
 public class AppParser
 {
-    private readonly Dictionary<ConfigType, string> _configPaths;
+    private readonly ConfigPaths _configPaths;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ILogger<AppParser> _logger;
 
-    public AppParser(Dictionary<ConfigType, string> configPaths,
+    public AppParser(ConfigPaths configPaths,
         JsonSerializerOptions jsonSerializerOptions, ILogger<AppParser> logger)
     {
         _configPaths = configPaths;
@@ -70,7 +71,7 @@ public class AppParser
 
     public async Task<AppEntry> GetAppDefinition(string definitionName)
     {
-        var appEntryPath = Path.Combine(_configPaths[ConfigType.Entries], $"{definitionName}.json");
+        var appEntryPath = Path.Combine(_configPaths.Subdirectories[ConfigType.Entries], $"{definitionName}.json");
         
         if (!File.Exists(appEntryPath))
             throw new ApplicationException($"The entry ({definitionName}) isn't defined!");
@@ -85,6 +86,32 @@ public class AppParser
             throw new ApplicationException("The entry definition is invalid!");
         
         _logger.LogInformation("Entry {AppEntryName} has been loaded successfully", definitionName);
+
+        return definition;
+    }
+    
+    public async Task<AppEntry> GetAppDefinition(string definitionName, string argumentPath)
+    {
+        var appEntryPath = Path.Combine(_configPaths.Subdirectories[ConfigType.Entries], $"{definitionName}.json");
+        
+        if (!File.Exists(appEntryPath))
+            throw new ApplicationException($"The entry ({definitionName}) isn't defined!");
+        
+        _logger.LogInformation("Entry {AppEntryName} exists, reading its definition from {AppEntryPath}...",
+            definitionName, appEntryPath);
+        
+        var definitionData = await File.ReadAllTextAsync(appEntryPath);
+        var definition = JsonSerializer.Deserialize<AppEntry>(definitionData, _jsonSerializerOptions);
+        
+        if (definition is null)
+            throw new ApplicationException("The entry definition is invalid!");
+        
+        _logger.LogInformation("Entry {AppEntryName} has been loaded successfully", definitionName);
+        
+        definition.Path = ParserHelper.ExpandEnvironmentVariables(definition.Path);
+        definition.Arguments = ParserHelper.ExpandEnvironmentVariables(definition.Arguments, argumentPath);
+        
+        _logger.LogInformation("App entry {AppEntryName} has had its variables expanded", definitionName);
 
         return definition;
     }
