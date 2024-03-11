@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena", "Athena\Athena.csproj", "{B4565B57-25E5-4E87-B091-04D8CA584C05}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Cli", "Athena.Cli\Athena.Cli.csproj", "{B4565B57-25E5-4E87-B091-04D8CA584C05}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Core", "Athena.Core\Athena.Core.csproj", "{83BE2314-BD91-4753-8AB4-588C75ECFDFA}"
 EndProject

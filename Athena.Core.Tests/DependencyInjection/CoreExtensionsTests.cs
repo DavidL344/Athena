@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
+using Athena.Core.Configuration;
 using Athena.Core.DependencyInjection;
-using Athena.Core.Model;
 using Athena.Core.Parser;
 using Athena.Core.Parser.Shared;
 using Athena.Core.Runner;
@@ -54,7 +54,7 @@ public class CoreExtensionsTests : IDisposable
         
         // Assert
         Assert.NotNull(serviceProvider.GetRequiredService<ILogger<CoreExtensionsTests>>());
-        Assert.NotNull(serviceProvider.GetRequiredService<Dictionary<ConfigType, string>>());
+        Assert.NotNull(serviceProvider.GetRequiredService<ConfigPaths>());
         Assert.NotNull(serviceProvider.GetRequiredService<JsonSerializerOptions>());
         Assert.NotNull(serviceProvider.GetRequiredService<PathParser>());
         Assert.NotNull(serviceProvider.GetRequiredService<OpenerParser>());
@@ -78,12 +78,12 @@ public class CoreExtensionsTests : IDisposable
         // Act
         services.AddAthenaCore(_testsConfigDir);
         var serviceProvider = services.BuildServiceProvider();
-        var configPaths = serviceProvider.GetRequiredService<Dictionary<ConfigType, string>>();
+        var configPaths = serviceProvider.GetRequiredService<ConfigPaths>();
         
         // Assert
-        Assert.Equal(entriesDir, configPaths[ConfigType.Entries]);
-        Assert.Equal(filesDir, configPaths[ConfigType.Files]);
-        Assert.Equal(protocolsDir, configPaths[ConfigType.Protocols]);
+        Assert.Equal(entriesDir, configPaths.Subdirectories[ConfigType.Entries]);
+        Assert.Equal(filesDir, configPaths.Subdirectories[ConfigType.Files]);
+        Assert.Equal(protocolsDir, configPaths.Subdirectories[ConfigType.Protocols]);
         
         Assert.True(File.Exists(configFile));
         Assert.True(Directory.Exists(entriesDir));

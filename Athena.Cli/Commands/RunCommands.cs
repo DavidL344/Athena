@@ -1,16 +1,16 @@
-using Athena.Commands.Internal;
-using Athena.Commands.Internal.Model;
-using Athena.Core.Model;
+using Athena.Cli.Commands.Internal;
+using Athena.Cli.Commands.Internal.Model;
+using Athena.Cli.Terminal;
+using Athena.Core.Configuration;
 using Athena.Core.Model.AppPicker;
 using Athena.Core.Model.Opener;
 using Athena.Core.Parser;
 using Athena.Core.Parser.Options;
 using Athena.Core.Runner;
-using Athena.Terminal;
 using Cocona;
 using Microsoft.Extensions.Logging;
 
-namespace Athena.Commands;
+namespace Athena.Cli.Commands;
 
 public class RunCommands : ICommands
 {

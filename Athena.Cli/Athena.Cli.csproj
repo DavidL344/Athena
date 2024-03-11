@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GitVersion>true</GitVersion>
+        <AssemblyName>Athena</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

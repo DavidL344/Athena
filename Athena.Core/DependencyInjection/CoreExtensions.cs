@@ -1,9 +1,8 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Athena.Core.Model;
+using Athena.Core.Configuration;
 using Athena.Core.Parser;
-using Athena.Core.Parser.Shared;
 using Athena.Core.Runner;
 using Athena.Core.Runner.Options;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,13 +27,7 @@ public static class CoreExtensions
             services.AddLogging();
         
         // Config paths
-        services.AddSingleton<Dictionary<ConfigType, string>>(_ =>
-            new Dictionary<ConfigType, string>
-            {
-                { ConfigType.Entries, Path.Combine(appDataDir, "entries") },
-                { ConfigType.Files, Path.Combine(appDataDir, "files") },
-                { ConfigType.Protocols, Path.Combine(appDataDir, "protocols") }
-            });
+        services.AddSingleton(new ConfigPaths(appDataDir));
         
         // JSON options
         var serializerOptions = new JsonSerializerOptions

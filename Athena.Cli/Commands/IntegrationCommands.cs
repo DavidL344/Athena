@@ -1,10 +1,10 @@
 using System.Reflection;
-using Athena.Commands.Internal;
+using Athena.Cli.Commands.Internal;
 using Athena.Core.Runner;
 using Cocona;
 using Spectre.Console;
 
-namespace Athena.Commands;
+namespace Athena.Cli.Commands;
 
 public class IntegrationCommands : ICommands
 {
