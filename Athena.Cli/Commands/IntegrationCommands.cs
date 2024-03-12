@@ -1,6 +1,6 @@
 using System.Reflection;
 using Athena.Cli.Commands.Internal;
-using Athena.Core.Runner;
+using Athena.Core.Configuration;
 using Cocona;
 using Spectre.Console;
 
@@ -8,14 +8,14 @@ namespace Athena.Cli.Commands;
 
 public class IntegrationCommands : ICommands
 {
-    private readonly AppRunner _runner;
+    private readonly ConfigPaths _configPaths;
     private readonly string _appPath;
     private readonly string _appPathDir;
     private readonly string _symlinkPath;
-    
-    public IntegrationCommands(AppRunner runner)
+
+    public IntegrationCommands(ConfigPaths configPaths)
     {
-        _runner = runner;
+        _configPaths = configPaths;
         
         // On Linux, the assembly's location points to its dll instead of the executable
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
@@ -31,7 +31,10 @@ public class IntegrationCommands : ICommands
     [Command("status", Description = "Show the current status of Athena")]
     public void Status()
     {
-        var registrationStatus = "[red]\u25cf Not registered (run `athena integration --add` to register)[/]";
+        var registrationCommand = OperatingSystem.IsWindows()
+            ? "athena integration --add"
+            : "./Athena integration --add";
+        var registrationStatus = $"[red]\u25cf Not registered (run `{registrationCommand}` to register)[/]";
         
         if (OperatingSystem.IsWindows())
         {
@@ -39,26 +42,36 @@ public class IntegrationCommands : ICommands
             var pattern = path!.EndsWith(';') ? $"{_appPathDir};" : $";{_appPathDir}";
             
             if (path.Contains(pattern))
-                registrationStatus = $"[green]\u25cf Registered[/] at {_appPath}";
+                registrationStatus = $"[green]\u25cf Registered[/] at {_appPath}" +
+                                     $"[blue]Running instance: {_appPath}[/]";
         }
         
         if (OperatingSystem.IsLinux() && File.Exists(_symlinkPath))
         {
             var symlinkTarget = File.ResolveLinkTarget(_symlinkPath, true)!.FullName;
+            var symlinkStyle = File.Exists(symlinkTarget) ? "darkorange" : "red";
+            var targetFound = !File.Exists(symlinkTarget) ? " but not found" : "";
+            
+            var symlinkDir = $"file://{Path.GetDirectoryName(_symlinkPath)}";
+            var symlinkTargetDir = $"file://{Path.GetDirectoryName(symlinkTarget)}";
+            var appDir = $"file://{Path.GetDirectoryName(_appPath)}";
+            
             registrationStatus = symlinkTarget == _appPath
-                ? $"[green]\u25cf Registered[/] at {_symlinkPath}"
-                : $"[darkorange]\u25cf Registered[/] at {_symlinkPath}" +
-                  $"\n\tRunning instance: [green]{_appPath}[/]" +
-                  $"\n\tSymlink target: [darkorange]{symlinkTarget}[/]";
+                ? $"[green]\u25cf Registered[/] at [link={symlinkDir}]{_symlinkPath}[/]"
+                : $"[{symlinkStyle}]\u25cf Another instance registered{targetFound}[/] at [link={symlinkDir}]{_symlinkPath}[/]" +
+                  $"\n\t[green]Running instance: [link={appDir}]{_appPath}[/][/]" +
+                  $"\n\t[{symlinkStyle}]Symlink instance: [link={symlinkTargetDir}]{symlinkTarget}[/][/]";
         }
         
-        AnsiConsole.MarkupLine($"{registrationStatus}");
+        AnsiConsole.MarkupLine($"{registrationStatus}" +
+                               $"\n\t[blue]Config directory: [link=file://{_configPaths.Root}]{_configPaths.Root}[/][/]");
     }
     
     [Command("integration", Description = "Integrate Athena into your system")]
-    public async Task Integration(
+    public void Integration(
         [Option('a', Description = "Add the integration")] bool add,
-        [Option('r', Description = "Remove the integration")] bool remove)
+        [Option('r', Description = "Remove the integration")] bool remove,
+        [Option('s', Description = "Display the integration status")] bool status)
     {
         if (add)
         {
@@ -73,7 +86,7 @@ public class IntegrationCommands : ICommands
             }
             
             if (File.Exists(_symlinkPath)) File.Delete(_symlinkPath);
-            await _runner.RunAsync("ln", $"-s {_appPath} {_symlinkPath}");
+            File.CreateSymbolicLink(_symlinkPath, _appPath);
             return;
         }
         
@@ -92,7 +105,13 @@ public class IntegrationCommands : ICommands
             if (File.Exists(_symlinkPath)) File.Delete(_symlinkPath);
             return;
         }
+
+        if (status)
+        {
+            Status();
+            return;
+        }
         
-        Status();
+        AnsiConsole.WriteLine("Error: Option 'action' is required. See '--help' for usage.");
     }
 }

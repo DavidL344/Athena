@@ -1,11 +1,11 @@
 using Athena.Cli.Commands.Internal;
-using Athena.Cli.Commands.Internal.Model;
+using Athena.Cli.Model;
 using Athena.Cli.Terminal;
 using Athena.Core.Configuration;
-using Athena.Core.Model.AppPicker;
-using Athena.Core.Model.Opener;
+using Athena.Core.Extensions;
+using Athena.Core.Model;
+using Athena.Core.Options;
 using Athena.Core.Parser;
-using Athena.Core.Parser.Options;
 using Athena.Core.Runner;
 using Cocona;
 using Microsoft.Extensions.Logging;
@@ -17,18 +17,18 @@ public class RunCommands : ICommands
     private readonly Config _config;
     private readonly PathParser _pathParser;
     private readonly OpenerParser _openerParser;
-    private readonly AppParser _appParser;
+    private readonly AppEntryParser _appEntryParser;
     private readonly AppRunner _runner;
     private readonly ILogger<RunCommands> _logger;
     
     public RunCommands(Config config, PathParser pathParser,
-        OpenerParser openerParser, AppParser appParser,
+        OpenerParser openerParser, AppEntryParser appEntryParser,
         AppRunner runner, ILogger<RunCommands> logger)
     {
         _config = config;
         _pathParser = pathParser;
         _openerParser = openerParser;
-        _appParser = appParser;
+        _appEntryParser = appEntryParser;
         _runner = runner;
         _logger = logger;
     }
@@ -42,11 +42,11 @@ public class RunCommands : ICommands
         [Option('l', Description = "Open any possible URLs as files rather than links")] bool local,
         [Option('p', Description = "Show the app picker even when the default app is specified")] bool picker)
     {
-        _logger.LogInformation(
+        _logger.LogDebug(
             "Opening {File} with entry={Entry}, default={PickDefaultApp}, local={Local}, and picker={Picker}...",
             filePath, entry, !first, local, picker);
 
-        var options = new OpenFileOptions
+        var openFileOptions = new OpenFileOptions
         {
             FilePath = filePath,
             EntryName = entry,
@@ -56,10 +56,27 @@ public class RunCommands : ICommands
             ForceShowAppPicker = picker
         };
         
+        var parserOptions = new ParserOptions
+        {
+            AllowProtocols = _config.EnableProtocolHandler,
+            OpenLocally = local,
+            StreamableProtocolPrefixes = _config.StreamableProtocolPrefixes
+        };
+        
         try
         {
-            var appEntryDefinition = await GetAppDefinition(options);
-            return await _runner.RunAsync(appEntryDefinition.Path, appEntryDefinition.Arguments);
+            var parsedPath = _pathParser.GetPath(filePath, parserOptions);
+            var opener = await _openerParser.GetDefinition(parsedPath, parserOptions);
+            var index = await GetAppEntryIndex(opener, openFileOptions);
+            
+            if (index == -1)
+                throw new ApplicationException("The default app is not in the list of registered apps!");
+            
+            var appEntry = await _appEntryParser.GetAppEntry(opener, index);
+            var expandedAppEntry = _appEntryParser.ExpandAppEntry(
+                appEntry, parsedPath, parserOptions.StreamableProtocolPrefixes);
+            
+            return await _runner.RunAsync(expandedAppEntry.Path, expandedAppEntry.Arguments);
         }
         catch (Exception e)
         {
@@ -67,56 +84,41 @@ public class RunCommands : ICommands
             return 1;
         }
     }
-
-    private async Task<AppEntry> GetAppDefinition(OpenFileOptions openFileOptions)
+    
+    private async Task<int> GetAppEntryIndex(IOpener opener, OpenFileOptions openFileOptions)
     {
-        var options = new ParserOptions
-        {
-            OpenLocally = openFileOptions.OpenLocally,
-            AllowProtocols = _config.EnableProtocolHandler,
-            StreamableProtocolPrefixes = _config.StreamableProtocolPrefixes
-        };
-        
-        var parsedPath = _pathParser.GetPath(openFileOptions.FilePath, options);
-        var openerDefinition = await _openerParser.GetOpenerDefinition(parsedPath, options);
+        int entryIndex;
         
         // The user has picked an entry name to open the file/protocol with
         if (openFileOptions.EntryName is not null)
-            return await _appParser.GetAppDefinition(
-                openerDefinition, openFileOptions.FilePath, openFileOptions.EntryName, options);
-        
+            return opener.GetAppEntryIndex(openFileOptions.EntryName);
+            
         // The user has picked an entry ID to open the file/protocol with
         if (openFileOptions.EntryId is not null)
-            return await _appParser.GetAppDefinition(
-                openerDefinition, openFileOptions.FilePath, openFileOptions.EntryId.Value, options);
-        
+            return openFileOptions.EntryId.Value;
+            
         // The user wants to use the first app in the list
         if (openFileOptions.OpenWithTheFirstEntry)
-            return await _appParser.GetAppDefinition(
-                openerDefinition, openFileOptions.FilePath, 0, options);
-        
+            return 0;
+            
         // There's no default app specified or the user decides to pick an app at runtime
-        if (openFileOptions.ForceShowAppPicker || string.IsNullOrWhiteSpace(openerDefinition.DefaultApp))
+        if (openFileOptions.ForceShowAppPicker || string.IsNullOrWhiteSpace(opener.DefaultApp))
         {
-            var context = new AppPickerContext
-            {
-                FriendlyName = openerDefinition.Name,
-                FilePath = openFileOptions.FilePath,
-                AppEntries = await _appParser.GetFriendlyNames(openerDefinition)
-            };
-            var appIndex = await AppPicker.Show(context);
-            
-            if (appIndex == -1)
+            entryIndex = await AppPicker.Show(opener.Name, opener.AppList);
+                
+            if (entryIndex == -1)
                 throw new ApplicationException("The user has cancelled the operation!");
-            
-            return await _appParser.GetAppDefinition(openerDefinition, openFileOptions.FilePath, appIndex, options);
+
+            return entryIndex;
         }
-        
+            
         // When no options are specified, use the default app
-        var defaultEntry = openerDefinition.AppList.ToList().IndexOf(openerDefinition.DefaultApp);
-        if (defaultEntry == -1)
-            throw new ApplicationException("The default app is not in the list of registered apps!");
+        entryIndex = opener.GetAppEntryIndex(opener.DefaultApp);
         
-        return await _appParser.GetAppDefinition(openerDefinition, parsedPath, defaultEntry, options);
+        if (entryIndex == -1)
+            _logger.LogDebug("Found {EntryName} at index {EntryIndex}",
+                openFileOptions.EntryName, entryIndex);
+        
+        return entryIndex;
     }
 }

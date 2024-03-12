@@ -1,9 +1,8 @@
 using System.Text.Json;
 using Athena.Cli.Commands.Internal;
 using Athena.Core.Configuration;
-using Athena.Core.Model.Opener;
+using Athena.Core.Model;
 using Athena.Core.Parser;
-using Athena.Core.Parser.Shared;
 using Athena.Core.Runner;
 using Cocona;
 using Microsoft.Extensions.Logging;
@@ -14,18 +13,18 @@ public class ConfigCommands : ICommands
 {
     private readonly Config _config;
     private readonly ConfigPaths _configPaths;
-    private readonly AppParser _appParser;
+    private readonly AppEntryParser _appEntryParser;
     private readonly AppRunner _appRunner;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ILogger<ConfigCommands> _logger;
     
     public ConfigCommands(Config config, ConfigPaths configPaths,
-        AppParser appParser, AppRunner appRunner,
+        AppEntryParser appEntryParser, AppRunner appRunner,
         JsonSerializerOptions serializerOptions, ILogger<ConfigCommands> logger)
     {
         _config = config;
         _configPaths = configPaths;
-        _appParser = appParser;
+        _appEntryParser = appEntryParser;
         _appRunner = appRunner;
         _jsonSerializerOptions = serializerOptions;
         _logger = logger;
@@ -36,26 +35,42 @@ public class ConfigCommands : ICommands
         [Argument("file", Description = "An entry (app entry, file extension, protocol) to be edited")] string? entry,
         [Option(Description = "Overrides the default editor specified in the configuration")] string? editor)
     {
+        _logger.LogWarning("Please note that this command only fully supports GUI editors!");
+        
         editor ??= _config.Editor;
+        var editPath = await GetEditPath(entry);
+        
+        var appEntry = await _appEntryParser.GetAppEntry(editor);
+        var expandedAppEntry = _appEntryParser.ExpandAppEntry(
+            appEntry, editPath, _config.StreamableProtocolPrefixes);
+        
+        await _appRunner.RunAsync(expandedAppEntry.Path, expandedAppEntry.Arguments);
+    }
+
+    private async Task<string> GetEditPath(string? entry)
+    {
         string editPath;
         
+        // Edit the config file
         if (entry is null)
         {
-            var config = await _appParser.GetAppDefinition(editor, _configPaths.File);
-            await _appRunner.RunAsync(config.Path, config.Arguments);
-            return;
+            _logger.LogDebug("Parsed {Entry} as the config file", entry);
+            
+            return _configPaths.ConfigFile;
         }
         
+        // Edit a file extension
         if (entry.StartsWith('.'))
         {
-            editPath = Path.Combine(_configPaths.Subdirectories[ConfigType.Files],
-                $"{entry.Remove(0, 1)}.json");
+            _logger.LogDebug("Parsed {Entry} as a file extension", entry);
+            
+            editPath = _configPaths.GetEntryPath(entry, ConfigType.FileExtensions);
             
             if (!File.Exists(editPath))
             {
                 var fileContents = new FileExtension
                 {
-                    Name = $"{entry.Remove(0, 1).ToUpper()} file",
+                    Name = $"{_configPaths.GetParsedEntryName(entry, ConfigType.FileExtensions).ToUpper()} file",
                     AppList = ["sample.open", "sample.edit"],
                     DefaultApp = ""
                 };
@@ -63,22 +78,22 @@ public class ConfigCommands : ICommands
                 await File.WriteAllTextAsync(editPath,
                     JsonSerializer.Serialize(fileContents, _jsonSerializerOptions));
             }
-            
-            var fileExtension = await _appParser.GetAppDefinition(editor, editPath);
-            await _appRunner.RunAsync(fileExtension.Path, fileExtension.Arguments);
-            return;
-        }
 
+            return editPath;
+        }
+        
+        // Edit a protocol
         if (entry.Contains("://"))
         {
-            editPath = Path.Combine(_configPaths.Subdirectories[ConfigType.Protocols],
-                $"{entry.Replace("://", "")}.json");
+            _logger.LogDebug("Parsed {Entry} as a protocol", entry);
+            
+            editPath = _configPaths.GetEntryPath(entry, ConfigType.Protocols);
 
             if (!File.Exists(editPath))
             {
                 var protocolContents = new Protocol
                 {
-                    Name = entry.Replace("://", ""),
+                    Name = _configPaths.GetParsedEntryName(entry, ConfigType.Protocols),
                     AppList = ["sample.open", "sample.edit"],
                     DefaultApp = ""
                 };
@@ -86,29 +101,27 @@ public class ConfigCommands : ICommands
                 await File.WriteAllTextAsync(editPath,
                     JsonSerializer.Serialize(protocolContents, _jsonSerializerOptions));
             }
-            
-            var protocol = await _appParser.GetAppDefinition(editor, editPath);
-            await _appRunner.RunAsync(protocol.Path, protocol.Arguments);
-            return;
+                
+            return editPath;
         }
         
-        _logger.LogInformation("Editing {File}...", entry);
-        editPath = Path.Combine(_configPaths.Subdirectories[ConfigType.Entries], $"{entry}.json");
-        if (!File.Exists(editPath))
+        // Edit an app entry
+        _logger.LogDebug("Parsed {Entry} as an app entry", entry);
+        
+        editPath = _configPaths.GetEntryPath(entry, ConfigType.AppEntries);
+        if (File.Exists(editPath)) return editPath;
+        
+        var appContents = new AppEntry
         {
-            var appContents = new AppEntry
-            {
-                Name = entry,
-                Path = "sample",
-                Arguments = "$FILE",
-                RemoveProtocol = false
-            };
+            Name = _configPaths.GetParsedEntryName(entry, ConfigType.AppEntries),
+            Path = "sample",
+            Arguments = "$FILE",
+            RemoveProtocol = false
+        };
             
-            await File.WriteAllTextAsync(editPath,
-                JsonSerializer.Serialize(appContents, _jsonSerializerOptions));
-        }
-        
-        var appDefinition = await _appParser.GetAppDefinition(editor, editPath);
-        await _appRunner.RunAsync(appDefinition.Path, appDefinition.Arguments);
+        await File.WriteAllTextAsync(editPath,
+            JsonSerializer.Serialize(appContents, _jsonSerializerOptions));
+
+        return editPath;
     }
 }
