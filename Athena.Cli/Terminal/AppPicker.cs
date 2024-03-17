@@ -1,20 +1,19 @@
 using System.Text;
-using Athena.Core.Model.AppPicker;
 using Spectre.Console;
 
 namespace Athena.Cli.Terminal;
 
-public class AppPicker : IAppPicker
+public class AppPicker
 {
-    public static async Task<int> Show(AppPickerContext ctx)
+    public static async Task<int> Show(string friendlyName, IEnumerable<string> appEntryList)
     {
-        var appList = ctx.AppEntries;
+        var appList = appEntryList.ToArray();
         
         var appListReturnCode = new[] { -1, 0 };
         if (appList.Length < 2)
             return appListReturnCode[appList.Length];
         
-        var promptText = $"Select an app to open [green]{ctx.FriendlyName}[/] with:";
+        var promptText = $"Select an app to open [green]{friendlyName}[/] with:";
         int index;
         
         try

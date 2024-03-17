@@ -2,9 +2,10 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Athena.Core.Configuration;
-using Athena.Core.Model.Opener;
+using Athena.Core.Internal;
+using Athena.Core.Model;
+using Athena.Core.Options;
 using Athena.Core.Parser;
-using Athena.Core.Parser.Options;
 using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Tests.Parser;
@@ -22,6 +23,7 @@ public class OpenerParserTests : IDisposable
         
         _testsConfigDir = Path.Combine(workingDir, "user-opener-parser-tests");
         _configPaths = new ConfigPaths(_testsConfigDir);
+        
         _jsonSerializerOptions = new JsonSerializerOptions
         {
             AllowTrailingCommas = false,
@@ -29,15 +31,19 @@ public class OpenerParserTests : IDisposable
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true
         };
+        
         _logger = new Logger<OpenerParser>(new LoggerFactory());
         
-        Internal.Samples.Generate(_testsConfigDir, _jsonSerializerOptions).GetAwaiter().GetResult();
+        Startup.CheckEntries(new ConfigPaths(_testsConfigDir), _jsonSerializerOptions)
+            .GetAwaiter().GetResult();
     }
     
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        Internal.Samples.Remove(_testsConfigDir);
+        
+        if (Directory.Exists(_testsConfigDir))
+            Directory.Delete(_testsConfigDir, true);
     }
     
     [Theory]
@@ -56,7 +62,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetOpenerDefinition(filePath, options);
+        var result = await parser.GetDefinition(filePath, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -81,7 +87,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetOpenerDefinition(filePath, options);
+        var result = await parser.GetDefinition(filePath, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -101,7 +107,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetOpenerDefinition(url, options);
+        var result = await parser.GetDefinition(url, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -126,7 +132,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetOpenerDefinition(url, options);
+        var result = await parser.GetDefinition(url, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -154,7 +160,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetOpenerDefinition(url, options);
+        var result = await parser.GetDefinition(url, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -169,7 +175,7 @@ public class OpenerParserTests : IDisposable
         var parser = new OpenerParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
-        var exception = await Record.ExceptionAsync(() => parser.GetOpenerDefinition(url, options));
+        var exception = await Record.ExceptionAsync(() => parser.GetDefinition(url, options));
         
         // Assert
         Assert.NotNull(exception);
@@ -187,7 +193,7 @@ public class OpenerParserTests : IDisposable
         var parser = new OpenerParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
-        var exception = await Record.ExceptionAsync(() => parser.GetOpenerDefinition(filePath, options));
+        var exception = await Record.ExceptionAsync(() => parser.GetDefinition(filePath, options));
         
         // Assert
         Assert.NotNull(exception);

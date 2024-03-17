@@ -1,5 +1,5 @@
-using Athena.Core.Parser.Options;
-using Athena.Core.Parser.Shared;
+using Athena.Core.Internal.Helpers;
+using Athena.Core.Options;
 using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Parser;
@@ -18,7 +18,6 @@ public class PathParser
         var expandedPath = ParserHelper.ExpandEnvironmentVariables(filePath);
         Uri uri;
         
-        
         // Prevent the backslashes from expanding the file path as a relative path
         if (expandedPath.StartsWith('\\'))
             expandedPath = expandedPath.Replace('\\', '/');
@@ -28,7 +27,7 @@ public class PathParser
             uri = new Uri(expandedPath);
             expandedPath = expandedPath.Replace('/', Path.DirectorySeparatorChar);
             
-            _logger.LogInformation("Parsed {FilePath} as an absolute path: {FileUri}",
+            _logger.LogDebug("Parsed {FilePath} as an absolute path: {FileUri}",
                 filePath, uri);
         }
         catch (UriFormatException)
@@ -37,7 +36,7 @@ public class PathParser
             expandedPath = Path.GetFullPath(expandedPath);
             uri = new Uri(expandedPath);
             
-            _logger.LogInformation("Parsed {FilePath} as either a relative path or a URL: {FileUri}",
+            _logger.LogDebug("Parsed {FilePath} as either a relative path or a URL: {FileUri}",
                 filePath, uri);
         }
         

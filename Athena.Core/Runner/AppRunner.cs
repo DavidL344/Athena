@@ -1,5 +1,5 @@
-using Athena.Core.Runner.Options;
-using Athena.Core.Runner.Shared;
+using Athena.Core.Internal.Helpers;
+using Athena.Core.Options;
 using CliWrap;
 using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;
@@ -10,19 +10,19 @@ public class AppRunner
 {
     private readonly RunnerOptions _options;
     private readonly ILogger<AppRunner> _logger;
-
+    
     public AppRunner(RunnerOptions options, ILogger<AppRunner> logger)
     {
         _options = options;
         _logger = logger;
     }
-
+    
     public async Task<int> RunAsync(string executablePath, string arguments)
     {
-        if (!File.Exists(executablePath) && !File.Exists(RunnerHelper.WhereIs(executablePath)))
+        if (!File.Exists(executablePath) && !File.Exists(SystemHelper.WhereIs(executablePath)))
             throw new ApplicationException($"Command '{executablePath}' not found!");
         
-        _logger.LogInformation(
+        _logger.LogDebug(
             "Opening {Path} with params {Arguments}...",
             executablePath, arguments);
         
@@ -35,7 +35,7 @@ public class AppRunner
             .ExecuteBufferedAsync();
         
         var exitCode = result.ExitCode;
-        _logger.LogInformation("Process exited with exit code {ExitCode}", exitCode);
+        _logger.LogDebug("Process exited with exit code {ExitCode}", exitCode);
         
         return exitCode;
     }

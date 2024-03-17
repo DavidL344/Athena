@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Text;
+using Athena.Core.Options;
 using Athena.Core.Runner;
-using Athena.Core.Runner.Options;
 using CliWrap;
 using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;
@@ -49,7 +49,7 @@ public class AppRunnerTests
         // Assert
         Assert.Equal(0, exitCode);
         Assert.Equal(expectedStdOut, _stdOutBuffer.ToString().Trim());
-        Assert.Equal("", _stdErrBuffer.ToString().Trim());
+        Assert.Empty(_stdErrBuffer.ToString().Trim());
     }
     
     [Theory]
@@ -75,8 +75,8 @@ public class AppRunnerTests
         
         // Assert
         Assert.Equal(expectedExitCode, actualExitCode);
-        Assert.Equal(stdOut.ToString().Trim(), _stdOutBuffer.ToString().Trim());
-        Assert.Equal(stdErr.ToString().Trim(), _stdErrBuffer.ToString().Trim());
+        Assert.Equal(stdOut.ToString(), _stdOutBuffer.ToString());
+        Assert.Equal(stdErr.ToString(), _stdErrBuffer.ToString());
     }
 
     [Fact]
@@ -84,15 +84,15 @@ public class AppRunnerTests
     {
         // Arrange
         ClearBuffers();
-        var executablePath = Assembly.GetAssembly(typeof(Startup.Checks))!.Location;
+        var executablePath = Assembly.GetAssembly(typeof(ITestsMarker))!.Location;
         
         // Act
         var exitCode = await _runner.RunAsync("dotnet", executablePath);
         
         // Assert
-        Assert.Equal(131, exitCode);
-        Assert.Equal("", _stdOutBuffer.ToString().Trim());
-        Assert.NotEmpty(_stdErrBuffer.ToString().Trim());
+        Assert.Equal(0, exitCode);
+        Assert.Equal(0, _stdOutBuffer.Length);
+        Assert.Equal(0, _stdErrBuffer.Length);
     }
     
     [Theory]
@@ -111,7 +111,7 @@ public class AppRunnerTests
         Assert.NotNull(exception);
         Assert.IsType<ApplicationException>(exception);
         Assert.Equal($"Command '{executablePath}' not found!", exception.Message);
-        Assert.Equal("", _stdOutBuffer.ToString().Trim());
-        Assert.Equal("", _stdErrBuffer.ToString().Trim());
+        Assert.Empty(_stdOutBuffer.ToString().Trim());
+        Assert.Empty(_stdErrBuffer.ToString().Trim());
     }
 }

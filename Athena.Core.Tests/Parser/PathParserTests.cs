@@ -1,24 +1,23 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Athena.Core.Configuration;
+using Athena.Core.Internal;
+using Athena.Core.Options;
 using Athena.Core.Parser;
-using Athena.Core.Parser.Options;
 using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
 
 namespace Athena.Core.Tests.Parser;
 
 public class PathParserTests : IDisposable
 {
     private readonly string _workingDir;
-    private readonly ITestOutputHelper _console;
     private readonly string _testsConfigDir;
     private readonly ILogger<PathParser> _logger;
 
-    public PathParserTests(ITestOutputHelper testOutputHelper)
+    public PathParserTests()
     {
         _workingDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-        _console = testOutputHelper;
         _testsConfigDir = Path.Combine(_workingDir, "user-path-parser-tests");
         _logger = new Logger<PathParser>(new LoggerFactory());
         
@@ -30,15 +29,18 @@ public class PathParserTests : IDisposable
             WriteIndented = true
         };
         
-        Internal.Samples.Generate(_testsConfigDir, jsonSerializerOptions).GetAwaiter().GetResult();
+        Startup.CheckEntries(new ConfigPaths(_testsConfigDir), jsonSerializerOptions)
+            .GetAwaiter().GetResult();
     }
     
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        Internal.Samples.Remove(_testsConfigDir);
+        
+        if (Directory.Exists(_testsConfigDir))
+            Directory.Delete(_testsConfigDir, true);
     }
-
+    
     [Theory]
     [InlineData("file.txt")]
     [InlineData("./file.txt")]
@@ -109,8 +111,6 @@ public class PathParserTests : IDisposable
         
         // Act
         var result = parser.GetPath(filePath, options);
-        _console.WriteLine(expected);
-        _console.WriteLine(result);
         
         // Assert
         Assert.Equal(expected, result);
