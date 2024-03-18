@@ -43,8 +43,9 @@ public class LinuxIntegration : IDesktopIntegration
         _parser = parser;
     }
     
-    public LinuxIntegration() : this(GetMimeAppsPath(), new ConfigPaths(), new FileIniDataParser()) { }
-
+    public LinuxIntegration() : this(GetMimeAppsPath(), new ConfigPaths(),
+        new FileIniDataParser { Parser = { Configuration = { AssigmentSpacer = "" } } }) { }
+    
     public void RegisterEntry()
     {
         // Create a symlink to the executable in ~/.local/bin
