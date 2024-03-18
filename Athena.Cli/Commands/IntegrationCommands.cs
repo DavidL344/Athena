@@ -1,6 +1,7 @@
 using System.Reflection;
 using Athena.Cli.Commands.Internal;
 using Athena.Core.Configuration;
+using Athena.Core.Desktop;
 using Cocona;
 using Spectre.Console;
 
@@ -11,19 +12,17 @@ public class IntegrationCommands : ICommands
     private readonly ConfigPaths _configPaths;
     private readonly string _appPath;
     private readonly string _appPathDir;
-    private readonly string _symlinkPath;
+    private readonly IDesktopIntegration _desktopIntegration;
 
-    public IntegrationCommands(ConfigPaths configPaths)
+    public IntegrationCommands(ConfigPaths configPaths, IDesktopIntegration desktopIntegration)
     {
         _configPaths = configPaths;
+        _desktopIntegration = desktopIntegration;
         
         // On Linux, the assembly's location points to its dll instead of the executable
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
         _appPath = Path.ChangeExtension(assemblyLocation,
             OperatingSystem.IsWindows() ? "exe" : null);
-        
-        _symlinkPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "bin", "athena");
         
         _appPathDir = Path.GetDirectoryName(_appPath)!;
     }
@@ -44,31 +43,18 @@ public class IntegrationCommands : ICommands
             if (path.Contains(pattern))
                 registrationStatus = $"[green]\u25cf Registered[/] at {_appPath}" +
                                      $"[blue]Running instance: {_appPath}[/]";
+            
+            AnsiConsole.MarkupLine($"{registrationStatus}" +
+                                   $"\n\t[blue]Config directory: [link=file://{_configPaths.Root}]{_configPaths.Root}[/][/]");
+            
+            return;
         }
         
-        if (OperatingSystem.IsLinux() && File.Exists(_symlinkPath))
-        {
-            var symlinkTarget = File.ResolveLinkTarget(_symlinkPath, true)!.FullName;
-            var symlinkStyle = File.Exists(symlinkTarget) ? "darkorange" : "red";
-            var targetFound = !File.Exists(symlinkTarget) ? " but not found" : "";
-            
-            var symlinkDir = $"file://{Path.GetDirectoryName(_symlinkPath)}";
-            var symlinkTargetDir = $"file://{Path.GetDirectoryName(symlinkTarget)}";
-            var appDir = $"file://{Path.GetDirectoryName(_appPath)}";
-            
-            registrationStatus = symlinkTarget == _appPath
-                ? $"[green]\u25cf Registered[/] at [link={symlinkDir}]{_symlinkPath}[/]"
-                : $"[{symlinkStyle}]\u25cf Another instance registered{targetFound}[/] at [link={symlinkDir}]{_symlinkPath}[/]" +
-                  $"\n\t[green]Running instance: [link={appDir}]{_appPath}[/][/]" +
-                  $"\n\t[{symlinkStyle}]Symlink instance: [link={symlinkTargetDir}]{symlinkTarget}[/][/]";
-        }
-        
-        AnsiConsole.MarkupLine($"{registrationStatus}" +
-                               $"\n\t[blue]Config directory: [link=file://{_configPaths.Root}]{_configPaths.Root}[/][/]");
+        AnsiConsole.MarkupLine(_desktopIntegration.ConsoleStatus());
     }
     
     [Command("integration", Description = "Integrate Athena into your system")]
-    public void Integration(
+    public int Integration(
         [Option('a', Description = "Add the integration")] bool add,
         [Option('r', Description = "Remove the integration")] bool remove,
         [Option('s', Description = "Display the integration status")] bool status)
@@ -82,12 +68,15 @@ public class IntegrationCommands : ICommands
                     ? $"{pathBefore}{_appPathDir};"
                     : $"{pathBefore};{_appPathDir}";
                 Environment.SetEnvironmentVariable("PATH", pathAfter, EnvironmentVariableTarget.User);
-                return;
+                return 0;
             }
             
-            if (File.Exists(_symlinkPath)) File.Delete(_symlinkPath);
-            File.CreateSymbolicLink(_symlinkPath, _appPath);
-            return;
+            var date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+
+            _desktopIntegration.RegisterEntry();
+            _desktopIntegration.BackupAllEntries(Path.Combine(_configPaths.Root, $"mimeapps.list.{date}.bak"));
+            _desktopIntegration.AssociateWithApps();
+            return 0;
         }
         
         if (remove)
@@ -99,19 +88,21 @@ public class IntegrationCommands : ICommands
                     ? pathBefore.Replace($"{_appPathDir};", "")
                     : pathBefore.Replace($";{_appPathDir}", "");
                 Environment.SetEnvironmentVariable("PATH", pathAfter, EnvironmentVariableTarget.User);
-                return;
+                return 0;
             }
             
-            if (File.Exists(_symlinkPath)) File.Delete(_symlinkPath);
-            return;
+            _desktopIntegration.DeregisterEntry();
+            _desktopIntegration.DissociateFromApps();
+            return 0;
         }
 
         if (status)
         {
             Status();
-            return;
+            return 0;
         }
         
         AnsiConsole.WriteLine("Error: Option 'action' is required. See '--help' for usage.");
+        return 1;
     }
 }
