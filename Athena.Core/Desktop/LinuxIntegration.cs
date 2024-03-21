@@ -1,6 +1,7 @@
 using System.Reflection;
 using Athena.Core.Configuration;
 using Athena.Core.Desktop.Linux;
+using Athena.Core.Desktop.Shared;
 using IniParser;
 using IniParser.Model;
 
@@ -20,6 +21,7 @@ public class LinuxIntegration : IDesktopIntegration
     
     // Athena.Cli <--> athena
     private readonly string _appPath;
+    private readonly string _symlinkDir;
     private readonly string _symlinkPath;
 
     public LinuxIntegration(string mimeAppsPath, ConfigPaths configPaths, FileIniDataParser parser)
@@ -34,10 +36,11 @@ public class LinuxIntegration : IDesktopIntegration
         // On Linux, the assembly's location points to its dll instead of the executable
         var assemblyLocation = Assembly.GetEntryAssembly()!.Location;
         _appPath = Path.ChangeExtension(assemblyLocation, null);
-        
-        _symlinkPath = Path.Combine(
+
+        _symlinkDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ".local", "bin", "athena");
+            ".local", "bin");
+        _symlinkPath = Path.Combine(_symlinkDir, "athena");
         
         _mimeAppsPath = mimeAppsPath;
         _parser = parser;
@@ -48,6 +51,13 @@ public class LinuxIntegration : IDesktopIntegration
     
     public void RegisterEntry()
     {
+        // Create a directory for symlinks if it doesn't exist
+        if (!Directory.Exists(_symlinkDir))
+            Directory.CreateDirectory(_symlinkDir);
+        
+        // Add the symlink directory to $PATH
+        PathEntry.Add(_symlinkDir);
+        
         // Create a symlink to the executable in ~/.local/bin
         SymlinkEntry.Create(_symlinkPath, _appPath);
         
@@ -59,6 +69,13 @@ public class LinuxIntegration : IDesktopIntegration
     {
         SymlinkEntry.Delete(_symlinkPath);
         DesktopEntry.Delete(_desktopFilePath);
+        
+        // Only remove the symlink directory if it's empty
+        if (!Directory.Exists(_symlinkDir)) return;
+        if (Directory.GetFiles(_symlinkDir).Length != 0 || Directory.GetDirectories(_symlinkDir).Length != 0) return;
+        
+        PathEntry.Remove(_symlinkDir);
+        PathEntry.Remove(_symlinkDir);
     }
     
     public void AssociateWithApps()
@@ -141,16 +158,26 @@ public class LinuxIntegration : IDesktopIntegration
         WriteMimeApps(modifiedMimeApps);
     }
 
-    public void BackupAllEntries(string backupPath)
+    public void BackupAllEntries(string backupDir, string identifier)
     {
         var mimeApps = ReadMimeApps();
-        WriteMimeApps(mimeApps, backupPath);
+        WriteMimeApps(mimeApps, Path.Combine(backupDir, $"mimeapps.list.{identifier}.bak"));
+
+        var pathBackup = Path.Combine(backupDir, $"path.{identifier}.bak");
+        File.WriteAllText(pathBackup, PathEntry.Get());
     }
     
-    public void RestoreAllEntries(string backupPath)
+    public void RestoreAllEntries(string backupDir, string identifier, string newBackupIdentifier)
     {
-        var mimeApps = _parser.ReadFile(backupPath);
+        var mimeApps = _parser.ReadFile(Path.Combine(backupDir, $"mimeapps.list.{identifier}.bak"));
         WriteMimeApps(mimeApps);
+        
+        var pathBackup = Path.Combine(backupDir, $"environment.path.{identifier}.bak");
+        var path = File.ReadAllText(pathBackup);
+        PathEntry.Overwrite(path, out var oldPath, out var newPath);
+        
+        File.WriteAllText(Path.ChangeExtension(newBackupIdentifier, ".before.bak"), oldPath);
+        File.WriteAllText(Path.ChangeExtension(newBackupIdentifier, ".after.bak"), newPath);
     }
 
     public string ConsoleStatus()
@@ -176,11 +203,14 @@ public class LinuxIntegration : IDesktopIntegration
     
     private void WriteMimeApps(IniData mimeApps)
     {
-        _parser.WriteFile(_mimeAppsPath, mimeApps);
+        WriteMimeApps(mimeApps, _mimeAppsPath);
     }
     
     private void WriteMimeApps(IniData mimeApps, string filePath)
     {
+        if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+        
         _parser.WriteFile(filePath, mimeApps);
     }
 

@@ -79,18 +79,24 @@ public interface IDesktopIntegration
     /// <b>Windows</b>: saves the entries to a *.reg file<br />
     /// <b>Linux</b>: copies the entries to a *.list.bak file
     /// </remarks>
-    /// <param name="backupPath">The path to save the backup to</param>
-    void BackupAllEntries(string backupPath);
+    /// <param name="backupDir">The directory to save the backup to</param>
+    /// <param name="identifier">The identifier to use for the backup file</param>
+    void BackupAllEntries(string backupDir, string identifier);
     
     /// <summary>
     /// Restore all entries from a backup.
     /// </summary>
     /// <remarks>
     /// <b>Windows</b>: restores the entries from a *.reg file<br />
-    /// <b>Linux</b>: copies the entries from a *.list.bak file
+    /// <b>Linux</b>: copies the entries from a *.list.bak file<br /><br />
+    /// The parameter <paramref name="newBackupIdentifier"/>
+    /// appends ".before" or ".after" to the identifier before ".bak"
+    /// to distinguish between the backup files before and after the restore
     /// </remarks>
-    /// <param name="backupPath">The path to the backup file</param>
-    void RestoreAllEntries(string backupPath);
+    /// <param name="backupDir">The directory to the backup file</param>
+    /// <param name="identifier">The identifier of the backup file</param>
+    /// <param name="newBackupIdentifier">The identifier to use for the new backup files</param>
+    void RestoreAllEntries(string backupDir, string identifier, string newBackupIdentifier);
     
     /// <summary>
     /// Output the current status of Athena's integration with the system to the console.

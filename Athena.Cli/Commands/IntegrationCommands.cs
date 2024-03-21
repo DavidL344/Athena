@@ -12,12 +12,16 @@ public class IntegrationCommands : ICommands
     private readonly ConfigPaths _configPaths;
     private readonly string _appPath;
     private readonly string _appPathDir;
+    private readonly string _backupDir;
     private readonly IDesktopIntegration _desktopIntegration;
+    private readonly string _currentDate;
 
     public IntegrationCommands(ConfigPaths configPaths, IDesktopIntegration desktopIntegration)
     {
+        _backupDir = Path.Combine(configPaths.Root, "backup");
         _configPaths = configPaths;
         _desktopIntegration = desktopIntegration;
+        _currentDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
         
         // On Linux, the assembly's location points to its dll instead of the executable
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
@@ -71,10 +75,11 @@ public class IntegrationCommands : ICommands
                 return 0;
             }
             
-            var date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            if (!Directory.Exists(_backupDir))
+                Directory.CreateDirectory(_backupDir);
 
             _desktopIntegration.RegisterEntry();
-            _desktopIntegration.BackupAllEntries(Path.Combine(_configPaths.Root, $"mimeapps.list.{date}.bak"));
+            _desktopIntegration.BackupAllEntries(_backupDir, _currentDate);
             _desktopIntegration.AssociateWithApps();
             return 0;
         }
@@ -92,6 +97,7 @@ public class IntegrationCommands : ICommands
             }
             
             _desktopIntegration.DeregisterEntry();
+            _desktopIntegration.BackupAllEntries(_backupDir, _currentDate);
             _desktopIntegration.DissociateFromApps();
             return 0;
         }
