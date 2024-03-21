@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text;
 using Athena.Core.Configuration;
 using Athena.Core.Desktop.Linux;
 using Athena.Core.Desktop.Shared;
@@ -211,7 +212,7 @@ public class LinuxIntegration : IDesktopIntegration
         if (!Directory.Exists(Path.GetDirectoryName(filePath)))
             Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
         
-        _parser.WriteFile(filePath, mimeApps);
+        _parser.WriteFile(filePath, mimeApps, Encoding.ASCII);
     }
 
     private static string GetMimeAppsPath()
