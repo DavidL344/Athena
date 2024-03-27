@@ -60,10 +60,11 @@ public class IntegrationCommands : ICommands
     [Command("integration", Description = "Integrate Athena into your system")]
     public int Integration(
         [Option('a', Description = "Add the integration")] bool add,
+        [Option('A', Description = "Add the integration to all apps")] bool addAll,
         [Option('r', Description = "Remove the integration")] bool remove,
         [Option('s', Description = "Display the integration status")] bool status)
     {
-        if (add)
+        if (add || addAll)
         {
             if (OperatingSystem.IsWindows())
             {
@@ -80,7 +81,11 @@ public class IntegrationCommands : ICommands
 
             _desktopIntegration.RegisterEntry();
             _desktopIntegration.BackupAllEntries(_backupDir, _currentDate);
-            _desktopIntegration.AssociateWithApps();
+            _desktopIntegration.AssociateWithSampleApps();
+
+            if (addAll)
+                _desktopIntegration.AssociateWithAllApps();
+            
             return 0;
         }
         

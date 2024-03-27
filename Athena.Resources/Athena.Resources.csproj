@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <EmbeddedResource Include="Desktop\athena.desktop" />
+      <EmbeddedResource Include="Desktop\bashrc.sh" />
     </ItemGroup>
 
 </Project>

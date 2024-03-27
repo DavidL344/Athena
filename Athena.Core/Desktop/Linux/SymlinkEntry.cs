@@ -1,4 +1,4 @@
-namespace Athena.Core.Desktop.Shared;
+namespace Athena.Core.Desktop.Linux;
 
 internal static class SymlinkEntry
 {

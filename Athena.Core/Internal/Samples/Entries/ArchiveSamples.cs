@@ -61,4 +61,10 @@ internal class ArchiveSamples : ISample
     };
     
     public Dictionary<string, Protocol> Protocols { get; } = new();
+
+    public List<string> MimeTypes { get; } =
+    [
+        "application/zip", // zip
+        "application/x-7z-compressed" // 7z
+    ];
 }

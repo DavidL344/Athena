@@ -27,9 +27,12 @@ public interface IDesktopIntegration
     /// <b>Windows</b>: associates the Athena entry to be openable with the file extension(s) in the Windows Registry<br />
     /// <b>Linux</b>: adds the Athena entry to the MIME type(s) in the ~/.local/share/applications/mimeapps.list file under [Added Associations]
     /// </remarks>
-    void AssociateWithApps();
+    void AssociateWithAllApps();
     
-    /// <inheritdoc cref="AssociateWithApps"/>
+    /// <inheritdoc cref="AssociateWithAllApps"/>
+    void AssociateWithSampleApps();
+    
+    /// <inheritdoc cref="AssociateWithAllApps"/>
     /// <param name="fileExtensionOrMimeType">The file extension (Windows) or a MIME type (Linux) to associate</param>
     void AssociateWithApp(string fileExtensionOrMimeType);
     
@@ -89,14 +92,10 @@ public interface IDesktopIntegration
     /// <remarks>
     /// <b>Windows</b>: restores the entries from a *.reg file<br />
     /// <b>Linux</b>: copies the entries from a *.list.bak file<br /><br />
-    /// The parameter <paramref name="newBackupIdentifier"/>
-    /// appends ".before" or ".after" to the identifier before ".bak"
-    /// to distinguish between the backup files before and after the restore
     /// </remarks>
     /// <param name="backupDir">The directory to the backup file</param>
     /// <param name="identifier">The identifier of the backup file</param>
-    /// <param name="newBackupIdentifier">The identifier to use for the new backup files</param>
-    void RestoreAllEntries(string backupDir, string identifier, string newBackupIdentifier);
+    void RestoreAllEntries(string backupDir, string identifier);
     
     /// <summary>
     /// Output the current status of Athena's integration with the system to the console.

@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Text;
 using Athena.Core.Configuration;
 using Athena.Core.Desktop.Linux;
-using Athena.Core.Desktop.Shared;
+using Athena.Core.Runner;
 using IniParser;
 using IniParser.Model;
 
@@ -10,6 +10,7 @@ namespace Athena.Core.Desktop;
 
 public class LinuxIntegration : IDesktopIntegration
 {
+    private readonly AppRunner _appRunner;
     private readonly ConfigPaths _configPaths;
     
     // mimeapps.list
@@ -18,6 +19,7 @@ public class LinuxIntegration : IDesktopIntegration
     
     // athena.desktop
     private readonly string _desktopFileName;
+    private readonly string _desktopFileDir;
     private readonly string _desktopFilePath;
     
     // Athena.Cli <--> athena
@@ -25,14 +27,16 @@ public class LinuxIntegration : IDesktopIntegration
     private readonly string _symlinkDir;
     private readonly string _symlinkPath;
 
-    public LinuxIntegration(string mimeAppsPath, ConfigPaths configPaths, FileIniDataParser parser)
+    public LinuxIntegration(string mimeAppsPath, ConfigPaths configPaths,
+        FileIniDataParser parser, AppRunner appRunner)
     {
+        _appRunner = appRunner;
         _configPaths = configPaths;
         
         _desktopFileName = "athena.desktop";
-        _desktopFilePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ".local", "share", "applications", _desktopFileName);
+        _desktopFileDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            ".local", "share", "applications");
+        _desktopFilePath = Path.Combine(_desktopFileDir, _desktopFileName);
         
         // On Linux, the assembly's location points to its dll instead of the executable
         var assemblyLocation = Assembly.GetEntryAssembly()!.Location;
@@ -47,8 +51,8 @@ public class LinuxIntegration : IDesktopIntegration
         _parser = parser;
     }
     
-    public LinuxIntegration() : this(GetMimeAppsPath(), new ConfigPaths(),
-        new FileIniDataParser { Parser = { Configuration = { AssigmentSpacer = "" } } }) { }
+    public LinuxIntegration(ConfigPaths configPaths, AppRunner appRunner) :
+        this(GetMimeAppsPath(), configPaths, GetParserSettings(), appRunner) { }
     
     public void RegisterEntry()
     {
@@ -64,6 +68,10 @@ public class LinuxIntegration : IDesktopIntegration
         
         // Add a .desktop file to ~/.local/share/applications
         DesktopEntry.Create(_desktopFilePath);
+        
+        // Update the shell
+        PathEntry.Source(_appRunner);
+        DesktopEntry.Source(_desktopFileDir, _appRunner);
     }
     
     public void DeregisterEntry()
@@ -71,19 +79,32 @@ public class LinuxIntegration : IDesktopIntegration
         SymlinkEntry.Delete(_symlinkPath);
         DesktopEntry.Delete(_desktopFilePath);
         
+        // Update the shell
+        PathEntry.Source(_appRunner);
+        DesktopEntry.Source(_desktopFileDir, _appRunner);
+        
         // Only remove the symlink directory if it's empty
         if (!Directory.Exists(_symlinkDir)) return;
         if (Directory.GetFiles(_symlinkDir).Length != 0 || Directory.GetDirectories(_symlinkDir).Length != 0) return;
         
         PathEntry.Remove(_symlinkDir);
-        PathEntry.Remove(_symlinkDir);
     }
     
-    public void AssociateWithApps()
+    public void AssociateWithAllApps()
     {
         var mimeApps = ReadMimeApps();
         
         var modifiedMimeApps = MimeAppsList.AssociateWithAllApps(
+            mimeApps, _desktopFileName);
+        
+        WriteMimeApps(modifiedMimeApps);
+    }
+    
+    public void AssociateWithSampleApps()
+    {
+        var mimeApps = ReadMimeApps();
+        
+        var modifiedMimeApps = MimeAppsList.AssociateWithSampleApps(
             mimeApps, _desktopFileName);
         
         WriteMimeApps(modifiedMimeApps);
@@ -168,17 +189,10 @@ public class LinuxIntegration : IDesktopIntegration
         File.WriteAllText(pathBackup, PathEntry.Get());
     }
     
-    public void RestoreAllEntries(string backupDir, string identifier, string newBackupIdentifier)
+    public void RestoreAllEntries(string backupDir, string identifier)
     {
         var mimeApps = _parser.ReadFile(Path.Combine(backupDir, $"mimeapps.list.{identifier}.bak"));
         WriteMimeApps(mimeApps);
-        
-        var pathBackup = Path.Combine(backupDir, $"environment.path.{identifier}.bak");
-        var path = File.ReadAllText(pathBackup);
-        PathEntry.Overwrite(path, out var oldPath, out var newPath);
-        
-        File.WriteAllText(Path.ChangeExtension(newBackupIdentifier, ".before.bak"), oldPath);
-        File.WriteAllText(Path.ChangeExtension(newBackupIdentifier, ".after.bak"), newPath);
     }
 
     public string ConsoleStatus()
@@ -196,9 +210,10 @@ public class LinuxIntegration : IDesktopIntegration
     
     private IniData ReadMimeApps()
     {
-        if (!File.Exists(_mimeAppsPath))
-            throw new FileNotFoundException("The local MIME apps file doesn't exist!", _mimeAppsPath);
-        
+        if (File.Exists(_mimeAppsPath)) return _parser.ReadFile(_mimeAppsPath);
+            
+        WriteMimeApps(MimeAppsList.Create());
+
         return _parser.ReadFile(_mimeAppsPath);
     }
     
@@ -218,5 +233,10 @@ public class LinuxIntegration : IDesktopIntegration
     private static string GetMimeAppsPath()
     {
         return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "mimeapps.list");
+    }
+    
+    private static FileIniDataParser GetParserSettings()
+    {
+        return new FileIniDataParser { Parser = { Configuration = { AssigmentSpacer = "" } } };
     }
 }

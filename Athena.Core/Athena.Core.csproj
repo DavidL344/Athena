@@ -30,4 +30,8 @@
       <None Remove="Desktop\Resources\athena.desktop" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Desktop\Shared\" />
+    </ItemGroup>
+
 </Project>

@@ -84,4 +84,12 @@ internal class MediaSamples : ISample
     };
     
     public Dictionary<string, Protocol> Protocols { get; } = new();
+
+    public List<string> MimeTypes { get; } =
+    [
+        "audio/mpeg", // mp3
+        "video/mp4", // mp4
+        "video/x-matroska", // mkv
+        "video/x-msvideo" // avi
+    ];
 }
