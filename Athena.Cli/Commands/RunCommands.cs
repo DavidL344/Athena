@@ -66,13 +66,13 @@ public class RunCommands : ICommands
         try
         {
             var parsedPath = _pathParser.GetPath(filePath, parserOptions);
-            var opener = await _openerParser.GetDefinition(parsedPath, parserOptions);
+            var opener = _openerParser.GetDefinition(parsedPath, parserOptions);
             var index = await GetAppEntryIndex(opener, openFileOptions);
             
             if (index == -1)
                 throw new ApplicationException("The default app is not in the list of registered apps!");
             
-            var appEntry = await _appEntryParser.GetAppEntry(opener, index);
+            var appEntry = _appEntryParser.GetAppEntry(opener, index);
             var expandedAppEntry = _appEntryParser.ExpandAppEntry(
                 appEntry, parsedPath, parserOptions.StreamableProtocolPrefixes);
             

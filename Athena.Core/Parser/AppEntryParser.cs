@@ -21,16 +21,16 @@ public class AppEntryParser
         _logger = logger;
     }
     
-    public async Task<AppEntry> GetAppEntry(IOpener opener, int index)
+    public AppEntry GetAppEntry(IOpener opener, int index)
     {
         if (index < 0 || index >= opener.AppList.Count)
             throw new ApplicationException("The entry ID is out of range!");
         
         var appEntryName = opener.AppList[index];
-        return await GetAppEntry(appEntryName);
+        return GetAppEntry(appEntryName);
     }
     
-    public async Task<AppEntry> GetAppEntry(string appEntryName)
+    public AppEntry GetAppEntry(string appEntryName)
     {
         if (string.IsNullOrWhiteSpace(appEntryName))
             throw new ApplicationException("The app entry name is invalid!");
@@ -43,7 +43,7 @@ public class AppEntryParser
         _logger.LogDebug("App entry {AppEntryName} exists, reading its definition from {AppEntryPath}...",
             appEntryName, appEntryPath);
         
-        var definitionData = await File.ReadAllTextAsync(appEntryPath);
+        var definitionData = File.ReadAllText(appEntryPath);
         var definition = JsonSerializer.Deserialize<AppEntry>(definitionData, _jsonSerializerOptions);
         
         if (definition is null)
@@ -76,7 +76,7 @@ public class AppEntryParser
         return appEntry;
     }
     
-    public async Task<string[]> GetFriendlyNames(IOpener opener, bool markDefault = false)
+    public string[] GetFriendlyNames(IOpener opener, bool markDefault = false)
     {
         // Parse the names of the app entries
         var friendlyNames = new string[opener.AppList.Count];
@@ -84,7 +84,7 @@ public class AppEntryParser
         
         for (var i = 0; i < opener.AppList.Count; i++)
         {
-            var definition = await GetAppEntry(opener.AppList[i]);
+            var definition = GetAppEntry(opener.AppList[i]);
             friendlyNames[i] = opener.AppList[i] == opener.DefaultApp
                 ? $"{definition.Name}{defaultMark}"
                 : definition.Name;

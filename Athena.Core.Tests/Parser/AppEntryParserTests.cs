@@ -47,7 +47,7 @@ public class AppEntryParserTests : IDisposable
     [Theory]
     [InlineData("/file.mp4", true)]
     [InlineData("/file.mp4", false)]
-    public async Task GetAppDefinition__ReturnsAppDefinition__WhenItExists(string filePath, bool expandVars)
+    public void GetAppDefinition__ReturnsAppDefinition__WhenItExists(string filePath, bool expandVars)
     {
         // Arrange
         var options = new ParserOptions();
@@ -60,7 +60,7 @@ public class AppEntryParserTests : IDisposable
         };
         
         // Act
-        var appEntry = await parser.GetAppEntry(new FileExtension
+        var appEntry = parser.GetAppEntry(new FileExtension
         {
             Name = "MP4 Video",
             AppList = ["mpv.play"]
@@ -75,13 +75,13 @@ public class AppEntryParserTests : IDisposable
     
     [Theory]
     [InlineData("mpv.pause")]
-    public async Task GetAppDefinition__ThrowsException__WhenItDoesNotExist(string entryName)
+    public void GetAppDefinition__ThrowsException__WhenItDoesNotExist(string entryName)
     {
         // Arrange
         var parser = new AppEntryParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
-        var exception = await Record.ExceptionAsync(() => parser.GetAppEntry(entryName));
+        var exception = Record.Exception(() => parser.GetAppEntry(entryName));
         
         // Assert
         Assert.NotNull(exception);
@@ -93,13 +93,13 @@ public class AppEntryParserTests : IDisposable
     [Theory]
     [InlineData(-1)]
     [InlineData(1)]
-    public async Task GetAppDefinition__ThrowsException__WhenIndexIsOutOfRange(int entryIndex)
+    public void GetAppDefinition__ThrowsException__WhenIndexIsOutOfRange(int entryIndex)
     {
         // Arrange
         var parser = new AppEntryParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
-        var exception = await Record.ExceptionAsync(() => parser.GetAppEntry(new FileExtension
+        var exception = Record.Exception(() => parser.GetAppEntry(new FileExtension
         {
             Name = "MP4 Video",
             AppList = [ "mpv.play" ]
@@ -114,13 +114,13 @@ public class AppEntryParserTests : IDisposable
     [Theory]
     [InlineData("random.play")]
     [InlineData("random.open")]
-    public async Task GetAppDefinition__ThrowsException__WhenAppDefinitionDoesNotExist(string definitionName)
+    public void GetAppDefinition__ThrowsException__WhenAppDefinitionDoesNotExist(string definitionName)
     {
         // Arrange
         var parser = new AppEntryParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
-        var exception = await Record.ExceptionAsync(() => parser.GetAppEntry(definitionName));
+        var exception = Record.Exception(() => parser.GetAppEntry(definitionName));
         
         // Assert
         Assert.NotNull(exception);
@@ -131,7 +131,7 @@ public class AppEntryParserTests : IDisposable
     [Theory]
     [InlineData("https://example.com/file.temp", true)]
     [InlineData("https://example.com/file.temp", false)]
-    public async Task GetAppDefinition__RemovesProtocol__WhenRequested(string url, bool removeProtocol)
+    public void GetAppDefinition__RemovesProtocol__WhenRequested(string url, bool removeProtocol)
     {
         // Arrange
         var options = new ParserOptions();
@@ -147,9 +147,9 @@ public class AppEntryParserTests : IDisposable
         // Act
         var filePath = Path.Combine(_configPaths.Subdirectories[ConfigType.AppEntries], ".temp.open.json");
         var fileContents = JsonSerializer.Serialize(expected, _jsonSerializerOptions);
-        await File.WriteAllTextAsync(filePath, fileContents);
+        File.WriteAllText(filePath, fileContents);
         
-        var appEntry = await parser.GetAppEntry(new FileExtension
+        var appEntry = parser.GetAppEntry(new FileExtension
         {
             Name = "A temporary file",
             AppList = [ ".temp.open" ]
@@ -166,13 +166,13 @@ public class AppEntryParserTests : IDisposable
     [Theory]
     [InlineData("")]
     [InlineData(" ")]
-    public async Task GetAppDefinition__ThrowsException__WhenTheAppEntryIsEmpty(string appEntryName)
+    public void GetAppDefinition__ThrowsException__WhenTheAppEntryIsEmpty(string appEntryName)
     {
         // Arrange
         var parser = new AppEntryParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
-        var exception = await Record.ExceptionAsync(() => parser.GetAppEntry(appEntryName));
+        var exception = Record.Exception(() => parser.GetAppEntry(appEntryName));
         
         // Assert
         Assert.NotNull(exception);
@@ -181,14 +181,14 @@ public class AppEntryParserTests : IDisposable
     }
     
     [Fact]
-    public async Task GetFriendlyNames__ReturnsFriendlyNames__WhenTheyExist()
+    public void GetFriendlyNames__ReturnsFriendlyNames__WhenTheyExist()
     {
         // Arrange
         var parser = new AppEntryParser(_configPaths, _jsonSerializerOptions, _logger);
         var expected = new[] { "mpv (Play)" };
         
         // Act
-        var result = await parser.GetFriendlyNames(new FileExtension
+        var result = parser.GetFriendlyNames(new FileExtension
         {
             Name = "MP4 Video",
             AppList = [ "mpv.play" ]
