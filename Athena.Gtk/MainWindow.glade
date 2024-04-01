@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk+" version="3.18"/>
+  <object class="GtkWindow" id="MainWindow">
+    <property name="title" translatable="no">Athena</property>
+    <property name="default_width">480</property>
+    <property name="default_height">240</property>
+    <property name="resizable">False</property>
+    
+    <child>
+      <object class="GtkBox">
+        <property name="margin">8</property>
+        <property name="orientation">vertical</property>
+        
+        <child>
+          <object class="GtkLabel" id="_fileTypeLabel">
+            <property name="label" translatable="yes">Select an app to open the file with:</property>
+          </object>
+        </child>
+        
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="margin">10</property>
+            <child>
+              <object class="GtkListBox" id="_appPickerList">
+                <property name="selection-mode">single</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+          </packing>
+        </child>
+        
+        <child>
+          <object class="GtkLabel" id="_filePathLabel">
+            <property name="label" translatable="no">/full/path/to/the/file</property>
+          </object>
+        </child>
+        
+      </object>
+    </child>
+  </object>
+</interface>
