@@ -10,10 +10,17 @@
       <object class="GtkBox">
         <property name="margin">8</property>
         <property name="orientation">vertical</property>
+        <property name="homogeneous">False</property>
         
         <child>
           <object class="GtkLabel" id="_fileTypeLabel">
             <property name="label" translatable="yes">Select an app to open $FILE_TYPE with:</property>
+            <property name="ellipsize">middle</property>
+            <property name="wrap">True</property>
+            <property name="max-width-chars">60</property>
+            <property name="justify">center</property>
+            <property name="margin-left">20</property>
+            <property name="margin-right">20</property>
           </object>
         </child>
         
@@ -35,6 +42,12 @@
         <child>
           <object class="GtkLabel" id="_filePathLabel">
             <property name="label" translatable="no">$FILE_PATH</property>
+            <property name="ellipsize">middle</property>
+            <property name="wrap">True</property>
+            <property name="max-width-chars">60</property>
+            <property name="justify">center</property>
+            <property name="margin-left">20</property>
+            <property name="margin-right">20</property>
           </object>
         </child>
         
