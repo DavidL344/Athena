@@ -52,11 +52,35 @@ internal class MainWindow : Window
         }
         
         // Render the window
+        SetWindowSize();
         ShowAll();
         
         // Connect any relevant events
         _appPickerList.ListRowActivated += AppPickerList_RowSelected;
         DeleteEvent += Window_DeleteEvent;
+        ScreenChanged += (_, _) => SetWindowSize();
+    }
+    
+    private void SetWindowSize()
+    {
+        var dpi = Gdk.Screen.Default.Resolution;
+        
+        // [(int)(Gdk.Screen.Default.Height / 4.5)] when keeping the relative size of the window
+        var windowHeight = (int)(2.5 * dpi);
+        
+        // [Gdk.Screen.Default.Width / 4] when not keeping the 2:1 aspect ratio
+        var windowWidth = windowHeight * 2;
+        
+        DefaultWidth = windowWidth;
+        DefaultHeight = windowHeight;
+        SetSizeRequest(windowWidth, windowHeight);
+        
+        Resizable = false;
+        WindowPosition = WindowPosition.Center;
+        
+#if DEBUG
+        Title = $"Athena GTK ({windowWidth}x{windowHeight} @ {Gdk.Screen.Default.Resolution} dpi)";
+#endif
     }
     
     private void AppPickerList_RowSelected(object o, ListRowActivatedArgs args)
