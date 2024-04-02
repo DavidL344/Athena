@@ -6,11 +6,11 @@ namespace Athena.Gtk;
 
 internal class MainWindow : Window
 {
-    [UI] private readonly Label _fileTypeLabel = null;
-    [UI] private readonly Label _filePathLabel = null;
-    [UI] private readonly ListBox _appPickerList = null;
-
-    private int _selectedIndex = -1;
+    [UI] private readonly Label _fileTypeLabel = default!;
+    [UI] private readonly Label _filePathLabel = default!;
+    [UI] private readonly ListBox _appPickerList = default!;
+    
+    public int SelectedIndex { get; private set; } = -1;
     
     private static readonly string[] SampleEntries =
     [
@@ -42,22 +42,30 @@ internal class MainWindow : Window
                 MarginBottom = 10
             };
             
-            _appPickerList!.Add(label);
+            _appPickerList.Add(label);
         }
         
+        // Render the window
         ShowAll();
         
+        // Connect any relevant events
+        _appPickerList.ListRowActivated += AppPickerList_RowSelected;
         DeleteEvent += Window_DeleteEvent;
     }
-
-    public int GetEntryId()
+    
+    private void AppPickerList_RowSelected(object o, ListRowActivatedArgs args)
     {
-        Show();
-        return _appPickerList.SelectedRow.Index;
+        SelectedIndex = args.Row.Index;
+        Close();
     }
     
-    private static void Window_DeleteEvent(object sender, DeleteEventArgs a)
+    private void Window_DeleteEvent(object sender, DeleteEventArgs a)
     {
+        var senderWindow = (Window)sender;
+        a.RetVal = true;
+        
+        senderWindow.Hide();
+        senderWindow.Destroy();
         Application.Quit();
     }
 }

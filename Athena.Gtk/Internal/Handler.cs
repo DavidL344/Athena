@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Athena.Core.Configuration;
 using Athena.Core.Extensions;
 using Athena.Core.Extensions.DependencyInjection;
@@ -51,11 +50,11 @@ public class Handler
         return entryIndex;
     }
     
-    public async Task<int> RunEntry(IOpener opener, int entryId, string filePath)
+    public int RunEntry(IOpener opener, int entryId, string filePath)
     {
         var entry = _appEntryParser.GetAppEntry(opener, entryId);
         entry = _appEntryParser.ExpandAppEntry(entry, filePath, _config.StreamableProtocolPrefixes);
         
-        return await _runner.RunAsync(entry.Path, entry.Arguments);
+        return _runner.Run(entry.Path, entry.Arguments);
     }
 }

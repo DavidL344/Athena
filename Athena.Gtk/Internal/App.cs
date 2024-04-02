@@ -40,16 +40,18 @@ public class App
                 var appPicker = new MainWindow(opener.AppList);
                 _app.AddWindow(appPicker);
                 
-                // The method returns 0 when the user closes the window manually
-                entryId = appPicker.GetEntryId() - 1;
+                appPicker.Show();
                 Application.Run();
                 
-                var dialog = new MessageDialog(null, DialogFlags.Modal, MessageType.Error, ButtonsType.Ok, entryId.ToString());
-                dialog.Run();
-                dialog.Dispose();
+                entryId = appPicker.SelectedIndex;
+                appPicker.Close();
+                appPicker.Destroy();
+                
+                if (entryId == -1) Environment.Exit(130);
             }
-           
-            _ = handler.RunEntry(opener, entryId, args[0]);
+            
+            var exitCode = handler.RunEntry(opener, entryId, args[0]);
+            Environment.Exit(exitCode);
         }
         catch (ApplicationException e)
         {

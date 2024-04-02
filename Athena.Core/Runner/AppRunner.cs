@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Athena.Core.Internal.Helpers;
 using Athena.Core.Options;
 using CliWrap;
@@ -33,8 +34,39 @@ public class AppRunner
             .WithStandardErrorPipe(_options.StdErr)
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
-        
+
         var exitCode = result.ExitCode;
+        _logger.LogDebug("Process exited with exit code {ExitCode}", exitCode);
+        
+        return exitCode;
+    }
+
+    public int Run(string executablePath, string arguments)
+    {
+        if (!File.Exists(executablePath) && !File.Exists(SystemHelper.WhereIs(executablePath)))
+            throw new ApplicationException($"Command '{executablePath}' not found!");
+        
+        _logger.LogDebug(
+            "Opening {Path} with params {Arguments}...",
+            executablePath, arguments);
+        
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = executablePath,
+                Arguments = arguments,
+                UseShellExecute = true,
+                RedirectStandardOutput = false,
+                RedirectStandardError = false
+            }
+        };
+        
+        // Prevent deadlocks in GUI apps by synchronously waiting for the process to exit
+        process.Start();
+        process.WaitForExit();
+        
+        var exitCode = process.ExitCode;
         _logger.LogDebug("Process exited with exit code {ExitCode}", exitCode);
         
         return exitCode;
