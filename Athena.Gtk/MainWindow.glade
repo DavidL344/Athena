@@ -14,7 +14,7 @@
         
         <child>
           <object class="GtkLabel" id="_fileTypeLabel">
-            <property name="label" translatable="yes">Select an app to open the file with:</property>
+            <property name="label" translatable="yes">Select an app to open $FILE_TYPE with:</property>
           </object>
         </child>
         
@@ -35,7 +35,7 @@
         
         <child>
           <object class="GtkLabel" id="_filePathLabel">
-            <property name="label" translatable="no">/full/path/to/the/file</property>
+            <property name="label" translatable="no">$FILE_PATH</property>
           </object>
         </child>
         

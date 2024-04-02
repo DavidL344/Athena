@@ -20,18 +20,24 @@ internal class MainWindow : Window
         "Fourth Entry   |   /full/path/to/executable"
     ];
     
-    public MainWindow() : this(SampleEntries, new Builder("MainWindow.glade"))
+    public MainWindow() : this("the file", SampleEntries, "/full/path/to/the/file")
     {
     }
     
-    public MainWindow(IEnumerable<string> entries) : this(entries, new Builder("MainWindow.glade"))
+    public MainWindow(string openerName, IEnumerable<string> entries, string filePath)
+        : this(openerName, entries, filePath, new Builder("MainWindow.glade"))
     {
     }
     
-    private MainWindow(IEnumerable<string> entries, Builder builder) : base(builder.GetRawOwnedObject("MainWindow"))
+    private MainWindow(string openerName, IEnumerable<string> entries, string filePath, Builder builder)
+        : base(builder.GetRawOwnedObject("MainWindow"))
     {
         // Load the Glade file
         builder.Autoconnect(this);
+        
+        // Set the labels
+        _fileTypeLabel.Text = _fileTypeLabel.Text.Replace("$FILE_TYPE", openerName);
+        _filePathLabel.Text = _filePathLabel.Text.Replace("$FILE_PATH", filePath);
         
         // Add items to the list box
         foreach (var entry in entries)

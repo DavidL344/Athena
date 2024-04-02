@@ -37,7 +37,7 @@ public class App
            
             if (entryId == -1)
             {
-                var appPicker = new MainWindow(opener.AppList);
+                var appPicker = new MainWindow(opener.Name, opener.AppList, args[0]);
                 _app.AddWindow(appPicker);
                 
                 appPicker.Show();
