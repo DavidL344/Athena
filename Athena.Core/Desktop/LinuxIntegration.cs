@@ -61,7 +61,7 @@ public class LinuxIntegration : IDesktopIntegration
             Directory.CreateDirectory(_symlinkDir);
         
         // Add the symlink directory to $PATH
-        PathEntry.Add(_symlinkDir);
+        BashRcEntry.Add(_symlinkDir);
         
         // Create a symlink to the executable in ~/.local/bin
         SymlinkEntry.Create(_symlinkPath, _appPath);
@@ -70,24 +70,23 @@ public class LinuxIntegration : IDesktopIntegration
         DesktopEntry.Create(_desktopFilePath);
         
         // Update the shell
-        PathEntry.Source(_appRunner);
+        BashRcEntry.Source(_appRunner);
         DesktopEntry.Source(_desktopFileDir, _appRunner);
     }
     
     public void DeregisterEntry()
     {
+        BashRcEntry.Remove(_symlinkDir);
         SymlinkEntry.Delete(_symlinkPath);
         DesktopEntry.Delete(_desktopFilePath);
         
         // Update the shell
-        PathEntry.Source(_appRunner);
+        BashRcEntry.Source(_appRunner);
         DesktopEntry.Source(_desktopFileDir, _appRunner);
         
         // Only remove the symlink directory if it's empty
         if (!Directory.Exists(_symlinkDir)) return;
         if (Directory.GetFiles(_symlinkDir).Length != 0 || Directory.GetDirectories(_symlinkDir).Length != 0) return;
-        
-        PathEntry.Remove(_symlinkDir);
     }
     
     public void AssociateWithAllApps()
@@ -186,7 +185,7 @@ public class LinuxIntegration : IDesktopIntegration
         WriteMimeApps(mimeApps, Path.Combine(backupDir, $"mimeapps.list.{identifier}.bak"));
 
         var pathBackup = Path.Combine(backupDir, $"path.{identifier}.bak");
-        File.WriteAllText(pathBackup, PathEntry.Get());
+        File.WriteAllText(pathBackup, BashRcEntry.Get());
     }
     
     public void RestoreAllEntries(string backupDir, string identifier)

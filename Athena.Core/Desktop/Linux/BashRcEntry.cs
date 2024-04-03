@@ -3,7 +3,7 @@ using Athena.Resources;
 
 namespace Athena.Core.Desktop.Linux;
 
-internal static class PathEntry
+internal static class BashRcEntry
 {
     private static readonly string BashRcPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".bashrc");
@@ -52,7 +52,7 @@ internal static class PathEntry
 
     public static void Source(AppRunner appRunner)
     {
-        appRunner.RunAsync("bash", $"-c source {BashRcPath}").GetAwaiter().GetResult();
+        appRunner.RunAsync("bash", $"-c \"source {BashRcPath}\"").GetAwaiter().GetResult();
     }
     
     public static string Get()
