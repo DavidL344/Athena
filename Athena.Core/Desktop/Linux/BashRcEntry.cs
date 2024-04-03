@@ -1,4 +1,4 @@
-using Athena.Core.Runner;
+using System.Diagnostics;
 using Athena.Resources;
 
 namespace Athena.Core.Desktop.Linux;
@@ -13,8 +13,7 @@ internal static class BashRcEntry
         dirToAdd = dirToAdd.Replace(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "$HOME");
         
-        var bashrcPath = BashRcPath;
-        var bashrcData = File.ReadAllText(bashrcPath);
+        var bashrcData = File.ReadAllText(BashRcPath);
         
         var appendedLines = ResourceLoader.Load("Desktop/bashrc.sh")
             .Replace("$SYMLINK_DIR", $"\"{dirToAdd}\"")
@@ -25,7 +24,7 @@ internal static class BashRcEntry
         if (bashrcData.Contains(appendedLines))
             return;
         
-        File.AppendAllText(bashrcPath, appendedLines);
+        File.AppendAllText(BashRcPath, appendedLines);
     }
 
     public static void Remove(string dirToRemove)
@@ -33,8 +32,7 @@ internal static class BashRcEntry
         dirToRemove = dirToRemove.Replace(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "$HOME");
         
-        var bashrcPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".bashrc");
-        var bashrcData = File.ReadAllText(bashrcPath);
+        var bashrcData = File.ReadAllText(BashRcPath);
         
         var appendedLines = ResourceLoader.Load("Desktop/bashrc.sh")
             .Replace("$SYMLINK_DIR", $"\"{dirToRemove}\"")
@@ -47,12 +45,25 @@ internal static class BashRcEntry
             .Replace($"{Environment.NewLine}{appendedLines}", "")
             .Replace(appendedLines, "");
         
-        File.WriteAllText(bashrcPath, bashrcData);
+        File.WriteAllText(BashRcPath, bashrcData);
     }
 
-    public static void Source(AppRunner appRunner)
+    public static void Source()
     {
-        appRunner.RunAsync("bash", $"-c \"source {BashRcPath}\"").GetAwaiter().GetResult();
+        var command = $"bash --rcfile {BashRcPath} -i";
+
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "/bin/bash",
+                Arguments = $"-c \"{command}\"",
+                UseShellExecute = true
+            }
+        };
+        
+        process.Start();
+        process.WaitForExit();
     }
     
     public static string Get()

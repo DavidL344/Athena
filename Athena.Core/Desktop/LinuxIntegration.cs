@@ -70,7 +70,7 @@ public class LinuxIntegration : IDesktopIntegration
         DesktopEntry.Create(_desktopFilePath);
         
         // Update the shell
-        BashRcEntry.Source(_appRunner);
+        BashRcEntry.Source();
         DesktopEntry.Source(_desktopFileDir, _appRunner);
     }
     
@@ -81,7 +81,7 @@ public class LinuxIntegration : IDesktopIntegration
         DesktopEntry.Delete(_desktopFilePath);
         
         // Update the shell
-        BashRcEntry.Source(_appRunner);
+        BashRcEntry.Source();
         DesktopEntry.Source(_desktopFileDir, _appRunner);
         
         // Only remove the symlink directory if it's empty
