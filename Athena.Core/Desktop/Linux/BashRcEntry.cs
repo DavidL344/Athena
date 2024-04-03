@@ -47,24 +47,6 @@ internal static class BashRcEntry
         
         File.WriteAllText(BashRcPath, bashrcData);
     }
-
-    public static void Source()
-    {
-        var command = $"bash --rcfile {BashRcPath} -i";
-
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "/bin/bash",
-                Arguments = $"-c \"{command}\"",
-                UseShellExecute = true
-            }
-        };
-        
-        process.Start();
-        process.WaitForExit();
-    }
     
     public static string Get()
     {
