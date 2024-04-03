@@ -19,8 +19,9 @@ public class App
     {
         if (args.Length != 1)
         {
+            var processName = Process.GetCurrentProcess().ProcessName;
             _dialog = new MessageDialog(null, DialogFlags.Modal, MessageType.Info, ButtonsType.Ok,
-                "Usage: Athena.Gtk &lt;file to open&gt;");
+                $"Usage: {processName} &lt;file to open&gt;");
             
             _dialog.Run();
             _dialog.Dispose();

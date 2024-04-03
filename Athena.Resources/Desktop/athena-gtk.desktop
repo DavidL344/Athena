@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Athena (GTK)
+Exec=athena-gtk $PARAM_TYPE
+MimeType=application/octet-stream;
+Comment=A cross-platform file extension handler
+Categories=Utility;
+Terminal=false
+Type=Application

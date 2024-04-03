@@ -17,15 +17,15 @@ public class LinuxIntegration : IDesktopIntegration
     private readonly string _mimeAppsPath;
     private readonly FileIniDataParser _parser;
     
-    // athena.desktop
+    // athena.desktop, athena-gtk.desktop
     private readonly string _desktopFileName;
     private readonly string _desktopFileDir;
     private readonly string _desktopFilePath;
     
     // Athena.Cli <--> athena
-    private readonly string _appPath;
+    private readonly string[] _appPaths;
     private readonly string _symlinkDir;
-    private readonly string _symlinkPath;
+    private readonly string[] _symlinkPaths;
 
     public LinuxIntegration(string mimeAppsPath, ConfigPaths configPaths,
         FileIniDataParser parser, AppRunner appRunner)
@@ -40,12 +40,24 @@ public class LinuxIntegration : IDesktopIntegration
         
         // On Linux, the assembly's location points to its dll instead of the executable
         var assemblyLocation = Assembly.GetEntryAssembly()!.Location;
-        _appPath = Path.ChangeExtension(assemblyLocation, null);
+        _appPaths =
+        [
+            Path.ChangeExtension(assemblyLocation, null),
+            Path.ChangeExtension(assemblyLocation
+#if DEBUG
+                    .Replace("Athena.Cli", "Athena.Gtk")
+#endif
+                , ".Gtk")
+        ];
 
         _symlinkDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".local", "bin");
-        _symlinkPath = Path.Combine(_symlinkDir, "athena");
+        _symlinkPaths =
+        [
+            Path.Combine(_symlinkDir, "athena"),
+            Path.Combine(_symlinkDir, "athena-gtk")
+        ];
         
         _mimeAppsPath = mimeAppsPath;
         _parser = parser;
@@ -64,10 +76,14 @@ public class LinuxIntegration : IDesktopIntegration
         BashRcEntry.Add(_symlinkDir);
         
         // Create a symlink to the executable in ~/.local/bin
-        SymlinkEntry.Create(_symlinkPath, _appPath);
-        
+        for (var i = 0; i < _symlinkPaths.Length; i++)
+        {
+            var symlinkPath = _symlinkPaths[i];
+            SymlinkEntry.Create(symlinkPath, _appPaths[i]);
+        }
+
         // Add a .desktop file to ~/.local/share/applications
-        DesktopEntry.Create(_desktopFilePath);
+        DesktopEntry.Create(_desktopFileDir);
         
         // Update the shell
         DesktopEntry.Source(_desktopFileDir, _appRunner);
@@ -76,8 +92,9 @@ public class LinuxIntegration : IDesktopIntegration
     public void DeregisterEntry()
     {
         BashRcEntry.Remove(_symlinkDir);
-        SymlinkEntry.Delete(_symlinkPath);
-        DesktopEntry.Delete(_desktopFilePath);
+        foreach (var symlinkPath in _symlinkPaths)
+            SymlinkEntry.Delete(symlinkPath);
+        DesktopEntry.Delete(_desktopFileDir);
         
         // Update the shell
         DesktopEntry.Source(_desktopFileDir, _appRunner);
@@ -85,6 +102,7 @@ public class LinuxIntegration : IDesktopIntegration
         // Only remove the symlink directory if it's empty
         if (!Directory.Exists(_symlinkDir)) return;
         if (Directory.GetFiles(_symlinkDir).Length != 0 || Directory.GetDirectories(_symlinkDir).Length != 0) return;
+        Directory.Delete(_symlinkDir);
     }
     
     public void AssociateWithAllApps()
@@ -196,8 +214,8 @@ public class LinuxIntegration : IDesktopIntegration
     {
         var status = new LinuxStatus
         {
-            AppPath = _appPath,
-            SymlinkPath = _symlinkPath,
+            AppPath = _appPaths[0],
+            SymlinkPath = _symlinkPaths[0],
             DesktopFilePath = _desktopFilePath,
             ConfigDir = _configPaths.Root
         };

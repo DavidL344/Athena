@@ -5,21 +5,31 @@ namespace Athena.Core.Desktop.Linux;
 
 internal static class DesktopEntry
 {
-    public static void Create(string desktopFilePath)
+    private static readonly string[] DesktopFiles = ["Desktop/athena.desktop", "Desktop/athena-gtk.desktop"];
+    
+    public static void Create(string desktopFileDir)
     {
-        var desktopFile = ResourceLoader.Load("Desktop/athena.desktop")
-            .Replace("$PARAM_TYPE", "%u");
-        
-        File.WriteAllText(desktopFilePath, desktopFile);
+        foreach (var desktopFile in DesktopFiles)
+        {
+            var resourceData = ResourceLoader.Load(desktopFile)
+                .Replace("$PARAM_TYPE", "%u");
+
+            var desktopFilePath = Path.Combine(desktopFileDir, desktopFile.Split('/').Last());
+            File.WriteAllText(desktopFilePath, resourceData);
+        }
     }
     
-    public static void Delete(string desktopFilePath)
+    public static void Delete(string desktopFileDir)
     {
-        if (File.Exists(desktopFilePath)) File.Delete(desktopFilePath);
+        foreach (var desktopFile in DesktopFiles)
+        {
+            var desktopFilePath = Path.Combine(desktopFileDir, desktopFile.Split('/').Last());
+            if (File.Exists(desktopFilePath)) File.Delete(desktopFilePath);
+        }
     }
     
-    public static void Source(string directory, AppRunner appRunner)
+    public static void Source(string desktopFileDir, AppRunner appRunner)
     {
-        appRunner.RunAsync("update-desktop-database", directory).GetAwaiter().GetResult();
+        appRunner.RunAsync("update-desktop-database", desktopFileDir).GetAwaiter().GetResult();
     }
 }
