@@ -28,14 +28,17 @@ public class LinuxStatus
     public string ToSpectreConsole()
     {
         const string registrationCommand = "./Athena integration --add";
-        
-        if (!IsAtLeastPartiallyRegistered)
-            return $"[red]\u25cf Not registered (run `{registrationCommand}` to register)[/]";
-        
+
         var registrationStatus = "[$STATUS]\u25cf $REGISTERED[/]$AT";
-        var statusStyle = "darkorange";
+        var statusStyle = "";
         var statusText = "";
         var registeredAt = "";
+
+        if (!IsAtLeastPartiallyRegistered)
+        {
+            statusStyle = "red";
+            statusText = $"Not registered (run `{registrationCommand}` to register)";
+        }
         
         if (SymlinkExists)
         {
@@ -68,7 +71,7 @@ public class LinuxStatus
                 registrationStatus += $"\n\tXDG Desktop file: [blue][link=file://{desktopDir}]{DesktopFilePath}[/][/]";
         }
         
-        var statusResult = string.IsNullOrEmpty(statusStyle) ? "red" : statusStyle;
+        var statusResult = string.IsNullOrEmpty(statusStyle) ? "darkorange" : statusStyle;
         var registeredResult = string.IsNullOrEmpty(statusText) ? "Partially registered" : statusText;
         var registeredAtResult = string.IsNullOrEmpty(registeredAt) ? "" : registeredAt;
         
