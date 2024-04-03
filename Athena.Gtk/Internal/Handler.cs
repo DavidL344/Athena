@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Athena.Core.Configuration;
 using Athena.Core.Extensions;
 using Athena.Core.Extensions.DependencyInjection;
@@ -56,5 +57,10 @@ public class Handler
         entry = _appEntryParser.ExpandAppEntry(entry, filePath, _config.StreamableProtocolPrefixes);
         
         return _runner.Run(entry.Path, entry.Arguments);
+    }
+    
+    public IEnumerable<string> GetFriendlyNames(IOpener opener)
+    {
+        return _appEntryParser.GetFriendlyNames(opener);
     }
 }
