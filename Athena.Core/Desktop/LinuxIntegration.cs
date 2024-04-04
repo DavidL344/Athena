@@ -18,9 +18,9 @@ public class LinuxIntegration : IDesktopIntegration
     private readonly FileIniDataParser _parser;
     
     // athena.desktop, athena-gtk.desktop
-    private readonly string _desktopFileName;
+    private readonly string[] _desktopFileNames;
     private readonly string _desktopFileDir;
-    private readonly string _desktopFilePath;
+    private readonly string[] _desktopFilePaths;
     
     // Athena.Cli <--> athena
     private readonly string[] _appPaths;
@@ -33,10 +33,15 @@ public class LinuxIntegration : IDesktopIntegration
         _appRunner = appRunner;
         _configPaths = configPaths;
         
-        _desktopFileName = "athena.desktop";
+        _desktopFileNames = ["athena.desktop", "athena-gtk.desktop"];
         _desktopFileDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".local", "share", "applications");
-        _desktopFilePath = Path.Combine(_desktopFileDir, _desktopFileName);
+        _desktopFilePaths = new string[_desktopFileNames.Length];
+        
+        for (var i = 0; i < _desktopFileNames.Length; i++)
+        {
+            _desktopFilePaths[i] = Path.Combine(_desktopFileDir, _desktopFileNames[i]);
+        }
         
         // On Linux, the assembly's location points to its dll instead of the executable
         var assemblyLocation = Assembly.GetEntryAssembly()!.Location;
@@ -110,7 +115,7 @@ public class LinuxIntegration : IDesktopIntegration
         var mimeApps = ReadMimeApps();
         
         var modifiedMimeApps = MimeAppsList.AssociateWithAllApps(
-            mimeApps, _desktopFileName);
+            mimeApps, _desktopFileNames[1]);
         
         WriteMimeApps(modifiedMimeApps);
     }
@@ -120,7 +125,7 @@ public class LinuxIntegration : IDesktopIntegration
         var mimeApps = ReadMimeApps();
         
         var modifiedMimeApps = MimeAppsList.AssociateWithSampleApps(
-            mimeApps, _desktopFileName);
+            mimeApps, _desktopFileNames[1]);
         
         WriteMimeApps(modifiedMimeApps);
     }
@@ -130,7 +135,7 @@ public class LinuxIntegration : IDesktopIntegration
         var mimeApps = ReadMimeApps();
         
         var modifiedMimeApps = MimeAppsList.AssociateWithApp(
-            mimeApps, mimeType, _desktopFileName);
+            mimeApps, mimeType, _desktopFileNames[1]);
         
         WriteMimeApps(modifiedMimeApps);
     }
@@ -140,7 +145,7 @@ public class LinuxIntegration : IDesktopIntegration
         var mimeApps = ReadMimeApps();
         
         var modifiedMimeApps = MimeAppsList.DissociateFromAllApps(
-            mimeApps, _desktopFileName);
+            mimeApps, _desktopFileNames[1]);
         
         WriteMimeApps(modifiedMimeApps);
     }
@@ -150,7 +155,7 @@ public class LinuxIntegration : IDesktopIntegration
         var mimeApps = ReadMimeApps();
         
         var modifiedMimeApps = MimeAppsList.DissociateFromApp(
-            mimeApps, fileExtensionOrMimeType, _desktopFileName);
+            mimeApps, fileExtensionOrMimeType, _desktopFileNames[1]);
         
         WriteMimeApps(modifiedMimeApps);
     }
@@ -160,7 +165,7 @@ public class LinuxIntegration : IDesktopIntegration
         var mimeApps = ReadMimeApps();
         
         var modifiedMimeApps = MimeAppsList.SetAsDefaultForAllMimeTypes(
-            mimeApps, _desktopFileName);
+            mimeApps, _desktopFileNames[1]);
         
         WriteMimeApps(modifiedMimeApps);
     }
@@ -170,7 +175,7 @@ public class LinuxIntegration : IDesktopIntegration
         var mimeApps = ReadMimeApps();
         
         var modifiedMimeApps = MimeAppsList.SetAsDefaultForMimeType(
-            mimeApps, fileExtensionOrMimeType, _desktopFileName);
+            mimeApps, fileExtensionOrMimeType, _desktopFileNames[1]);
         
         WriteMimeApps(modifiedMimeApps);
     }
@@ -180,7 +185,7 @@ public class LinuxIntegration : IDesktopIntegration
         var mimeApps = ReadMimeApps();
         
         var modifiedMimeApps = MimeAppsList.UnsetDefault(
-            mimeApps, _desktopFileName);
+            mimeApps, _desktopFileNames[1]);
         
         WriteMimeApps(modifiedMimeApps);
     }
@@ -190,7 +195,7 @@ public class LinuxIntegration : IDesktopIntegration
         var mimeApps = ReadMimeApps();
         
         var modifiedMimeApps = MimeAppsList.UnsetDefaultFrom(
-            mimeApps, fileExtensionOrMimeType, _desktopFileName);
+            mimeApps, fileExtensionOrMimeType, _desktopFileNames[1]);
         
         WriteMimeApps(modifiedMimeApps);
     }
@@ -216,7 +221,7 @@ public class LinuxIntegration : IDesktopIntegration
         {
             AppPath = _appPaths[0],
             SymlinkPath = _symlinkPaths[0],
-            DesktopFilePath = _desktopFilePath,
+            DesktopFilePath = _desktopFilePaths[0],
             ConfigDir = _configPaths.Root
         };
         
