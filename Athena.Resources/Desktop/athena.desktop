@@ -5,4 +5,5 @@ MimeType=application/octet-stream;
 Comment=A cross-platform file extension handler
 Categories=Utility;
 Terminal=true
+NoDisplay=true
 Type=Application
