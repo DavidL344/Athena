@@ -56,7 +56,8 @@ public class Handler
         var entry = _appEntryParser.GetAppEntry(opener, entryId);
         entry = _appEntryParser.ExpandAppEntry(entry, filePath, _config.StreamableProtocolPrefixes);
         
-        return _runner.Run(entry.Path, entry.Arguments);
+        // In detached mode, the app picker will run the app and exit
+        return _runner.Run(entry.Path, entry.Arguments, false);
     }
     
     public IEnumerable<string> GetFriendlyNames(IOpener opener)

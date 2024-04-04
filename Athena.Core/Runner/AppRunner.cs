@@ -20,12 +20,7 @@ public class AppRunner
     
     public async Task<int> RunAsync(string executablePath, string arguments)
     {
-        if (!File.Exists(executablePath) && !File.Exists(SystemHelper.WhereIs(executablePath)))
-            throw new ApplicationException($"Command '{executablePath}' not found!");
-        
-        _logger.LogDebug(
-            "Opening {Path} with params {Arguments}...",
-            executablePath, arguments);
+        CheckForErrors(executablePath, arguments);
         
         var result = await Cli.Wrap(executablePath)
             .WithArguments(arguments)
@@ -41,14 +36,9 @@ public class AppRunner
         return exitCode;
     }
 
-    public int Run(string executablePath, string arguments)
+    public int Run(string executablePath, string arguments, bool detached)
     {
-        if (!File.Exists(executablePath) && !File.Exists(SystemHelper.WhereIs(executablePath)))
-            throw new ApplicationException($"Command '{executablePath}' not found!");
-        
-        _logger.LogDebug(
-            "Opening {Path} with params {Arguments}...",
-            executablePath, arguments);
+        CheckForErrors(executablePath, arguments);
         
         var process = new Process
         {
@@ -56,19 +46,33 @@ public class AppRunner
             {
                 FileName = executablePath,
                 Arguments = arguments,
-                UseShellExecute = true,
-                RedirectStandardOutput = false,
-                RedirectStandardError = false
+                UseShellExecute = true
             }
         };
         
-        // Prevent deadlocks in GUI apps by synchronously waiting for the process to exit
         process.Start();
-        process.WaitForExit();
+        if (!detached)
+        {
+            // Prevent deadlocks in GUI apps by synchronously waiting for the process to exit
+            process.WaitForExit();
+            
+            var exitCode = process.ExitCode;
+            _logger.LogDebug("Process exited with exit code {ExitCode}", exitCode);
         
-        var exitCode = process.ExitCode;
-        _logger.LogDebug("Process exited with exit code {ExitCode}", exitCode);
+            return exitCode;
+        }
         
-        return exitCode;
+        _logger.LogInformation("Process executed, detaching...");
+        return 0;
+    }
+    
+    private void CheckForErrors(string executablePath, string arguments)
+    {
+        if (!File.Exists(executablePath) && !File.Exists(SystemHelper.WhereIs(executablePath)))
+            throw new ApplicationException($"Command '{executablePath}' not found!");
+        
+        _logger.LogDebug(
+            "Opening {Path} with params {Arguments}...",
+            executablePath, arguments);
     }
 }
