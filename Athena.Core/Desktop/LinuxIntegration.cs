@@ -1,10 +1,8 @@
 using System.Reflection;
-using System.Text;
 using Athena.Core.Configuration;
 using Athena.Core.Desktop.Linux;
 using Athena.Core.Runner;
 using IniParser;
-using IniParser.Model;
 
 namespace Athena.Core.Desktop;
 
@@ -13,63 +11,64 @@ public class LinuxIntegration : IDesktopIntegration
     private readonly AppRunner _appRunner;
     private readonly ConfigPaths _configPaths;
     
-    // mimeapps.list
-    private readonly string _mimeAppsPath;
+    // XDG Desktop
+    private readonly string _desktopFileDir;
     private readonly FileIniDataParser _parser;
     
-    // athena.desktop, athena-gtk.desktop
-    private readonly string[] _desktopFileNames;
-    private readonly string _desktopFileDir;
-    private readonly string[] _desktopFilePaths;
+    // Athena.Cli
+    private readonly IntegrationPaths _athenaCli;
     
-    // Athena.Cli <--> athena
-    private readonly string[] _appPaths;
+    // Athena.Gtk
+    private readonly IntegrationPaths _athenaGtk;
+    
+    // Symlink directory in $PATH
     private readonly string _symlinkDir;
-    private readonly string[] _symlinkPaths;
 
-    public LinuxIntegration(string mimeAppsPath, ConfigPaths configPaths,
+    public LinuxIntegration(ConfigPaths configPaths,
         FileIniDataParser parser, AppRunner appRunner)
     {
         _appRunner = appRunner;
         _configPaths = configPaths;
+        _parser = parser;
         
-        _desktopFileNames = ["athena.desktop", "athena-gtk.desktop"];
         _desktopFileDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".local", "share", "applications");
-        _desktopFilePaths = new string[_desktopFileNames.Length];
         
-        for (var i = 0; i < _desktopFileNames.Length; i++)
-        {
-            _desktopFilePaths[i] = Path.Combine(_desktopFileDir, _desktopFileNames[i]);
-        }
-        
-        // On Linux, the assembly's location points to its dll instead of the executable
-        var assemblyLocation = Assembly.GetEntryAssembly()!.Location;
-        _appPaths =
-        [
-            Path.ChangeExtension(assemblyLocation, null),
-            Path.ChangeExtension(assemblyLocation
-#if DEBUG
-                    .Replace("Athena.Cli", "Athena.Gtk")
-#endif
-                , ".Gtk")
-        ];
-
         _symlinkDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".local", "bin");
-        _symlinkPaths =
-        [
-            Path.Combine(_symlinkDir, "athena"),
-            Path.Combine(_symlinkDir, "athena-gtk")
-        ];
         
-        _mimeAppsPath = mimeAppsPath;
-        _parser = parser;
+        // On Linux, the assembly's location points to its dll instead of the executable
+        var assemblyLocation = Assembly.GetEntryAssembly()!.Location;
+        var appDir = Path.GetDirectoryName(assemblyLocation)!;
+
+        _athenaCli = new IntegrationPaths
+        {
+            DesktopFileDir = _desktopFileDir,
+            SymlinkDir = _symlinkDir,
+            AppDir = appDir,
+            DesktopFileName = "athena.desktop",
+            SymlinkFileName = "athena",
+            AppName = "Athena"
+        };
+        
+        _athenaGtk = new IntegrationPaths
+        {
+            DesktopFileDir = _desktopFileDir,
+            SymlinkDir = _symlinkDir,
+            AppDir = appDir
+#if DEBUG
+                .Replace("Athena.Cli", "Athena.Gtk")
+#endif
+            ,
+            DesktopFileName = "athena-gtk.desktop",
+            SymlinkFileName = "athena-gtk",
+            AppName = "Athena.Gtk"
+        };
     }
     
     public LinuxIntegration(ConfigPaths configPaths, AppRunner appRunner) :
-        this(GetMimeAppsPath(), configPaths, GetParserSettings(), appRunner) { }
+        this(configPaths, GetParserSettings(), appRunner) { }
     
     public void RegisterEntry()
     {
@@ -77,18 +76,16 @@ public class LinuxIntegration : IDesktopIntegration
         if (!Directory.Exists(_symlinkDir))
             Directory.CreateDirectory(_symlinkDir);
         
-        // Add the symlink directory to $PATH
+        // Enable shell completion support
         BashRcEntry.Add(_symlinkDir);
         
-        // Create a symlink to the executable in ~/.local/bin
-        for (var i = 0; i < _symlinkPaths.Length; i++)
-        {
-            var symlinkPath = _symlinkPaths[i];
-            SymlinkEntry.Create(symlinkPath, _appPaths[i]);
-        }
+        // Create symlinks to the executables in ~/.local/bin
+        SymlinkEntry.Create(_athenaCli.SymlinkFilePath, _athenaCli.AppPath);
+        SymlinkEntry.Create(_athenaGtk.SymlinkFilePath, _athenaGtk.AppPath);
 
-        // Add a .desktop file to ~/.local/share/applications
-        DesktopEntry.Create(_desktopFileDir);
+        // Add XDG Desktop files to ~/.local/share/applications
+        DesktopEntry.Add(_athenaCli.DesktopFilePath);
+        DesktopEntry.Add(_athenaGtk.DesktopFilePath);
         
         // Update the shell
         DesktopEntry.Source(_desktopFileDir, _appRunner);
@@ -96,163 +93,67 @@ public class LinuxIntegration : IDesktopIntegration
     
     public void DeregisterEntry()
     {
+        // Disable shell completion support
         BashRcEntry.Remove(_symlinkDir);
-        foreach (var symlinkPath in _symlinkPaths)
-            SymlinkEntry.Delete(symlinkPath);
-        DesktopEntry.Delete(_desktopFileDir);
+        
+        // Remove symlinks
+        SymlinkEntry.Delete(_athenaCli.SymlinkFilePath);
+        SymlinkEntry.Delete(_athenaGtk.SymlinkFilePath);
+        
+        // Remove XDG Desktop files
+        DesktopEntry.Remove(_athenaCli.DesktopFilePath);
+        DesktopEntry.Remove(_athenaGtk.DesktopFilePath);
         
         // Update the shell
         DesktopEntry.Source(_desktopFileDir, _appRunner);
         
-        // Only remove the symlink directory if it's empty
+        // Remove the directory for symlinks if it's empty
         if (!Directory.Exists(_symlinkDir)) return;
         if (Directory.GetFiles(_symlinkDir).Length != 0 || Directory.GetDirectories(_symlinkDir).Length != 0) return;
         Directory.Delete(_symlinkDir);
     }
-    
-    public void AssociateWithAllApps()
-    {
-        var mimeApps = ReadMimeApps();
-        
-        var modifiedMimeApps = MimeAppsList.AssociateWithAllApps(
-            mimeApps, _desktopFileNames[1]);
-        
-        WriteMimeApps(modifiedMimeApps);
-    }
-    
-    public void AssociateWithSampleApps()
-    {
-        var mimeApps = ReadMimeApps();
-        
-        var modifiedMimeApps = MimeAppsList.AssociateWithSampleApps(
-            mimeApps, _desktopFileNames[1]);
-        
-        WriteMimeApps(modifiedMimeApps);
-    }
-    
-    public void AssociateWithApp(string mimeType)
-    {
-        var mimeApps = ReadMimeApps();
-        
-        var modifiedMimeApps = MimeAppsList.AssociateWithApp(
-            mimeApps, mimeType, _desktopFileNames[1]);
-        
-        WriteMimeApps(modifiedMimeApps);
-    }
-    
-    public void DissociateFromApps()
-    {
-        var mimeApps = ReadMimeApps();
-        
-        var modifiedMimeApps = MimeAppsList.DissociateFromAllApps(
-            mimeApps, _desktopFileNames[1]);
-        
-        WriteMimeApps(modifiedMimeApps);
-    }
-    
-    public void DissociateFromApp(string fileExtensionOrMimeType)
-    {
-        var mimeApps = ReadMimeApps();
-        
-        var modifiedMimeApps = MimeAppsList.DissociateFromApp(
-            mimeApps, fileExtensionOrMimeType, _desktopFileNames[1]);
-        
-        WriteMimeApps(modifiedMimeApps);
-    }
-    
-    public void SetAsDefault()
-    {
-        var mimeApps = ReadMimeApps();
-        
-        var modifiedMimeApps = MimeAppsList.SetAsDefaultForAllMimeTypes(
-            mimeApps, _desktopFileNames[1]);
-        
-        WriteMimeApps(modifiedMimeApps);
-    }
-    
-    public void SetAsDefaultFor(string fileExtensionOrMimeType)
-    {
-        var mimeApps = ReadMimeApps();
-        
-        var modifiedMimeApps = MimeAppsList.SetAsDefaultForMimeType(
-            mimeApps, fileExtensionOrMimeType, _desktopFileNames[1]);
-        
-        WriteMimeApps(modifiedMimeApps);
-    }
-    
-    public void UnsetDefault()
-    {
-        var mimeApps = ReadMimeApps();
-        
-        var modifiedMimeApps = MimeAppsList.UnsetDefault(
-            mimeApps, _desktopFileNames[1]);
-        
-        WriteMimeApps(modifiedMimeApps);
-    }
-    
-    public void UnsetDefaultFrom(string fileExtensionOrMimeType)
-    {
-        var mimeApps = ReadMimeApps();
-        
-        var modifiedMimeApps = MimeAppsList.UnsetDefaultFrom(
-            mimeApps, fileExtensionOrMimeType, _desktopFileNames[1]);
-        
-        WriteMimeApps(modifiedMimeApps);
-    }
 
-    public void BackupAllEntries(string backupDir, string identifier)
+    public void AssociateWithApps(IEnumerable<string> mimeTypes)
     {
-        var mimeApps = ReadMimeApps();
-        WriteMimeApps(mimeApps, Path.Combine(backupDir, $"mimeapps.list.{identifier}.bak"));
-
-        var pathBackup = Path.Combine(backupDir, $"path.{identifier}.bak");
-        File.WriteAllText(pathBackup, BashRcEntry.Get());
+        foreach (var mimeType in mimeTypes)
+        {
+            AssociateWithApp(mimeType, false);
+        }
+        DesktopEntry.Source(_desktopFileDir, _appRunner);
     }
     
-    public void RestoreAllEntries(string backupDir, string identifier)
+    public void AssociateWithApp(string mimeType, bool source = true)
     {
-        var mimeApps = _parser.ReadFile(Path.Combine(backupDir, $"mimeapps.list.{identifier}.bak"));
-        WriteMimeApps(mimeApps);
+        DesktopEntry.AddMimeType(_athenaGtk.DesktopFilePath, mimeType, _parser);
+        if (source) DesktopEntry.Source(_desktopFileDir, _appRunner);
     }
-
+    
+    public void DissociateFromApps(IEnumerable<string> mimeTypes)
+    {
+        foreach (var mimeType in mimeTypes)
+        {
+            DissociateFromApp(mimeType, false);
+        }
+        DesktopEntry.Source(_desktopFileDir, _appRunner);
+    }
+    
+    public void DissociateFromApp(string fileExtensionOrMimeType, bool source = true)
+    {
+        DesktopEntry.RemoveMimeType(_athenaGtk.DesktopFilePath, fileExtensionOrMimeType, _parser);
+        DesktopEntry.Source(_desktopFileDir, _appRunner);
+    }
+    
     public string ConsoleStatus()
     {
         var status = new LinuxStatus
         {
-            AppPath = _appPaths[0],
-            SymlinkPath = _symlinkPaths[0],
-            DesktopFilePath = _desktopFilePaths[0],
+            AppPath = _athenaCli.AppPath,
+            SymlinkPath = _athenaCli.SymlinkFilePath,
+            DesktopFilePath = _athenaCli.DesktopFilePath,
             ConfigDir = _configPaths.Root
         };
         
         return status.ToSpectreConsole();
-    }
-    
-    private IniData ReadMimeApps()
-    {
-        if (File.Exists(_mimeAppsPath)) return _parser.ReadFile(_mimeAppsPath);
-            
-        WriteMimeApps(MimeAppsList.Create());
-
-        return _parser.ReadFile(_mimeAppsPath);
-    }
-    
-    private void WriteMimeApps(IniData mimeApps)
-    {
-        WriteMimeApps(mimeApps, _mimeAppsPath);
-    }
-    
-    private void WriteMimeApps(IniData mimeApps, string filePath)
-    {
-        if (!Directory.Exists(Path.GetDirectoryName(filePath)))
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-        
-        _parser.WriteFile(filePath, mimeApps, Encoding.ASCII);
-    }
-
-    private static string GetMimeAppsPath()
-    {
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "mimeapps.list");
     }
     
     private static FileIniDataParser GetParserSettings()

@@ -12,16 +12,12 @@ public class IntegrationCommands : ICommands
     private readonly ConfigPaths _configPaths;
     private readonly string _appPath;
     private readonly string _appPathDir;
-    private readonly string _backupDir;
     private readonly IDesktopIntegration _desktopIntegration;
-    private readonly string _currentDate;
 
     public IntegrationCommands(ConfigPaths configPaths, IDesktopIntegration desktopIntegration)
     {
-        _backupDir = Path.Combine(configPaths.Root, "backup");
         _configPaths = configPaths;
         _desktopIntegration = desktopIntegration;
-        _currentDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
         
         // On Linux, the assembly's location points to its dll instead of the executable
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
@@ -60,11 +56,10 @@ public class IntegrationCommands : ICommands
     [Command("integration", Description = "Integrate Athena into your system")]
     public int Integration(
         [Option('a', Description = "Add the integration")] bool add,
-        [Option('A', Description = "Add the integration to all apps")] bool addAll,
         [Option('r', Description = "Remove the integration")] bool remove,
         [Option('s', Description = "Display the integration status")] bool status)
     {
-        if (add || addAll)
+        if (add)
         {
             if (OperatingSystem.IsWindows())
             {
@@ -75,16 +70,14 @@ public class IntegrationCommands : ICommands
                 Environment.SetEnvironmentVariable("PATH", pathAfter, EnvironmentVariableTarget.User);
                 return 0;
             }
-            
-            if (!Directory.Exists(_backupDir))
-                Directory.CreateDirectory(_backupDir);
 
             _desktopIntegration.RegisterEntry();
-            _desktopIntegration.BackupAllEntries(_backupDir, _currentDate);
-            _desktopIntegration.AssociateWithSampleApps();
+            
+            string[] fileExtensionsOrMimeTypes = OperatingSystem.IsWindows()
+                ? [".txt", ".mp3", ".mp4", "http", "https"]
+                : ["text/plain", "audio/mp3", "video/mp4", "x-scheme-handler/http", "x-scheme-handler/https"];
 
-            if (addAll)
-                _desktopIntegration.AssociateWithAllApps();
+            _desktopIntegration.AssociateWithApps(fileExtensionsOrMimeTypes);
             
             return 0;
         }
@@ -102,8 +95,6 @@ public class IntegrationCommands : ICommands
             }
             
             _desktopIntegration.DeregisterEntry();
-            _desktopIntegration.BackupAllEntries(_backupDir, _currentDate);
-            _desktopIntegration.DissociateFromApps();
             return 0;
         }
 

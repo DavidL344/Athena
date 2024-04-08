@@ -24,78 +24,43 @@ public interface IDesktopIntegration
     /// Add Athena to the list of apps that can open files.
     /// </summary>
     /// <remarks>
-    /// <b>Windows</b>: associates the Athena entry to be openable with the file extension(s) in the Windows Registry<br />
-    /// <b>Linux</b>: adds the Athena entry to the MIME type(s) in the ~/.local/share/applications/mimeapps.list file under [Added Associations]
+    /// <b>Windows</b>: associates the Athena entry to be openable with the file extensions in the Windows Registry<br />
+    /// <b>Linux</b>: adds the MIME types to the Athena XDG Desktop file
     /// </remarks>
-    void AssociateWithAllApps();
+    /// <param name="fileExtensionsOrMimeTypes">The file extensions (Windows) or a MIME types (Linux) to associate</param>
+    void AssociateWithApps(IEnumerable<string> fileExtensionsOrMimeTypes);
     
-    /// <inheritdoc cref="AssociateWithAllApps"/>
-    void AssociateWithSampleApps();
-    
-    /// <inheritdoc cref="AssociateWithAllApps"/>
+    /// <summary>
+    /// Add Athena to the list of apps that can open files.
+    /// </summary>
+    /// <remarks>
+    /// <b>Windows</b>: associates the Athena entry to be openable with the file extension in the Windows Registry<br />
+    /// <b>Linux</b>: adds the MIME type to the Athena XDG Desktop file
+    /// </remarks>
     /// <param name="fileExtensionOrMimeType">The file extension (Windows) or a MIME type (Linux) to associate</param>
-    void AssociateWithApp(string fileExtensionOrMimeType);
+    /// <param name="source">Whether the shell should be updated immediately after adding the association</param>
+    void AssociateWithApp(string fileExtensionOrMimeType, bool source = true);
     
     /// <summary>
     /// Remove Athena from the list of apps that can open files.
     /// </summary>
     /// <remarks>
-    /// <b>Windows</b>: removes the Athena entry from being openable with the file extension(s) in the Windows Registry<br />
-    /// <b>Linux</b>: removes the Athena entry from the MIME type(s) in the ~/.local/share/applications/mimeapps.list file under [Added Associations]
+    /// <b>Windows</b>: removes the Athena entry from being openable with the file extensions in the Windows Registry<br />
+    /// <b>Linux</b>: removes the MIME types from the Athena XDG Desktop file
     /// </remarks>
-    void DissociateFromApps();
+    /// <param name="fileExtensionsOrMimeTypes">The file extension (Windows) or a MIME type (Linux) to remove the association from</param>
+    void DissociateFromApps(IEnumerable<string> fileExtensionsOrMimeTypes);
     
-    /// <inheritdoc cref="DissociateFromApps"/>
+    /// <summary>
+    /// Remove Athena from the list of apps that can open files.
+    /// </summary>
+    /// <remarks>
+    /// <b>Windows</b>: removes the Athena entry from being openable with the file extension in the Windows Registry<br />
+    /// <b>Linux</b>: removes the MIME type from the Athena XDG Desktop file
+    /// </remarks>
     /// <param name="fileExtensionOrMimeType">The file extension (Windows) or a MIME type (Linux) to remove the association from</param>
-    void DissociateFromApp(string fileExtensionOrMimeType);
-    
-    /// <summary>
-    /// Set Athena as the default app for opening files.
-    /// </summary>
-    /// <remarks>
-    /// <b>Windows</b>: sets the Athena entry as the default app for the file extension(s) in the Windows Registry<br />
-    /// <b>Linux</b>: sets the Athena entry as the default app for the MIME type(s) in the ~/.local/share/applications/mimeapps.list file under [Default Applications]
-    /// </remarks>
-    void SetAsDefault();
-    
-    /// <inheritdoc cref="SetAsDefault"/>
-    /// <param name="fileExtensionOrMimeType">The file extension (Windows) or a MIME type (Linux) to set Athena as the default app for</param>
-    void SetAsDefaultFor(string fileExtensionOrMimeType);
-    
-    /// <summary>
-    /// Remove Athena from being the default app for opening files.
-    /// </summary>
-    /// <remarks>
-    /// <b>Windows</b>: removes the Athena entry from being the default app for the file extension(s) in the Windows Registry<br />
-    /// <b>Linux</b>: removes the Athena entry from being the default app for the MIME type(s) in the ~/.local/share/applications/mimeapps.list file under [Default Applications]
-    /// </remarks>
-    void UnsetDefault();
-    
-    /// <inheritdoc cref="UnsetDefault"/>
-    /// <param name="fileExtensionOrMimeType">The file extension (Windows) or a MIME type (Linux) to remove Athena as the default app for</param>
-    void UnsetDefaultFrom(string fileExtensionOrMimeType);
-    
-    /// <summary>
-    /// Backup all entries before making any changes to the system.
-    /// </summary>
-    /// <remarks>
-    /// <b>Windows</b>: saves the entries to a *.reg file<br />
-    /// <b>Linux</b>: copies the entries to a *.list.bak file
-    /// </remarks>
-    /// <param name="backupDir">The directory to save the backup to</param>
-    /// <param name="identifier">The identifier to use for the backup file</param>
-    void BackupAllEntries(string backupDir, string identifier);
-    
-    /// <summary>
-    /// Restore all entries from a backup.
-    /// </summary>
-    /// <remarks>
-    /// <b>Windows</b>: restores the entries from a *.reg file<br />
-    /// <b>Linux</b>: copies the entries from a *.list.bak file<br /><br />
-    /// </remarks>
-    /// <param name="backupDir">The directory to the backup file</param>
-    /// <param name="identifier">The identifier of the backup file</param>
-    void RestoreAllEntries(string backupDir, string identifier);
+    /// <param name="source">Whether the shell should be updated immediately after removing the association</param>
+    void DissociateFromApp(string fileExtensionOrMimeType, bool source = true);
     
     /// <summary>
     /// Output the current status of Athena's integration with the system to the console.

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Athena.Resources;
 
 namespace Athena.Core.Desktop.Linux;
@@ -46,15 +45,5 @@ internal static class BashRcEntry
             .Replace(appendedLines, "");
         
         File.WriteAllText(BashRcPath, bashrcData);
-    }
-    
-    public static string Get()
-    {
-        var path = Environment.GetEnvironmentVariable("PATH");
-        
-        if (path is null)
-            throw new ArgumentNullException(nameof(path), "The PATH environment variable is not set!");
-        
-        return path;
     }
 }
