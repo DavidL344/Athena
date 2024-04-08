@@ -7,6 +7,7 @@ using Athena.Core.Internal.Helpers;
 
 namespace Athena.Core.Tests.Internal.Helpers;
 
+[Collection("Sequential")]
 public class ConfigHelperTests : IDisposable
 {
     private readonly string _localConfigDir;
