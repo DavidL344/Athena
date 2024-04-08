@@ -107,4 +107,27 @@ public class IntegrationCommands : ICommands
         AnsiConsole.WriteLine("Error: Option 'action' is required. See '--help' for usage.");
         return 1;
     }
+    
+    [Command("register", Description = "Register files or URLs with the shell")]
+    public void Register(
+        [Argument(Name = "File/URL type",
+            Description = "The file extension (Windows) / MIME type (Linux) or URL to register")]
+        IEnumerable<string> fileExtMimeUrls,
+        [Option('r', Description = "Deregister the specified arguments instead")]
+        bool remove)
+    {
+        if (OperatingSystem.IsWindows())
+            throw new ApplicationException("This feature is not available on Windows!");
+        
+        if (!_desktopIntegration.IsRegistered)
+            throw new ApplicationException("Athena is not registered with the system!");
+        
+        if (remove)
+        {
+            _desktopIntegration.DissociateFromApps(fileExtMimeUrls);
+            return;
+        }
+        
+        _desktopIntegration.AssociateWithApps(fileExtMimeUrls);
+    }
 }

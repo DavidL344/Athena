@@ -63,6 +63,15 @@ public interface IDesktopIntegration
     void DissociateFromApp(string fileExtensionOrMimeType, bool source = true);
     
     /// <summary>
+    /// Check if Athena is registered with the system.
+    /// </summary>
+    /// <remarks>
+    /// <b>Windows</b>: returns true when the Athena entry is in the Windows Registry<br />
+    /// <b>Linux</b>: returns true when the Athena symlink and XDG Desktop file are present
+    /// </remarks>
+    bool IsRegistered { get; }
+    
+    /// <summary>
     /// Output the current status of Athena's integration with the system to the console.
     /// </summary>
     /// <remarks>

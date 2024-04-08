@@ -54,7 +54,10 @@ internal static class DesktopEntry
         
         if (!data.Sections[DesktopEntrySection].ContainsKey(MimeTypeKey)) return;
         
-        var mimeTypes = data.Sections[DesktopEntrySection][MimeTypeKey].Split(Separator).ToList();
+        var mimeTypes = data.Sections[DesktopEntrySection][MimeTypeKey]
+            .Trim()
+            .Split(Separator, StringSplitOptions.RemoveEmptyEntries)
+            .ToList();
         if (!mimeTypes.Contains(mimeType)) return;
         
         // If the MIME type that is being removed is the only one in the list, remove the key

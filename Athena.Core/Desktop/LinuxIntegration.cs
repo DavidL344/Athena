@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Athena.Core.Configuration;
 using Athena.Core.Desktop.Linux;
 using Athena.Core.Runner;
@@ -6,12 +7,10 @@ using IniParser;
 
 namespace Athena.Core.Desktop;
 
-public class LinuxIntegration : IDesktopIntegration
+public partial class LinuxIntegration : IDesktopIntegration
 {
-    private readonly AppRunner _appRunner;
-    private readonly ConfigPaths _configPaths;
-    
     // XDG Desktop
+    private readonly AppRunner _appRunner;
     private readonly string _desktopFileDir;
     private readonly FileIniDataParser _parser;
     
@@ -23,12 +22,15 @@ public class LinuxIntegration : IDesktopIntegration
     
     // Symlink directory in $PATH
     private readonly string _symlinkDir;
+    
+    // Integration status
+    public bool IsRegistered { get; }
+    private readonly LinuxStatus _status;
 
     public LinuxIntegration(ConfigPaths configPaths,
         FileIniDataParser parser, AppRunner appRunner)
     {
         _appRunner = appRunner;
-        _configPaths = configPaths;
         _parser = parser;
         
         _desktopFileDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
@@ -65,6 +67,16 @@ public class LinuxIntegration : IDesktopIntegration
             SymlinkFileName = "athena-gtk",
             AppName = "Athena.Gtk"
         };
+        
+        _status = new LinuxStatus
+        {
+            AppPath = _athenaCli.AppPath,
+            SymlinkPath = _athenaCli.SymlinkFilePath,
+            DesktopFilePath = _athenaCli.DesktopFilePath,
+            ConfigDir = configPaths.Root
+        };
+        
+        IsRegistered = _status.IsRegistered;
     }
     
     public LinuxIntegration(ConfigPaths configPaths, AppRunner appRunner) :
@@ -124,6 +136,10 @@ public class LinuxIntegration : IDesktopIntegration
     
     public void AssociateWithApp(string mimeType, bool source = true)
     {
+        var pattern = MimeTypeRegex();
+        if (!pattern.IsMatch(mimeType))
+            throw new ArgumentException("The specified MIME type is invalid!", nameof(mimeType));
+        
         DesktopEntry.AddMimeType(_athenaGtk.DesktopFilePath, mimeType, _parser);
         if (source) DesktopEntry.Source(_desktopFileDir, _appRunner);
     }
@@ -137,27 +153,26 @@ public class LinuxIntegration : IDesktopIntegration
         DesktopEntry.Source(_desktopFileDir, _appRunner);
     }
     
-    public void DissociateFromApp(string fileExtensionOrMimeType, bool source = true)
+    public void DissociateFromApp(string mimeType, bool source = true)
     {
-        DesktopEntry.RemoveMimeType(_athenaGtk.DesktopFilePath, fileExtensionOrMimeType, _parser);
+        var pattern = MimeTypeRegex();
+        if (!pattern.IsMatch(mimeType))
+            throw new ArgumentException("The specified MIME type is invalid!", nameof(mimeType));
+        
+        DesktopEntry.RemoveMimeType(_athenaGtk.DesktopFilePath, mimeType, _parser);
         DesktopEntry.Source(_desktopFileDir, _appRunner);
     }
     
     public string ConsoleStatus()
     {
-        var status = new LinuxStatus
-        {
-            AppPath = _athenaCli.AppPath,
-            SymlinkPath = _athenaCli.SymlinkFilePath,
-            DesktopFilePath = _athenaCli.DesktopFilePath,
-            ConfigDir = _configPaths.Root
-        };
-        
-        return status.ToSpectreConsole();
+        return _status.ToSpectreConsole();
     }
     
     private static FileIniDataParser GetParserSettings()
     {
         return new FileIniDataParser { Parser = { Configuration = { AssigmentSpacer = "" } } };
     }
+
+    [GeneratedRegex(@"^[a-zA-Z0-9\-]+\/[a-zA-Z0-9\-\.\+]+$")]
+    private static partial Regex MimeTypeRegex();
 }

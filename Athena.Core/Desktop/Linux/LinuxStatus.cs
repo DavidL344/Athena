@@ -24,6 +24,9 @@ public class LinuxStatus
     
     private bool IsAtLeastPartiallyRegistered
         => IsSymlinkRegistered || IsDesktopFileRegistered;
+    
+    public bool IsRegistered
+        => IsSymlinkRegistered && IsDesktopFileRegistered;
 
     public string ToSpectreConsole()
     {
