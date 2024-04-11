@@ -41,7 +41,7 @@ public class IntegrationCommands : ICommands
             var pattern = path!.EndsWith(';') ? $"{_appPathDir};" : $";{_appPathDir}";
             
             if (path.Contains(pattern))
-                registrationStatus = $"[green]\u25cf Registered[/] at {_appPath}" +
+                registrationStatus = $"[green]\u25cf Registered[/] at {_appPath}\n\t" +
                                      $"[blue]Running instance: {_appPath}[/]";
             
             AnsiConsole.MarkupLine($"{registrationStatus}" +
