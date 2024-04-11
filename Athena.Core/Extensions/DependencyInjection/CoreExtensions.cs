@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Athena.Core.Configuration;
+using Athena.Core.Desktop;
 using Athena.Core.Internal;
 using Athena.Core.Internal.Helpers;
 using Athena.Core.Options;
@@ -50,5 +51,18 @@ public static class CoreExtensions
         // User config
         Startup.CheckEntries(configPaths, serializerOptions).GetAwaiter().GetResult();
         services.AddSingleton(ConfigHelper.GetConfig(configPaths, serializerOptions));
+        
+        // Desktop integration
+        services.RegisterDesktopIntegration();
+    }
+
+    private static void RegisterDesktopIntegration(this IServiceCollection services)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            services.AddSingleton<IDesktopIntegration, LinuxIntegration>();
+            return;
+        }
+        services.AddSingleton<IDesktopIntegration, WindowsIntegration>();
     }
 }

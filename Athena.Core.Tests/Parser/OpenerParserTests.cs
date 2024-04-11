@@ -50,7 +50,7 @@ public class OpenerParserTests : IDisposable
     [InlineData("/file.mp4")]
     [InlineData("/home/file.mp4")]
     [InlineData("C:/file.mp4")]
-    public async Task GetOpenerDefinition__ReturnsFileExtensionDefinition__WhenFilePathIsSpecified(string filePath)
+    public void GetOpenerDefinition__ReturnsFileExtensionDefinition__WhenFilePathIsSpecified(string filePath)
     {
         // Arrange
         var options = new ParserOptions();
@@ -62,7 +62,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetDefinition(filePath, options);
+        var result = parser.GetDefinition(filePath, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -75,7 +75,7 @@ public class OpenerParserTests : IDisposable
     [InlineData("file://C:/file.mp4")]
     [InlineData("file:///home/file.mp4")]
     [InlineData("file://home/file.mp4")]
-    public async Task GetOpenerDefinition__ReturnsFileExtensionDefinition__WhenUriIsLocal(string filePath)
+    public void GetOpenerDefinition__ReturnsFileExtensionDefinition__WhenUriIsLocal(string filePath)
     {
         // Arrange
         var options = new ParserOptions();
@@ -87,7 +87,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetDefinition(filePath, options);
+        var result = parser.GetDefinition(filePath, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -95,7 +95,7 @@ public class OpenerParserTests : IDisposable
 
     [Theory]
     [InlineData("https://example.com/file.mp4")]
-    public async Task GetOpenerDefinition__ReturnsFileExtensionDefinition__WhenLocalOverrideRequested(string url)
+    public void GetOpenerDefinition__ReturnsFileExtensionDefinition__WhenLocalOverrideRequested(string url)
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
@@ -107,7 +107,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetDefinition(url, options);
+        var result = parser.GetDefinition(url, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -120,7 +120,7 @@ public class OpenerParserTests : IDisposable
     [InlineData("stream:https://example.com/file.mp4")]
     [InlineData("stream:/https://example.com/file.mp4")]
     [InlineData("stream://https://example.com/file.mp4")]
-    public async Task GetOpenerDefinition__ReturnsFileExtensionDefinition__WhenUrlIsStreamable(string url)
+    public void GetOpenerDefinition__ReturnsFileExtensionDefinition__WhenUrlIsStreamable(string url)
     {
         // Arrange
         var options = new ParserOptions { StreamableProtocolPrefixes = [ "athena", "stream" ] };
@@ -132,7 +132,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetDefinition(url, options);
+        var result = parser.GetDefinition(url, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -141,7 +141,7 @@ public class OpenerParserTests : IDisposable
     [Theory]
     [InlineData("http://example.com/file.mp4")]
     [InlineData("https://example.com/file.mp4")]
-    public async Task GetOpenerDefinition__ReturnsProtocolDefinition__WhenUriIsRemote(string url)
+    public void GetOpenerDefinition__ReturnsProtocolDefinition__WhenUriIsRemote(string url)
     {
         // Arrange
         var uri = new Uri(url);
@@ -160,7 +160,7 @@ public class OpenerParserTests : IDisposable
         };
         
         // Act
-        var result = await parser.GetDefinition(url, options);
+        var result = parser.GetDefinition(url, options);
         
         // Assert
         Assert.Equivalent(expected, result);
@@ -168,14 +168,14 @@ public class OpenerParserTests : IDisposable
     
     [Theory]
     [InlineData("https://example.com/file.mp4")]
-    public async Task GetOpenerDefinition__ThrowsException__WhenProtocolHandlerIsDisabled(string url)
+    public void GetOpenerDefinition__ThrowsException__WhenProtocolHandlerIsDisabled(string url)
     {
         // Arrange
         var options = new ParserOptions { AllowProtocols = false };
         var parser = new OpenerParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
-        var exception = await Record.ExceptionAsync(() => parser.GetDefinition(url, options));
+        var exception = Record.Exception(() => parser.GetDefinition(url, options));
         
         // Assert
         Assert.NotNull(exception);
@@ -186,14 +186,14 @@ public class OpenerParserTests : IDisposable
     [Theory]
     [InlineData("/file.random")]
     [InlineData("https://example.com/file.random")]
-    public async Task GetOpenerDefinition__ThrowsException__WhenFileExtensionIsNotRegistered(string filePath)
+    public void GetOpenerDefinition__ThrowsException__WhenFileExtensionIsNotRegistered(string filePath)
     {
         // Arrange
         var options = new ParserOptions { OpenLocally = true, AllowProtocols = true};
         var parser = new OpenerParser(_configPaths, _jsonSerializerOptions, _logger);
         
         // Act
-        var exception = await Record.ExceptionAsync(() => parser.GetDefinition(filePath, options));
+        var exception = Record.Exception(() => parser.GetDefinition(filePath, options));
         
         // Assert
         Assert.NotNull(exception);

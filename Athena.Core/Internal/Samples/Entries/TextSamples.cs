@@ -76,4 +76,9 @@ internal class TextSamples : ISample
     };
     
     public Dictionary<string, Protocol> Protocols { get; } = new();
+
+    public List<string> MimeTypes { get; } =
+    [
+        "text/plain" // txt
+    ];
 }

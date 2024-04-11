@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Tests.Extensions.DependencyInjection;
 
+[Collection("Sequential")]
 public class CoreExtensionsTests : IDisposable
 {
     private readonly string _testsConfigDir;

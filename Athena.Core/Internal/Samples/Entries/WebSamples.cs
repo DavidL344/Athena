@@ -86,4 +86,11 @@ internal class WebSamples : ISample
             }
         }
     };
+
+    public List<string> MimeTypes { get; } =
+    [
+        "text/html", // html
+        "x-scheme-handler/http", // http
+        "x-scheme-handler/https" // https
+    ];
 }

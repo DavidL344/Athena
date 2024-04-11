@@ -40,7 +40,7 @@ public class ConfigCommands : ICommands
         editor ??= _config.Editor;
         var editPath = await GetEditPath(entry);
         
-        var appEntry = await _appEntryParser.GetAppEntry(editor);
+        var appEntry = _appEntryParser.GetAppEntry(editor);
         var expandedAppEntry = _appEntryParser.ExpandAppEntry(
             appEntry, editPath, _config.StreamableProtocolPrefixes);
         
