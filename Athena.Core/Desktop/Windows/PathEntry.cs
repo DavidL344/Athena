@@ -22,7 +22,7 @@ public static class PathEntry
             return;
 
         var newPath = pathVariable.EndsWith(';')
-            ? pathVariable.Replace($"{dirToRemove};", ";")
+            ? pathVariable.Replace($"{dirToRemove};", "")
             : pathVariable.Replace($";{dirToRemove}", "");
         
         SetPath(newPath);

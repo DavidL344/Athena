@@ -40,7 +40,6 @@ public partial class LinuxIntegration : IDesktopIntegration
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".local", "bin");
         
-        // On Linux, the assembly's location points to its dll instead of the executable
         var assemblyLocation = Assembly.GetEntryAssembly()!.Location;
         var appDir = Path.GetDirectoryName(assemblyLocation)!;
 

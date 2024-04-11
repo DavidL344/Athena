@@ -1,26 +1,44 @@
-using Microsoft.Extensions.Logging;
+using System.Reflection;
+using Athena.Core.Configuration;
+using Athena.Core.Desktop.Windows;
 
 namespace Athena.Core.Desktop;
 
 public class WindowsIntegration : IDesktopIntegration
 {
+    // Placeholder for yet-to-be-implemented methods
     private const string Placeholder = "This class is a placeholder!";
+    
+    // %PATH%
+    private readonly string _appPathDir;
+    
+    // Integration status
     public bool IsRegistered { get; }
-
-    public WindowsIntegration(ILogger<WindowsIntegration> logger)
+    private readonly WindowsStatus _status;
+    
+    public WindowsIntegration(ConfigPaths configPaths)
     {
-        IsRegistered = false;
-        logger.LogWarning(Placeholder);
+        var assemblyLocation = Assembly.GetEntryAssembly()!.Location;
+        var appPath = Path.ChangeExtension(assemblyLocation, "exe");
+        _appPathDir = Path.GetDirectoryName(appPath)!;
+
+        _status = new WindowsStatus
+        {
+            AppPath = appPath,
+            ConfigDir = configPaths.Root
+        };
+        
+        IsRegistered = _status.IsRegistered;
     }
     
     public void RegisterEntry()
     {
-        throw new ApplicationException(Placeholder);
+        PathEntry.Add(_appPathDir);
     }
     
     public void DeregisterEntry()
     {
-        throw new ApplicationException(Placeholder);
+        PathEntry.Remove(_appPathDir);
     }
     
     public void AssociateWithApps(IEnumerable<string> fileExtensions)
@@ -45,6 +63,6 @@ public class WindowsIntegration : IDesktopIntegration
     
     public string ConsoleStatus()
     {
-        throw new ApplicationException(Placeholder);
+        return _status.ToSpectreConsole();
     }
 }
