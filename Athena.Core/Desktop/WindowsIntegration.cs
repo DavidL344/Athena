@@ -3,6 +3,7 @@ using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using Athena.Core.Configuration;
 using Athena.Core.Desktop.Windows;
+using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Desktop;
 
@@ -17,8 +18,13 @@ public partial class WindowsIntegration : IDesktopIntegration
     public bool IsRegistered { get; }
     private readonly WindowsStatus _status;
     
-    public WindowsIntegration(ConfigPaths configPaths)
+    // Logger
+    private readonly ILogger<WindowsIntegration> _logger;
+    
+    public WindowsIntegration(ConfigPaths configPaths, ILogger<WindowsIntegration> logger)
     {
+        _logger = logger;
+        
         var assembly = Assembly.GetEntryAssembly()!;
         
         // The assembly's location points to its dll instead of the executable
@@ -37,10 +43,12 @@ public partial class WindowsIntegration : IDesktopIntegration
     public void RegisterEntry()
     {
         PathEntry.Add(_appPathDir);
+        AssociateWithApp("*");
     }
     
     public void DeregisterEntry()
     {
+        DissociateFromApp("*");
         PathEntry.Remove(_appPathDir);
     }
     
@@ -58,6 +66,10 @@ public partial class WindowsIntegration : IDesktopIntegration
         var fileExtensionPattern = FileExtensionRegex();
         if (fileExtensionPattern.IsMatch(fileExtension))
         {
+            if (fileExtension != "*")
+                _logger.LogWarning(
+                    "This feature is currently unstable: already associated file extensions might not be updated (please use \"*\" as a workaround)!");
+            
             RegistryEntry.AddToContextMenu(
                 RegistryEntry.Type.FileExtension, fileExtension.ToLower(), _appPath, "run %1");
             
@@ -128,7 +140,7 @@ public partial class WindowsIntegration : IDesktopIntegration
         return _status.ToSpectreConsole();
     }
     
-    [GeneratedRegex(@"^\.[a-zA-Z0-9_\-\.+]+$")]
+    [GeneratedRegex(@"^(\*)|(\.[a-zA-Z0-9_\-\.+]+)$")]
     private static partial Regex FileExtensionRegex();
     
     [GeneratedRegex(@"^[a-zA-Z]+:[\/]{0,2}$")]

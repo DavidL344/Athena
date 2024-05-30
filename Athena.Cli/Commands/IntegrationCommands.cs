@@ -31,10 +31,11 @@ public class IntegrationCommands : ICommands
             _desktopIntegration.RegisterEntry();
             
             string[] fileExtensionsOrMimeTypes = OperatingSystem.IsWindows()
-                ? [".txt", ".mp3", ".mp4"/*, "http:", "https:"*/]
+                ? [/*".txt", ".mp3", ".mp4", "http:", "https:"*/]
                 : ["text/plain", "audio/mp3", "video/mp4", "x-scheme-handler/http", "x-scheme-handler/https"];
             
-            _desktopIntegration.AssociateWithApps(fileExtensionsOrMimeTypes);
+            if (!OperatingSystem.IsWindows())
+                _desktopIntegration.AssociateWithApps(fileExtensionsOrMimeTypes);
             
             return 0;
         }

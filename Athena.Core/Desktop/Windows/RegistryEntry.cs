@@ -99,14 +99,14 @@ public class RegistryEntry
         key.Close();
         
         // HKCU\Software\Classes\*
-        if (fullDeletion)
+        if (fullDeletion && fileExtension != "*")
         {
             Registry.CurrentUser.DeleteSubKeyTree(keyPath);
             return;
         }
         
         // HKCU\Software\Classes\*\shell\OpenWithAthena
-        Registry.CurrentUser.DeleteSubKeyTree($@"{keyPath}\shell\OpenWithAthena");
+        Registry.CurrentUser.DeleteSubKeyTree($@"{keyPath}\shell\OpenWithAthena", false);
     }
     
     private static void RemoveProtocolFromContextMenu(string protocol)

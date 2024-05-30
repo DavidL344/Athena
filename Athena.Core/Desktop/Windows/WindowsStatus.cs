@@ -1,5 +1,9 @@
-﻿namespace Athena.Core.Desktop.Windows;
+﻿using System.Runtime.Versioning;
+using Microsoft.Win32;
 
+namespace Athena.Core.Desktop.Windows;
+
+[SupportedOSPlatform("windows")]
 public class WindowsStatus
 {
     public string AppPath { get; init; } = default!;
@@ -19,6 +23,17 @@ public class WindowsStatus
         }
     }
 
+    private bool IsInContextMenu
+    {
+        get
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(
+                @"Software\Classes\*\shell\OpenWithAthena\command", false);
+            
+            return key is not null && key.GetValue(null) as string == $"\"{AppPath}\" run \"%1\"";
+        }
+    }
+
     public bool IsRegistered
         => IsInPath;
 
@@ -29,9 +44,14 @@ public class WindowsStatus
         
         if (IsInPath)
             registrationStatus = $"[green]\u25cf Registered[/] at [link=file://{AppPathDir}]{AppPathDir}[/]\n\t" +
-                                 $"[blue]Running instance: [link=file://{AppPathDir}]{AppPath}[/][/]";
+                                 $"Running instance: [blue][link=file://{AppPathDir}]{AppPath}[/][/]";
+        
+        registrationStatus += $"\n\tConfig directory: [blue][link=file://{ConfigDir}]{ConfigDir}[/][/]";
+        
+        var entryStatus = IsInContextMenu ? "[green]Active[/]" : "[red]Missing[/]";
+        registrationStatus += $"\n\tContext menu entry: {entryStatus}";
+        
+        return registrationStatus;
 
-        return $"{registrationStatus}" +
-               $"\n\t[blue]Config directory: [link=file://{ConfigDir}]{ConfigDir}[/][/]";
     }
 }
