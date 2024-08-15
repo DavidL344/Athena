@@ -1,6 +1,7 @@
 using Athena.Cli.Commands.Internal;
 using Athena.Core.Desktop;
 using Cocona;
+using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
 namespace Athena.Cli.Commands;
@@ -8,10 +9,12 @@ namespace Athena.Cli.Commands;
 public class IntegrationCommands : ICommands
 {
     private readonly IDesktopIntegration _desktopIntegration;
+    private readonly ILogger<IntegrationCommands> _logger;
 
-    public IntegrationCommands(IDesktopIntegration desktopIntegration)
+    public IntegrationCommands(IDesktopIntegration desktopIntegration, ILogger<IntegrationCommands> logger)
     {
         _desktopIntegration = desktopIntegration;
+        _logger = logger;
     }
     
     [Command("status", Description = "Show the current status of Athena")]
@@ -34,8 +37,11 @@ public class IntegrationCommands : ICommands
                 ? [/*".txt", ".mp3", ".mp4", "http:", "https:"*/]
                 : ["text/plain", "audio/mp3", "video/mp4", "x-scheme-handler/http", "x-scheme-handler/https"];
             
-            if (!OperatingSystem.IsWindows())
-                _desktopIntegration.AssociateWithApps(fileExtensionsOrMimeTypes);
+            _desktopIntegration.AssociateWithApps(fileExtensionsOrMimeTypes);
+            
+            if (OperatingSystem.IsWindows())
+                _logger.LogWarning(
+                    "Please restart your terminal to finish registering Athena!");
             
             return 0;
         }
@@ -43,6 +49,10 @@ public class IntegrationCommands : ICommands
         if (remove)
         {
             _desktopIntegration.DeregisterEntry();
+            
+            if (OperatingSystem.IsWindows())
+                _logger.LogWarning("Please restart your terminal to finish the removal process!");
+            
             return 0;
         }
 
