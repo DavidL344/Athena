@@ -43,10 +43,10 @@ public class WindowsStatus
         var registrationStatus = $"[red]\u25cf Not registered (run `{registrationCommand}` to register)[/]";
         
         if (IsInPath)
-            registrationStatus = $"[green]\u25cf Registered[/] at [link=file://{AppPathDir}]{AppPathDir}[/]\n\t" +
-                                 $"Running instance: [blue][link=file://{AppPathDir}]{AppPath}[/][/]";
+            registrationStatus = $"[green]\u25cf Registered[/] at [link=file://{AppPathDir}]{AppPathDir}[/]";
         
-        registrationStatus += $"\n\tConfig directory: [blue][link=file://{ConfigDir}]{ConfigDir}[/][/]";
+        registrationStatus += $"\n\tRunning instance: [blue][link=file://{AppPathDir}]{AppPath}[/][/]" +
+                              $"\n\tConfig directory: [blue][link=file://{ConfigDir}]{ConfigDir}[/][/]";
         
         var entryStatus = IsInContextMenu ? "[green]Active[/]" : "[red]Missing[/]";
         registrationStatus += $"\n\tContext menu entry: {entryStatus}";
