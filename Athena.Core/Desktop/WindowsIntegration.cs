@@ -71,7 +71,12 @@ public partial class WindowsIntegration : IDesktopIntegration
                     "This feature is currently unstable: already associated file extensions might not be updated (please use \"*\" as a workaround)!");
             
             RegistryEntry.AddToContextMenu(
-                RegistryEntry.Type.FileExtension, fileExtension.ToLower(), _appPath, "run %1");
+                RegistryEntry.Type.FileExtension, fileExtension.ToLower(),
+                _appPath.Replace("Athena.exe", "Athena.Wpf.exe")
+#if DEBUG
+                    .Replace("Athena.Cli", "Athena.Wpf")
+#endif
+                    , "%1");
             
             if (source) RegistryEntry.Source();
             return;

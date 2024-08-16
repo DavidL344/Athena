@@ -29,8 +29,14 @@ public class WindowsStatus
         {
             using var key = Registry.CurrentUser.OpenSubKey(
                 @"Software\Classes\*\shell\OpenWithAthena\command", false);
+
+            var appPath = AppPath
+#if DEBUG
+                .Replace("Athena.Cli", "Athena.Wpf")
+#endif
+                .Replace("Athena.exe", "Athena.Wpf.exe");
             
-            return key is not null && key.GetValue(null) as string == $"\"{AppPath}\" run \"%1\"";
+            return key is not null && key.GetValue(null) as string == $"\"{appPath}\" \"%1\"";
         }
     }
 
