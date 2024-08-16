@@ -1,0 +1,17 @@
+﻿<Page x:Class="Athena.Wpf.Pages.AppPicker"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:Athena.Wpf.Pages"
+      xmlns:ui="http://schemas.modernwpf.com/2019"
+      mc:Ignorable="d"
+      Title="AppPicker">
+      <ui:SimpleStackPanel Style="{StaticResource AppPickerPanel}">
+            <TextBlock Name="FileTypeLabel" Text="Select an app to open $FILE_TYPE with:" />
+            <ListBox Name="Selection" />
+            <ScrollViewer Style="{StaticResource AppPickerSelectedFileText}">
+                  <TextBlock Name="FilePathLabel" Text="$FILE_PATH" />
+            </ScrollViewer>
+      </ui:SimpleStackPanel>
+</Page>

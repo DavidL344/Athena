@@ -12,4 +12,8 @@
       <PackageReference Include="ModernWpfUI" Version="0.9.6" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Athena.Core\Athena.Core.csproj" />
+    </ItemGroup>
+
 </Project>

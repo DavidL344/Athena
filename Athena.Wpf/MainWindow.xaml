@@ -8,18 +8,6 @@
         mc:Ignorable="d"
         ui:WindowHelper.UseModernWindowStyle="True"
         MinHeight="450" MinWidth="800" Height="450" Width="800"
-        Title="Athena" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
-    <ui:SimpleStackPanel Style="{StaticResource AppPickerPanel}">
-        <TextBlock Text="Select an app to open the file with:" />
-        <CheckBox Content="Remember this choice" />
-        <ListBox>
-            <ListBoxItem Content="Foobar2000 (Play)&#x0a;          &quot;C:\Program Files (x86)\foobar2000\foobar2000.exe&quot; &quot;%1&quot;" />
-            <ListBoxItem Content="Foobar2000 (Enqueue)&#x0a;          &quot;C:\Program Files (x86)\foobar2000\foobar2000.exe&quot; /add &quot;%1&quot;" />
-            <ListBoxItem Content="VLC Media Player&#x0a;          &quot;C:\Program Files (x86)\VideoLAN\VLC\vlc.exe&quot; &quot;%1&quot;" />
-            <ListBoxItem Content="Windows Media Player&#x0a;          &quot;C:\Program Files (x86)\Windows Media Player\wmplayer.exe&quot; /prefetch:6 /Open &quot;%1&quot;" />
-        </ListBox>
-        <ScrollViewer Style="{StaticResource AppPickerSelectedFileText}">
-            <TextBlock Text="C:\Users\Sample\Music\Sample.mp3" />
-        </ScrollViewer>
-    </ui:SimpleStackPanel>
+        Title="" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <ui:Frame x:Name="Frame" />
 </Window>

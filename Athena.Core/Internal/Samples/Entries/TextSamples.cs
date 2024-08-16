@@ -65,7 +65,7 @@ internal class TextSamples : ISample
                 AppList =
                 [
                     "vi.open",
-                    "nano.play",
+                    "nano.open",
                     "gedit.open",
                     "codium.open",
                     "code.open",
