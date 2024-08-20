@@ -76,7 +76,7 @@ public class AppEntryParser
         return appEntry;
     }
     
-    public string[] GetFriendlyNames(IOpener opener, bool markDefault = false)
+    public string[] GetFriendlyNames(IOpener opener, bool markDefault = false, bool multiline = false)
     {
         // Parse the names of the app entries
         var friendlyNames = new string[opener.AppList.Count];
@@ -88,6 +88,13 @@ public class AppEntryParser
             friendlyNames[i] = opener.AppList[i] == opener.DefaultApp
                 ? $"{definition.Name}{defaultMark}"
                 : definition.Name;
+
+            if (multiline)
+            {
+                friendlyNames[i] = friendlyNames[i].Replace(definition.Name,
+                    $"{definition.Name}\r\n          {definition.Path}" +
+                    $" {definition.Arguments.Replace("$FILE", "%1")}");
+            }
         }
         
         return friendlyNames;

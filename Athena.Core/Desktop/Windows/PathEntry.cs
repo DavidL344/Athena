@@ -22,7 +22,7 @@ public static class PathEntry
             return;
 
         var newPath = pathVariable.EndsWith(';')
-            ? pathVariable.Replace($"{dirToRemove};", ";")
+            ? pathVariable.Replace($"{dirToRemove};", "")
             : pathVariable.Replace($";{dirToRemove}", "");
         
         SetPath(newPath);
@@ -30,7 +30,7 @@ public static class PathEntry
     
     private static string GetPath()
     {
-        var path = Environment.GetEnvironmentVariable("PATH");
+        var path = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
         
         if (path is null)
             throw new ArgumentNullException(nameof(path), "The PATH environment variable is not set!");

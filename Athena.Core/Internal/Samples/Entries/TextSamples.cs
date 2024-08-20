@@ -42,7 +42,7 @@ internal class TextSamples : ISample
             "code.open", new AppEntry
             {
                 Name = "Visual Studio Code (Open)",
-                Path = "code",
+                Path = "code.exe",
                 Arguments = "$FILE"
             }
         },
@@ -50,7 +50,7 @@ internal class TextSamples : ISample
             "notepad.open", new AppEntry
             {
                 Name = "Notepad (Open)",
-                Path = "notepad",
+                Path = "notepad.exe",
                 Arguments = "$FILE"
             }
         }
@@ -65,7 +65,7 @@ internal class TextSamples : ISample
                 AppList =
                 [
                     "vi.open",
-                    "nano.play",
+                    "nano.open",
                     "gedit.open",
                     "codium.open",
                     "code.open",

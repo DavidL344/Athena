@@ -1,55 +1,25 @@
-using System.Reflection;
 using Athena.Cli.Commands.Internal;
-using Athena.Core.Configuration;
 using Athena.Core.Desktop;
 using Cocona;
+using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
 namespace Athena.Cli.Commands;
 
 public class IntegrationCommands : ICommands
 {
-    private readonly ConfigPaths _configPaths;
-    private readonly string _appPath;
-    private readonly string _appPathDir;
     private readonly IDesktopIntegration _desktopIntegration;
+    private readonly ILogger<IntegrationCommands> _logger;
 
-    public IntegrationCommands(ConfigPaths configPaths, IDesktopIntegration desktopIntegration)
+    public IntegrationCommands(IDesktopIntegration desktopIntegration, ILogger<IntegrationCommands> logger)
     {
-        _configPaths = configPaths;
         _desktopIntegration = desktopIntegration;
-        
-        // On Linux, the assembly's location points to its dll instead of the executable
-        var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-        _appPath = Path.ChangeExtension(assemblyLocation,
-            OperatingSystem.IsWindows() ? "exe" : null);
-        
-        _appPathDir = Path.GetDirectoryName(_appPath)!;
+        _logger = logger;
     }
     
     [Command("status", Description = "Show the current status of Athena")]
     public void Status()
     {
-        var registrationCommand = OperatingSystem.IsWindows()
-            ? "athena integration --add"
-            : "./Athena integration --add";
-        var registrationStatus = $"[red]\u25cf Not registered (run `{registrationCommand}` to register)[/]";
-        
-        if (OperatingSystem.IsWindows())
-        {
-            var path = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
-            var pattern = path!.EndsWith(';') ? $"{_appPathDir};" : $";{_appPathDir}";
-            
-            if (path.Contains(pattern))
-                registrationStatus = $"[green]\u25cf Registered[/] at {_appPath}\n\t" +
-                                     $"[blue]Running instance: {_appPath}[/]";
-            
-            AnsiConsole.MarkupLine($"{registrationStatus}" +
-                                   $"\n\t[blue]Config directory: [link=file://{_configPaths.Root}]{_configPaths.Root}[/][/]");
-            
-            return;
-        }
-        
         AnsiConsole.MarkupLine(_desktopIntegration.ConsoleStatus());
     }
     
@@ -61,40 +31,28 @@ public class IntegrationCommands : ICommands
     {
         if (add)
         {
-            if (OperatingSystem.IsWindows())
-            {
-                var pathBefore = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
-                var pathAfter = pathBefore!.EndsWith(';')
-                    ? $"{pathBefore}{_appPathDir};"
-                    : $"{pathBefore};{_appPathDir}";
-                Environment.SetEnvironmentVariable("PATH", pathAfter, EnvironmentVariableTarget.User);
-                return 0;
-            }
-
             _desktopIntegration.RegisterEntry();
             
             string[] fileExtensionsOrMimeTypes = OperatingSystem.IsWindows()
-                ? [".txt", ".mp3", ".mp4", "http", "https"]
+                ? [/*".txt", ".mp3", ".mp4", "http:", "https:"*/]
                 : ["text/plain", "audio/mp3", "video/mp4", "x-scheme-handler/http", "x-scheme-handler/https"];
-
+            
             _desktopIntegration.AssociateWithApps(fileExtensionsOrMimeTypes);
+            
+            if (OperatingSystem.IsWindows())
+                _logger.LogWarning(
+                    "Please restart your terminal to finish registering Athena!");
             
             return 0;
         }
         
         if (remove)
         {
-            if (OperatingSystem.IsWindows())
-            {
-                var pathBefore = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
-                var pathAfter = pathBefore!.EndsWith(';')
-                    ? pathBefore.Replace($"{_appPathDir};", "")
-                    : pathBefore.Replace($";{_appPathDir}", "");
-                Environment.SetEnvironmentVariable("PATH", pathAfter, EnvironmentVariableTarget.User);
-                return 0;
-            }
-            
             _desktopIntegration.DeregisterEntry();
+            
+            if (OperatingSystem.IsWindows())
+                _logger.LogWarning("Please restart your terminal to finish the removal process!");
+            
             return 0;
         }
 
@@ -116,9 +74,6 @@ public class IntegrationCommands : ICommands
         [Option('r', Description = "Deregister the specified arguments instead")]
         bool remove)
     {
-        if (OperatingSystem.IsWindows())
-            throw new ApplicationException("This feature is not available on Windows!");
-        
         if (!_desktopIntegration.IsRegistered)
             throw new ApplicationException("Athena is not registered with the system!");
         
