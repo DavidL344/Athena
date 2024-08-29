@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using Athena.Desktop.Configuration;
 using Athena.Desktop.Runner;
@@ -7,6 +8,7 @@ using IniParser;
 
 namespace Athena.Desktop.System;
 
+[SupportedOSPlatform("linux")]
 public partial class LinuxIntegration : IDesktopIntegration
 {
     // XDG Desktop

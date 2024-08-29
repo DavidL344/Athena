@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using Athena.Desktop.Runner;
 using Athena.Resources;
@@ -7,6 +8,7 @@ using IniParser.Model;
 
 namespace Athena.Desktop.System.Linux;
 
+[SupportedOSPlatform("linux")]
 internal static class DesktopEntry
 {
     private const string DesktopEntrySection = "Desktop Entry";

@@ -1,5 +1,8 @@
+using System.Runtime.Versioning;
+
 namespace Athena.Desktop.System.Linux;
 
+[SupportedOSPlatform("linux")]
 public class IntegrationPaths
 {
     public required string DesktopFileDir { get; init; }

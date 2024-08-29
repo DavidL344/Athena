@@ -1,17 +1,24 @@
+using System.Runtime.Versioning;
 using Athena.Desktop.System;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Athena.Desktop.DependencyInjection;
 
+[SupportedOSPlatform("linux")]
+[SupportedOSPlatform("windows")]
 public static class DesktopExtensions
 {
     public static void RegisterDesktopIntegration(this IServiceCollection services)
     {
-        if (!OperatingSystem.IsWindows())
+        if (OperatingSystem.IsLinux())
         {
-            services.AddSingleton<IDesktopIntegration, System.LinuxIntegration>();
+            services.AddSingleton<IDesktopIntegration, LinuxIntegration>();
             return;
         }
-        services.AddSingleton<IDesktopIntegration, System.WindowsIntegration>();
+
+        if (OperatingSystem.IsWindows())
+        {
+            services.AddSingleton<IDesktopIntegration, WindowsIntegration>();
+        }
     }
 }

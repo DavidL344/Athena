@@ -1,5 +1,8 @@
+using System.Runtime.Versioning;
+
 namespace Athena.Desktop.System.Windows;
 
+[SupportedOSPlatform("windows")]
 public static class PathEntry
 {
     public static void Add(string dirToAdd)

@@ -1,5 +1,8 @@
+using System.Runtime.Versioning;
+
 namespace Athena.Desktop.System.Linux;
 
+[SupportedOSPlatform("linux")]
 internal static class SymlinkEntry
 {
     public static void Create(string symlinkPath, string appPath)
