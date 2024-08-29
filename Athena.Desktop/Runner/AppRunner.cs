@@ -1,11 +1,10 @@
 using System.Diagnostics;
-using Athena.Core.Internal.Helpers;
-using Athena.Core.Options;
+using Athena.Desktop.Helpers;
 using CliWrap;
 using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;
 
-namespace Athena.Core.Runner;
+namespace Athena.Desktop.Runner;
 
 public class AppRunner
 {

@@ -1,4 +1,4 @@
-namespace Athena.Core.Desktop.Windows;
+namespace Athena.Desktop.System.Windows;
 
 public static class PathEntry
 {

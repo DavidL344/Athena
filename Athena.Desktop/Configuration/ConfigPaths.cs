@@ -1,6 +1,6 @@
-using Athena.Core.Internal.Helpers;
+using Athena.Desktop.Helpers;
 
-namespace Athena.Core.Configuration;
+namespace Athena.Desktop.Configuration;
 
 public class ConfigPaths
 {

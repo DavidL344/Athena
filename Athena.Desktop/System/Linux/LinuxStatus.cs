@@ -1,4 +1,4 @@
-namespace Athena.Core.Desktop.Linux;
+namespace Athena.Desktop.System.Linux;
 
 public class LinuxStatus
 {

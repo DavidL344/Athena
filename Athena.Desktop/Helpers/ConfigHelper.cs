@@ -1,10 +1,10 @@
 using System.Reflection;
 using System.Text.Json;
-using Athena.Core.Configuration;
+using Athena.Desktop.Configuration;
 
-namespace Athena.Core.Internal.Helpers;
+namespace Athena.Desktop.Helpers;
 
-internal class ConfigHelper
+public class ConfigHelper
 {
     private const string AppVersion
         = $"{ThisAssembly.Git.SemVer.Major}.{ThisAssembly.Git.SemVer.Minor}.{ThisAssembly.Git.SemVer.Patch}";

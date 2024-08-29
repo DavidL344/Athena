@@ -1,6 +1,6 @@
-namespace Athena.Core.Internal.Helpers;
+namespace Athena.Desktop.Helpers;
 
-internal class SystemHelper
+public class SystemHelper
 {
     public static string WhereIs(string command)
     {

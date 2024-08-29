@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Text;
-using Athena.Core.Options;
-using Athena.Core.Runner;
+using Athena.Desktop.Runner;
 using CliWrap;
 using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;

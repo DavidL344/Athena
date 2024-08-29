@@ -1,11 +1,11 @@
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
-using Athena.Core.Configuration;
-using Athena.Core.Desktop.Windows;
+using Athena.Desktop.Configuration;
+using Athena.Desktop.System.Windows;
 using Microsoft.Extensions.Logging;
 
-namespace Athena.Core.Desktop;
+namespace Athena.Desktop.System;
 
 [SupportedOSPlatform("windows")]
 public partial class WindowsIntegration : IDesktopIntegration

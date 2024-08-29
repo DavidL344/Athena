@@ -1,11 +1,11 @@
 using System.Reflection;
 using System.Text;
-using Athena.Core.Runner;
+using Athena.Desktop.Runner;
 using Athena.Resources;
 using IniParser;
 using IniParser.Model;
 
-namespace Athena.Core.Desktop.Linux;
+namespace Athena.Desktop.System.Linux;
 
 internal static class DesktopEntry
 {

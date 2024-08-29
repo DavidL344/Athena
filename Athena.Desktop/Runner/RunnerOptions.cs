@@ -1,6 +1,6 @@
 using CliWrap;
 
-namespace Athena.Core.Options;
+namespace Athena.Desktop.Runner;
 
 public class RunnerOptions
 {

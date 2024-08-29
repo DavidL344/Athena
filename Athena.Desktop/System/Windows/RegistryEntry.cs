@@ -2,7 +2,7 @@
 using System.Runtime.Versioning;
 using Microsoft.Win32;
 
-namespace Athena.Core.Desktop.Windows;
+namespace Athena.Desktop.System.Windows;
 
 [SupportedOSPlatform("windows")]
 public class RegistryEntry

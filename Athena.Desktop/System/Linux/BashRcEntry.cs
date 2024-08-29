@@ -1,6 +1,6 @@
 using Athena.Resources;
 
-namespace Athena.Core.Desktop.Linux;
+namespace Athena.Desktop.System.Linux;
 
 internal static class BashRcEntry
 {
