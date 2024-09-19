@@ -13,11 +13,25 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="ini-parser-new" Version="2.6.2" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     </ItemGroup>
 
     <ItemGroup>
         <InternalsVisibleTo Include="Athena.Core.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Athena.DataStructures\Athena.DataStructures.csproj" />
+      <ProjectReference Include="..\Athena.Resources\Athena.Resources.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Desktop\Resources\athena.desktop" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Desktop\Shared\" />
     </ItemGroup>
 
 </Project>

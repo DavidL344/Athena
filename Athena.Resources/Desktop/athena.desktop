@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Athena
+Icon=$ICON_PATH
+Exec=athena run $PARAM_TYPE
+MimeType=application/octet-stream;
+Comment=A cross-platform file extension handler
+Categories=Utility;
+Terminal=true
+NoDisplay=true
+Type=Application

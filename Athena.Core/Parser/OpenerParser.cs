@@ -1,45 +1,55 @@
 using System.Text.Json;
-using Athena.Core.Model.Internal;
-using Athena.Core.Model.Opener;
-using Athena.Core.Parser.Options;
-using Athena.Core.Parser.Shared;
+using Athena.Core.Configuration;
+using Athena.Core.Internal.Helpers;
+using Athena.Core.Model;
+using Athena.Core.Options;
 using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Parser;
 
 public class OpenerParser
 {
-    private readonly Dictionary<ConfigType, string> _configPaths;
+    private readonly ConfigPaths _configPaths;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ILogger<OpenerParser> _logger;
 
-    public OpenerParser(Dictionary<ConfigType, string> configPaths,
+    public OpenerParser(ConfigPaths configPaths,
         JsonSerializerOptions jsonSerializerOptions, ILogger<OpenerParser> logger)
     {
         _configPaths = configPaths;
         _jsonSerializerOptions = jsonSerializerOptions;
         _logger = logger;
     }
-
-    public async Task<IOpener> GetOpenerDefinition(string filePath, ParserOptions options)
-        => ParserHelper.IsLocalOrRequested(filePath, options.OpenLocally, options.StreamableProtocolPrefixes)
-            ? await GetFileExtensionDefinition(filePath)
-            : await GetProtocolDefinition(new Uri(filePath), options);
-
-    private async Task<FileExtension> GetFileExtensionDefinition(string filePath)
+    
+    public IOpener GetDefinition(string parsedPath, ParserOptions options)
     {
-        _logger.LogInformation("Local file detected, getting the file extension definition...");
+        if (ParserHelper.IsLocalOrRequested(parsedPath, options.OpenLocally, options.StreamableProtocolPrefixes))
+        {
+            _logger.LogDebug("Local file detected, getting the file extension definition...");
+            
+            var fileExtension = Path.GetExtension(parsedPath);
+            if (string.IsNullOrEmpty(fileExtension))
+                throw new ApplicationException("The file has no extension!");
+            
+            return GetFileExtensionDefinition(fileExtension);
+        }
         
-        if (Path.GetExtension(filePath).Length == 0)
-            throw new ApplicationException("The file has no extension!");
+        _logger.LogDebug("Remote file detected, getting the protocol definition...");
         
-        var fileExtension = Path.GetExtension(filePath).Substring(1);
-        var definitionPath = Path.Combine(_configPaths[ConfigType.Files], $"{fileExtension}.json");
+        if (!options.AllowProtocols)
+            throw new ApplicationException("The protocol handler is disabled!");
+        
+        return GetProtocolDefinition(new Uri(parsedPath).Scheme);
+    }
+
+    private FileExtension GetFileExtensionDefinition(string fileExtension)
+    {
+        var definitionPath = _configPaths.GetEntryPath(fileExtension, ConfigType.FileExtensions);
         
         if (!File.Exists(definitionPath))
-            throw new ApplicationException($"The file extension ({fileExtension}) isn't registered with Athena!");
-        
-        var definitionData = await File.ReadAllTextAsync(definitionPath);
+            throw new ApplicationException($"The file extension ({fileExtension.Remove(0, 1)}) isn't registered with Athena!");
+
+        var definitionData = File.ReadAllText(definitionPath);
         var definition = JsonSerializer.Deserialize<FileExtension>(definitionData, _jsonSerializerOptions);
         
         if (definition is null)
@@ -51,28 +61,22 @@ public class OpenerParser
         return definition;
     }
 
-    private async Task<Protocol> GetProtocolDefinition(Uri uri, ParserOptions options)
+    private Protocol GetProtocolDefinition(string uriScheme)
     {
-        _logger.LogInformation("Remote file detected, getting the protocol definition...");
-        
-        if (!options.AllowProtocols)
-            throw new ApplicationException("The protocol handler is disabled!");
-        
-        var protocol = uri.Scheme;
-        var definitionPath = Path.Combine(_configPaths[ConfigType.Protocols], $"{protocol}.json");
+        var definitionPath = _configPaths.GetEntryPath(uriScheme, ConfigType.Protocols);
         
         if (!File.Exists(definitionPath))
-            throw new ApplicationException($"The protocol ({protocol}) isn't registered with Athena!");
+            throw new ApplicationException($"The protocol ({uriScheme}) isn't registered with Athena!");
         
-        var definitionData = await File.ReadAllTextAsync(definitionPath);
+        var definitionData = File.ReadAllText(definitionPath);
         var definition = JsonSerializer.Deserialize<Protocol>(definitionData, _jsonSerializerOptions);
         
         if (definition is null)
             throw new ApplicationException("The protocol definition is invalid!");
-
+        
         if (definition.AppList.Count == 0)
             throw new ApplicationException("The protocol has no associated entries!");
-
+        
         return definition;
     }
 }
