@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using Athena.Core.Runner;
 using Athena.Resources;
@@ -14,8 +15,15 @@ internal static class DesktopEntry
     
     public static void Add(string desktopFilePath)
     {
+        var workingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        var iconLocation = Path.Combine(workingDirectory, "athena.png");
+        
+        if (!File.Exists(iconLocation))
+            ResourceLoader.Save("Desktop/athena.png", iconLocation);
+        
         var resourceData = ResourceLoader.Load($"Desktop/{desktopFilePath.Split('/').Last()}")
-            .Replace("$PARAM_TYPE", "%u");
+            .Replace("$PARAM_TYPE", "%u")
+            .Replace("$ICON_PATH", iconLocation);
         
         File.WriteAllText(desktopFilePath, resourceData);
     }

@@ -10,6 +10,7 @@
       <EmbeddedResource Include="Desktop\athena-gtk.desktop" />
       <EmbeddedResource Include="Desktop\athena.desktop" />
       <EmbeddedResource Include="Desktop\bashrc.sh" />
+      <EmbeddedResource Include="Desktop\athena.png" />
     </ItemGroup>
 
 </Project>
