@@ -25,7 +25,8 @@ public class PathParser
         try
         {
             uri = new Uri(expandedPath);
-            expandedPath = expandedPath.Replace('/', Path.DirectorySeparatorChar);
+            if (!expandedPath.Contains("://") && !expandedPath.Contains(@":\\"))
+                expandedPath = expandedPath.Replace('/', Path.DirectorySeparatorChar);
             
             _logger.LogDebug("Parsed {FilePath} as an absolute path: {FileUri}",
                 filePath, uri);

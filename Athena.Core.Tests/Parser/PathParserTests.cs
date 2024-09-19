@@ -74,14 +74,17 @@ public class PathParserTests : IDisposable
         Environment.SetEnvironmentVariable("CURRENT_DIR", _workingDir);
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             filePath = filePath
-                .Replace("$HOME", "$USERPROFILE")
+                .Replace("$HOME", "%USERPROFILE%")
                 .Replace("%HOME%", "%USERPROFILE%");
         
         filePath = Environment.ExpandEnvironmentVariables(filePath
             .Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
             .Replace("$HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
             .Replace("$CURRENT_DIR", _workingDir));
-        var expected = filePath;
+        
+        var expected = filePath
+            .Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\\', Path.DirectorySeparatorChar);
         
         // Act
         var result = parser.GetPath(filePath, options);
@@ -104,10 +107,13 @@ public class PathParserTests : IDisposable
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
         var parser = new PathParser(_logger);
-        var expected = filePath.StartsWith('\\')
+        var expected = filePath.StartsWith('/') || filePath.StartsWith('\\')
                 ? $"{Path.GetPathRoot(Directory.GetCurrentDirectory())}{filePath
-                    .Remove(0, 1).Replace('\\', Path.DirectorySeparatorChar)}"
+                    .Remove(0, 1)}"
                 : filePath;
+        
+        expected = expected.Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\\', Path.DirectorySeparatorChar);
         
         // Act
         var result = parser.GetPath(filePath, options);
