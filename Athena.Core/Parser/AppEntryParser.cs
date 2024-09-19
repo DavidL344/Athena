@@ -1,7 +1,7 @@
 using System.Text.Json;
-using Athena.Core.Configuration;
 using Athena.Core.Internal.Helpers;
 using Athena.Core.Model;
+using Athena.Desktop.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Parser;

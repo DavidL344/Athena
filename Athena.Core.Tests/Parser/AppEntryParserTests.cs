@@ -1,11 +1,11 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Athena.Core.Configuration;
 using Athena.Core.Internal;
 using Athena.Core.Model;
 using Athena.Core.Options;
 using Athena.Core.Parser;
+using Athena.Desktop.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Tests.Parser;

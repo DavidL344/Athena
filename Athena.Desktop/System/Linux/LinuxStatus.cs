@@ -1,5 +1,8 @@
-namespace Athena.Core.Desktop.Linux;
+using System.Runtime.Versioning;
 
+namespace Athena.Desktop.System.Linux;
+
+[SupportedOSPlatform("linux")]
 public class LinuxStatus
 {
     public string SymlinkPath { get; init; } = default!;

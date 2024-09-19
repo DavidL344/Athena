@@ -1,4 +1,4 @@
-namespace Athena.Core.Configuration;
+namespace Athena.Desktop.Configuration;
 
 public enum ConfigType
 {

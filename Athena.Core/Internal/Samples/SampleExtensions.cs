@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Athena.Core.Configuration;
+using Athena.Desktop.Configuration;
 
 namespace Athena.Core.Internal.Samples;
 

@@ -1,5 +1,5 @@
 using Athena.Cli.Commands.Internal;
-using Athena.Core.Desktop;
+using Athena.Desktop.System;
 using Cocona;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;

@@ -1,4 +1,4 @@
-namespace Athena.Core.Desktop;
+namespace Athena.Desktop.System;
 
 public interface IDesktopIntegration
 {

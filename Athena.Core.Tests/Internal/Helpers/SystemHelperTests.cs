@@ -1,4 +1,4 @@
-using Athena.Core.Internal.Helpers;
+using Athena.Desktop.Helpers;
 
 namespace Athena.Core.Tests.Internal.Helpers;
 

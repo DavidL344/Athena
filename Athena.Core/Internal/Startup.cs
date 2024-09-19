@@ -1,6 +1,6 @@
 using System.Text.Json;
-using Athena.Core.Configuration;
 using Athena.Core.Internal.Helpers;
+using Athena.Desktop.Configuration;
 
 namespace Athena.Core.Internal;
 

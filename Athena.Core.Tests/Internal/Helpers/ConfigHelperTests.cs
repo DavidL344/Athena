@@ -1,9 +1,9 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Athena.Core.Configuration;
 using Athena.Core.Internal;
-using Athena.Core.Internal.Helpers;
+using Athena.Desktop.Configuration;
+using Athena.Desktop.Helpers;
 
 namespace Athena.Core.Tests.Internal.Helpers;
 

@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Gtk", "Athena.Gtk\At
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Wpf", "Athena.Wpf\Athena.Wpf.csproj", "{4BB25764-5F88-4D3A-8284-5C35510ABB1A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Desktop", "Athena.Desktop\Athena.Desktop.csproj", "{F4CD21A3-3DEB-45F8-8BBA-ACE8014C1A01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{4BB25764-5F88-4D3A-8284-5C35510ABB1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BB25764-5F88-4D3A-8284-5C35510ABB1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4BB25764-5F88-4D3A-8284-5C35510ABB1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4CD21A3-3DEB-45F8-8BBA-ACE8014C1A01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4CD21A3-3DEB-45F8-8BBA-ACE8014C1A01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4CD21A3-3DEB-45F8-8BBA-ACE8014C1A01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4CD21A3-3DEB-45F8-8BBA-ACE8014C1A01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

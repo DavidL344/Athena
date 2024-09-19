@@ -1,7 +1,9 @@
+using System.Runtime.Versioning;
 using Athena.Resources;
 
-namespace Athena.Core.Desktop.Linux;
+namespace Athena.Desktop.System.Linux;
 
+[SupportedOSPlatform("linux")]
 internal static class BashRcEntry
 {
     private static readonly string BashRcPath =

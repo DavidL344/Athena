@@ -1,12 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Athena.Core.Configuration;
-using Athena.Core.Desktop;
 using Athena.Core.Internal;
-using Athena.Core.Internal.Helpers;
-using Athena.Core.Options;
 using Athena.Core.Parser;
-using Athena.Core.Runner;
+using Athena.Desktop.Configuration;
+using Athena.Desktop.DependencyInjection;
+using Athena.Desktop.Helpers;
+using Athena.Desktop.Runner;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -54,15 +53,5 @@ public static class CoreExtensions
         
         // Desktop integration
         services.RegisterDesktopIntegration();
-    }
-
-    private static void RegisterDesktopIntegration(this IServiceCollection services)
-    {
-        if (!OperatingSystem.IsWindows())
-        {
-            services.AddSingleton<IDesktopIntegration, LinuxIntegration>();
-            return;
-        }
-        services.AddSingleton<IDesktopIntegration, WindowsIntegration>();
     }
 }

@@ -1,10 +1,10 @@
-﻿using Athena.Core.Configuration;
-using Athena.Core.Extensions;
+﻿using Athena.Core.Extensions;
 using Athena.Core.Extensions.DependencyInjection;
 using Athena.Core.Model;
 using Athena.Core.Options;
 using Athena.Core.Parser;
-using Athena.Core.Runner;
+using Athena.Desktop.Configuration;
+using Athena.Desktop.Runner;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Athena.Wpf.Internal;
