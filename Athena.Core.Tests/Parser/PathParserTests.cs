@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Athena.Core.Internal;
 using Athena.Core.Options;
 using Athena.Core.Parser;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Athena.Core.Tests.Parser;
 
-public class PathParserTests : IDisposable
+public partial class PathParserTests : IDisposable
 {
     private readonly string _workingDir;
     private readonly string _testsConfigDir;
@@ -107,13 +108,29 @@ public class PathParserTests : IDisposable
         // Arrange
         var options = new ParserOptions { OpenLocally = true };
         var parser = new PathParser(_logger);
-        var expected = filePath.StartsWith('/') || filePath.StartsWith('\\')
-                ? $"{Path.GetPathRoot(Directory.GetCurrentDirectory())}{filePath
-                    .Remove(0, 1)}"
-                : filePath;
         
-        expected = expected.Replace('/', Path.DirectorySeparatorChar)
-            .Replace('\\', Path.DirectorySeparatorChar);
+        var expected = filePath;
+        
+        if (OperatingSystem.IsWindows())
+        {
+            if (filePath.StartsWith('/'))
+                expected = $"{Path.GetPathRoot(Directory.GetCurrentDirectory())}{filePath
+                    .Remove(0, 1)
+                    .Replace('/', Path.DirectorySeparatorChar)}";
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            var windowsDriveRegex = WindowsDriveRegex();
+            var windowsDriveMatch = windowsDriveRegex.Match(filePath);
+            
+            if (windowsDriveMatch.Success)
+                expected = $"/{expected.Remove(0, windowsDriveMatch.Length)}";
+            
+            // Making sure it's not a Windows network drive that starts with "\\" instead of "/"
+            if (!expected.StartsWith(@"\\"))
+                expected = expected.Replace('\\', Path.DirectorySeparatorChar);
+        }
         
         // Act
         var result = parser.GetPath(filePath, options);
@@ -177,4 +194,7 @@ public class PathParserTests : IDisposable
         // Assert
         Assert.Equal(expected, result);
     }
+
+    [GeneratedRegex(@"^[a-zA-Z]:[\\|\/]")]
+    private static partial Regex WindowsDriveRegex();
 }
