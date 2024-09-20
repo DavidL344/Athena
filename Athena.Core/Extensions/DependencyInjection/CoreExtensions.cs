@@ -52,6 +52,7 @@ public static class CoreExtensions
         services.AddSingleton(ConfigHelper.GetConfig(configPaths, serializerOptions));
         
         // Desktop integration
-        services.RegisterDesktopIntegration();
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+            services.RegisterDesktopIntegration();
     }
 }
