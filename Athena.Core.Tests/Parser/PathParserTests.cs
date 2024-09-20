@@ -113,10 +113,11 @@ public partial class PathParserTests : IDisposable
         
         if (OperatingSystem.IsWindows())
         {
-            if (filePath.StartsWith('/'))
+            if (filePath.StartsWith('/') || filePath.StartsWith('\\'))
                 expected = $"{Path.GetPathRoot(Directory.GetCurrentDirectory())}{filePath
-                    .Remove(0, 1)
-                    .Replace('/', Path.DirectorySeparatorChar)}";
+                    .Remove(0, 1)}";
+            
+            expected = expected.Replace('/', Path.DirectorySeparatorChar);
         }
 
         if (OperatingSystem.IsLinux())
