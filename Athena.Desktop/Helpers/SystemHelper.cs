@@ -4,7 +4,7 @@ public class SystemHelper
 {
     public static string WhereIs(string command)
     {
-        var paths = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine)?.Split(Path.PathSeparator);
+        var paths = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process)?.Split(Path.PathSeparator);
         if (paths is null)
             throw new ApplicationException("Environment variable 'PATH' not found!");
         
