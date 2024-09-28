@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Athena.Core.Internal.Helpers;
 using Athena.Core.Options;
@@ -49,16 +50,7 @@ public partial class PathParser
         {
             // On Linux, convert the drive letter to the root directory
             if (OperatingSystem.IsLinux())
-            {
-                var windowsDriveRegex = WindowsDriveRegex();
-                var windowsDriveMatch = windowsDriveRegex.Match(filePath);
-            
-                if (windowsDriveMatch.Success)
-                    expandedPath = $"/{expandedPath.Remove(0, windowsDriveMatch.Length)}";
-                
-                if (!expandedPath.StartsWith('\\'))
-                    expandedPath = expandedPath.Replace('\\', Path.DirectorySeparatorChar);
-            }
+                expandedPath = ConvertDriveLetter(expandedPath, filePath);
             
             return expandedPath;
         }
@@ -67,6 +59,23 @@ public partial class PathParser
         // based on its file extension instead of the protocol
         if (ParserHelper.IsLocalOrRequested(expandedPath, options.OpenLocally, options.StreamableProtocolPrefixes))
             return Path.GetFullPath(expandedPath);
+        
+        return expandedPath;
+    }
+
+#if !LINUX
+    [ExcludeFromCodeCoverage]
+#endif
+    private static string ConvertDriveLetter(string expandedPath, string filePath)
+    {
+        var windowsDriveRegex = WindowsDriveRegex();
+        var windowsDriveMatch = windowsDriveRegex.Match(filePath);
+            
+        if (windowsDriveMatch.Success)
+            expandedPath = $"/{expandedPath.Remove(0, windowsDriveMatch.Length)}";
+                
+        if (!expandedPath.StartsWith('\\'))
+            expandedPath = expandedPath.Replace('\\', Path.DirectorySeparatorChar);
         
         return expandedPath;
     }
