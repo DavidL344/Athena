@@ -13,16 +13,20 @@ namespace Athena.Core.Extensions.DependencyInjection;
 
 public static class CoreExtensions
 {
-    public static void AddAthenaCore(this IServiceCollection services)
+    public static void AddAthenaCore(this IServiceCollection services, bool addExceptionHandler = true)
     {
-        services.AddAthenaCore(ConfigHelper.GetAppDataDir());
+        services.AddAthenaCore(ConfigHelper.GetAppDataDir(), addExceptionHandler);
     }
     
-    public static void AddAthenaCore(this IServiceCollection services, string appDataDir)
+    public static void AddAthenaCore(this IServiceCollection services, string appDataDir, bool addExceptionHandler = true)
     {
         // Logging
         if (services.All(x => x.ServiceType != typeof(ILogger<>)))
             services.AddLogging();
+        
+        // Exception handling
+        if (addExceptionHandler)
+            AppDomain.CurrentDomain.UnhandledException += HandleException;
         
         // Config paths
         var configPaths = new ConfigPaths(appDataDir);
@@ -54,5 +58,16 @@ public static class CoreExtensions
         // Desktop integration
         if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
             services.RegisterDesktopIntegration();
+        return;
+
+        void HandleException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var logger = services.BuildServiceProvider()
+                .GetRequiredService<ILogger<ExceptionHandler>>();
+            logger.LogCritical("{Error}", e.ExceptionObject.ToString());
+            Environment.Exit(1);
+        }
     }
+    
+    private abstract class ExceptionHandler;
 }
