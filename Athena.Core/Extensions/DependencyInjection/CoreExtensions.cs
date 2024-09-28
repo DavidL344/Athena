@@ -22,7 +22,7 @@ public static class CoreExtensions
     {
         // Logging
         if (services.All(x => x.ServiceType != typeof(ILogger<>)))
-            services.AddLogging();
+            services.AddLogging(x => x.AddConsole());
         
         // Exception handling
         if (addExceptionHandler)
@@ -53,13 +53,18 @@ public static class CoreExtensions
         
         // User config
         Startup.CheckEntries(configPaths, serializerOptions).GetAwaiter().GetResult();
-        services.AddSingleton(ConfigHelper.GetConfig(configPaths, serializerOptions));
+        var config = ConfigHelper.GetConfig(configPaths, serializerOptions);
+        services.AddSingleton(config);
         
         // Desktop integration
         if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
             services.RegisterDesktopIntegration();
+        
+        // Debug logging
+        if (config.Debug)
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.Debug));
         return;
-
+        
         void HandleException(object sender, UnhandledExceptionEventArgs e)
         {
             var logger = services.BuildServiceProvider()
