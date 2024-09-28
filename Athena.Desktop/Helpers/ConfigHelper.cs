@@ -80,7 +80,8 @@ public class ConfigHelper
             }
             
             if (result > appVersion[i])
-                throw new ApplicationException("The configuration version is newer than the application version!");
+                throw new ApplicationException(
+                    $"The configuration version ({config.Version}) is newer than the application version ({AppVersion})!");
         }
         newConfig = config;
         return true;
