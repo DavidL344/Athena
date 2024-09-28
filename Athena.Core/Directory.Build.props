@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+        <DefineConstants>WINDOWS</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(OS)' == 'Unix'">
+        <DefineConstants>UNIX</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(OS)' == 'Unix' AND $(RuntimeIdentifier.Contains('osx'))">
+        <DefineConstants>OSX</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(OS)' == 'Unix' AND $(RuntimeIdentifier.Contains('linux'))">
+        <DefineConstants>LINUX</DefineConstants>
+    </PropertyGroup>
+</Project>
