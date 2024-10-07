@@ -9,6 +9,7 @@ public record Config
     public string Editor { get; set; }
     public bool Debug { get; set; }
     public string Version { get; set; }
+    public bool BackwardsCompatible { get; set; }
 
     public Config()
     {
@@ -17,5 +18,6 @@ public record Config
         Editor = SystemHelper.GetDefaultEditor();
         Debug = false;
         Version = $"{ThisAssembly.Git.SemVer.Major}.{ThisAssembly.Git.SemVer.Minor}.{ThisAssembly.Git.SemVer.Patch}";
+        BackwardsCompatible = false;
     }
 }

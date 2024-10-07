@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
 using Athena.Desktop.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Athena.Desktop.Helpers;
 
@@ -78,10 +79,18 @@ public class ConfigHelper
                 };
                 return false;
             }
-            
+
             if (result > appVersion[i])
-                throw new ApplicationException(
-                    $"The configuration version ({config.Version}) is newer than the application version ({AppVersion})!");
+            {
+                var mismatchMessage = $"The configuration version ({config.Version}) is newer than the application version ({AppVersion})!";
+                
+                if (!config.BackwardsCompatible)
+                    throw new ApplicationException(mismatchMessage);
+                
+                using var factory = LoggerFactory.Create(builder => builder.AddConsole());
+                var logger = factory.CreateLogger<ConfigHelper>();
+                logger.LogWarning("{MismatchMessage}", mismatchMessage);
+            }
         }
         newConfig = config;
         return true;
