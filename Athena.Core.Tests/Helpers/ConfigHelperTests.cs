@@ -5,7 +5,7 @@ using Athena.Core.Internal;
 using Athena.Desktop.Configuration;
 using Athena.Desktop.Helpers;
 
-namespace Athena.Core.Tests.Internal.Helpers;
+namespace Athena.Core.Tests.Helpers;
 
 [Collection("Sequential")]
 public class ConfigHelperTests : IDisposable
