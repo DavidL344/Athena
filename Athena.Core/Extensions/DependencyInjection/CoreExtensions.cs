@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Athena.Core.Internal;
@@ -69,7 +70,14 @@ public static class CoreExtensions
         {
             var logger = services.BuildServiceProvider()
                 .GetRequiredService<ILogger<ExceptionHandler>>();
-            logger.LogCritical("{Error}", e.ExceptionObject.ToString());
+            var exceptionObject = (Exception)e.ExceptionObject;
+            
+            // Throws an exception for easier debugging 
+            if (Debugger.IsAttached)
+                throw exceptionObject;
+            
+            logger.LogCritical("{Error}", exceptionObject.Message);
+            
             Environment.Exit(1);
         }
     }
