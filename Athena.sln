@@ -1,20 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Cli", "Athena.Cli\Athena.Cli.csproj", "{B4565B57-25E5-4E87-B091-04D8CA584C05}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Cli", "src\Athena.Cli\Athena.Cli.csproj", "{B4565B57-25E5-4E87-B091-04D8CA584C05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Core", "Athena.Core\Athena.Core.csproj", "{83BE2314-BD91-4753-8AB4-588C75ECFDFA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Core", "src\Athena.Core\Athena.Core.csproj", "{83BE2314-BD91-4753-8AB4-588C75ECFDFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Core.Tests", "Athena.Core.Tests\Athena.Core.Tests.csproj", "{396D1E1A-DCDD-423E-9006-00C8A47DE2F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Core.Tests", "src\Athena.Core.Tests\Athena.Core.Tests.csproj", "{396D1E1A-DCDD-423E-9006-00C8A47DE2F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.DataStructures", "Athena.DataStructures\Athena.DataStructures.csproj", "{D4311744-F7D4-46BA-95CA-D7A9069C6E49}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.DataStructures", "src\Athena.DataStructures\Athena.DataStructures.csproj", "{D4311744-F7D4-46BA-95CA-D7A9069C6E49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Resources", "Athena.Resources\Athena.Resources.csproj", "{036652EA-94ED-4434-9BC1-B1292A5D227A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Resources", "src\Athena.Resources\Athena.Resources.csproj", "{036652EA-94ED-4434-9BC1-B1292A5D227A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Gtk", "Athena.Gtk\Athena.Gtk.csproj", "{B8FC11CA-A9BC-48C4-AA1E-6995DCF7D662}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Gtk", "src\Athena.Gtk\Athena.Gtk.csproj", "{B8FC11CA-A9BC-48C4-AA1E-6995DCF7D662}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Wpf", "Athena.Wpf\Athena.Wpf.csproj", "{4BB25764-5F88-4D3A-8284-5C35510ABB1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Wpf", "src\Athena.Wpf\Athena.Wpf.csproj", "{4BB25764-5F88-4D3A-8284-5C35510ABB1A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Desktop", "Athena.Desktop\Athena.Desktop.csproj", "{F4CD21A3-3DEB-45F8-8BBA-ACE8014C1A01}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Desktop", "src\Athena.Desktop\Athena.Desktop.csproj", "{F4CD21A3-3DEB-45F8-8BBA-ACE8014C1A01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

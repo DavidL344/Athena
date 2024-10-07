@@ -32,7 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\LICENSE">
+      <Content Include="..\..\LICENSE">
         <Link>LICENSE</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
