@@ -180,19 +180,21 @@ public class AppEntryParserTests : IDisposable
         Assert.Equal("The app entry name is invalid!", exception.Message);
     }
     
-    [Fact]
-    public void GetFriendlyNames__ReturnsFriendlyNames__WhenTheyExist()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void GetFriendlyNames__ReturnsFriendlyNames__WhenTheyExist(bool multiline)
     {
         // Arrange
         var parser = new AppEntryParser(_configPaths, _jsonSerializerOptions, _logger);
-        var expected = new[] { "mpv (Play)" };
+        var expected = new[] { multiline ? "mpv (Play)\r\n          mpv %1" : "mpv (Play)" };
         
         // Act
         var result = parser.GetFriendlyNames(new FileExtension
         {
             Name = "MP4 Video",
             AppList = [ "mpv.play" ]
-        });
+        }, multiline: multiline);
         
         // Assert
         Assert.Equivalent(expected, result);

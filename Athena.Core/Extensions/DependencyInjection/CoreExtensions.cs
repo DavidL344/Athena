@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Athena.Core.Internal;
@@ -13,16 +14,20 @@ namespace Athena.Core.Extensions.DependencyInjection;
 
 public static class CoreExtensions
 {
-    public static void AddAthenaCore(this IServiceCollection services)
+    public static void AddAthenaCore(this IServiceCollection services, bool addExceptionHandler = true)
     {
-        services.AddAthenaCore(ConfigHelper.GetAppDataDir());
+        services.AddAthenaCore(ConfigHelper.GetAppDataDir(), addExceptionHandler);
     }
     
-    public static void AddAthenaCore(this IServiceCollection services, string appDataDir)
+    public static void AddAthenaCore(this IServiceCollection services, string appDataDir, bool addExceptionHandler = true)
     {
         // Logging
         if (services.All(x => x.ServiceType != typeof(ILogger<>)))
-            services.AddLogging();
+            services.AddLogging(x => x.AddConsole());
+        
+        // Exception handling
+        if (addExceptionHandler)
+            AppDomain.CurrentDomain.UnhandledException += HandleException;
         
         // Config paths
         var configPaths = new ConfigPaths(appDataDir);
@@ -49,10 +54,33 @@ public static class CoreExtensions
         
         // User config
         Startup.CheckEntries(configPaths, serializerOptions).GetAwaiter().GetResult();
-        services.AddSingleton(ConfigHelper.GetConfig(configPaths, serializerOptions));
+        var config = ConfigHelper.GetConfig(configPaths, serializerOptions);
+        services.AddSingleton(config);
         
         // Desktop integration
         if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
             services.RegisterDesktopIntegration();
+        
+        // Debug logging
+        if (config.Debug)
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.Debug));
+        return;
+        
+        void HandleException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var logger = services.BuildServiceProvider()
+                .GetRequiredService<ILogger<ExceptionHandler>>();
+            var exceptionObject = (Exception)e.ExceptionObject;
+            
+            // Throws an exception for easier debugging 
+            if (Debugger.IsAttached)
+                throw exceptionObject;
+            
+            logger.LogCritical("{Error}", exceptionObject.Message);
+            
+            Environment.Exit(1);
+        }
     }
+    
+    private abstract class ExceptionHandler;
 }

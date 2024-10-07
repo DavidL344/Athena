@@ -20,7 +20,7 @@ public class Handler
     public Handler()
     {
         var services = new ServiceCollection();
-        services.AddAthenaCore();
+        services.AddAthenaCore(addExceptionHandler: false);
         var serviceProvider = services.BuildServiceProvider();
         
         _config = serviceProvider.GetRequiredService<Config>();

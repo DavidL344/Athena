@@ -49,7 +49,12 @@ internal class ParserHelper
         foreach (var match in matches)
         {
             var variable = match.Groups[1].Value;
-            expandedPath = expandedPath.Replace($"${variable}", $"%{variable}%");
+            var isNumber = int.TryParse(variable, out _);
+            
+            expandedPath = expandedPath
+                .Replace($"${variable}",isNumber
+                    ? $"%{variable}"
+                    : $"%{variable}%");
         }
         
         return Environment.ExpandEnvironmentVariables(expandedPath);

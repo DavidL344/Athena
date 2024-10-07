@@ -5,7 +5,7 @@ using Athena.Core.Internal;
 using Athena.Desktop.Configuration;
 using Athena.Desktop.Helpers;
 
-namespace Athena.Core.Tests.Internal.Helpers;
+namespace Athena.Core.Tests.Helpers;
 
 [Collection("Sequential")]
 public class ConfigHelperTests : IDisposable
@@ -160,13 +160,16 @@ public class ConfigHelperTests : IDisposable
     {
         // Arrange
         var config = new Config { Version = $"{int.MaxValue}.{int.MaxValue}.{int.MaxValue}" };
+        var expected = $"{ThisAssembly.Git.SemVer.Major}.{ThisAssembly.Git.SemVer.Minor}.{ThisAssembly.Git.SemVer.Patch}";
         
         // Act
         var exception = Record.Exception(() => ConfigHelper.IsConfigUpToDate(config, out _));
         
         // Assert
         Assert.IsType<ApplicationException>(exception);
-        Assert.Equal("The configuration version is newer than the application version!", exception.Message);
+        Assert.Equal(
+            $"The configuration version ({config.Version}) is newer than the application version ({expected})!",
+            exception.Message);
     }
     
     [Fact]

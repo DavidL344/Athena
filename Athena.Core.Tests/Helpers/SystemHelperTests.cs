@@ -1,6 +1,6 @@
 using Athena.Desktop.Helpers;
 
-namespace Athena.Core.Tests.Internal.Helpers;
+namespace Athena.Core.Tests.Helpers;
 
 public class SystemHelperTests
 {
