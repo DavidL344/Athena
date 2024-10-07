@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
-using Athena.Core.Configuration;
 using Athena.Core.Internal.Samples;
+using Athena.Desktop.Configuration;
 
 namespace Athena.Core.Internal.Helpers;
 

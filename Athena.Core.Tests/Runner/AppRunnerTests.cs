@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Text;
-using Athena.Core.Options;
-using Athena.Core.Runner;
+using Athena.Desktop.Runner;
 using CliWrap;
 using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;
@@ -10,6 +9,7 @@ namespace Athena.Core.Tests.Runner;
 
 public class AppRunnerTests
 {
+    private readonly string[] _builtinCommands = ["echo"];
     private readonly StringBuilder _stdOutBuffer;
     private readonly StringBuilder _stdErrBuffer;
     private readonly AppRunner _runner;
@@ -36,11 +36,12 @@ public class AppRunnerTests
         _stdErrBuffer.Clear();
     }
     
-    [Theory]
+    [SkippableTheory]
     [InlineData("echo", "Hello, World!", "Hello, World!")]
     public async Task Run__RunsCommand__WhenItExists(string executablePath, string arguments, string expectedStdOut)
     {
         // Arrange
+        Skip.If(IsSkippable(executablePath));
         ClearBuffers();
         
         // Act
@@ -52,13 +53,14 @@ public class AppRunnerTests
         Assert.Empty(_stdErrBuffer.ToString().Trim());
     }
     
-    [Theory]
+    [SkippableTheory]
     [InlineData("dotnet", "--version")]
     [InlineData("dotnet", "--help")]
     [InlineData("echo", "Hello, World!")]
     public async Task Run__ReturnsCorrectOutput__WhenExecutionFinishes(string executablePath, string arguments)
     {
         // Arrange
+        Skip.If(IsSkippable(executablePath));
         ClearBuffers();
         var stdOut = new StringBuilder();
         var stdErr = new StringBuilder();
@@ -114,4 +116,7 @@ public class AppRunnerTests
         Assert.Empty(_stdOutBuffer.ToString().Trim());
         Assert.Empty(_stdErrBuffer.ToString().Trim());
     }
+
+    private bool IsSkippable(string commandName)
+        => OperatingSystem.IsWindows() && _builtinCommands.Contains(commandName);
 }

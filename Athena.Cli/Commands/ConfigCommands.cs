@@ -1,9 +1,9 @@
 using System.Text.Json;
 using Athena.Cli.Commands.Internal;
-using Athena.Core.Configuration;
 using Athena.Core.Model;
 using Athena.Core.Parser;
-using Athena.Core.Runner;
+using Athena.Desktop.Configuration;
+using Athena.Desktop.Runner;
 using Cocona;
 using Microsoft.Extensions.Logging;
 

@@ -1,12 +1,12 @@
 using Athena.Cli.Commands.Internal;
 using Athena.Cli.Model;
 using Athena.Cli.Terminal;
-using Athena.Core.Configuration;
 using Athena.Core.Extensions;
 using Athena.Core.Model;
 using Athena.Core.Options;
 using Athena.Core.Parser;
-using Athena.Core.Runner;
+using Athena.Desktop.Configuration;
+using Athena.Desktop.Runner;
 using Cocona;
 using Microsoft.Extensions.Logging;
 

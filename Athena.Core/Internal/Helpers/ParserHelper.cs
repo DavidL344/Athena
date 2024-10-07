@@ -6,8 +6,13 @@ internal class ParserHelper
 {
     public static bool IsLocalOrRequested(string filePath, bool openLocally,
         IEnumerable<string> streamableProtocolPrefixes)
-        => new Uri(filePath).IsFile || openLocally || IsStreamable(filePath, streamableProtocolPrefixes);
-    
+    {
+        if (filePath.StartsWith('/') && OperatingSystem.IsWindows())
+            filePath = Path.GetFullPath(filePath);
+        
+        return new Uri(filePath).IsFile || openLocally || IsStreamable(filePath, streamableProtocolPrefixes);
+    }
+
     public static bool IsStreamable(string url, IEnumerable<string> streamableProtocolPrefixes)
         => streamableProtocolPrefixes.Any(protocol => url.StartsWith($"{protocol}:"));
     
@@ -44,7 +49,12 @@ internal class ParserHelper
         foreach (var match in matches)
         {
             var variable = match.Groups[1].Value;
-            expandedPath = expandedPath.Replace($"${variable}", $"%{variable}%");
+            var isNumber = int.TryParse(variable, out _);
+            
+            expandedPath = expandedPath
+                .Replace($"${variable}",isNumber
+                    ? $"%{variable}"
+                    : $"%{variable}%");
         }
         
         return Environment.ExpandEnvironmentVariables(expandedPath);
