@@ -11,6 +11,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="GitInfo" Version="3.3.4">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="ModernWpfUI" Version="0.9.6" />
     </ItemGroup>
 
